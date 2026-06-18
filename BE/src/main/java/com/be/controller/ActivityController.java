@@ -1,0 +1,58 @@
+package com.be.controller;
+
+import com.be.dto.request.ActivityRequest;
+import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.ApiResponse;
+import com.be.entity.User;
+import com.be.service.ActivityService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Set;
+
+@RestController
+@RequestMapping("/api/activity")
+@RequiredArgsConstructor
+public class ActivityController {
+    private final ActivityService activityService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
+
+    @PostMapping(
+            value = "/createActivity",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
+            @RequestPart("request") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal User currentUser
+            ) throws IOException {
+        ActivityRequest activityRequest =
+                objectMapper.readValue(requestJson, ActivityRequest.class);
+        Set<ConstraintViolation<ActivityRequest>> violations =
+                validator.validate(activityRequest);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+
+        ActivityResponse activityResponse =
+                activityService.createActivity(
+                        activityRequest,
+                        image,
+                        currentUser
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Success", activityResponse)
+        );
+    }
+}

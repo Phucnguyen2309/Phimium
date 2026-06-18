@@ -1,18 +1,14 @@
 package com.be.dto.response;
 
-import com.be.enums.UserRole;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class LoginResponse {
+@NoArgsConstructor
+public class RegisterResponse {
     private String username;
-    private String token;
-    private UserRole role;
-
+    private String fullname;
+    private String phone;
 }
