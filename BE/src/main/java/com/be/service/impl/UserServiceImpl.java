@@ -1,4 +1,6 @@
 package com.be.service.impl;
 
-public class UserServiceImpl {
+import com.be.service.UserService;
+
+public class UserServiceImpl implements UserService {
 }
