@@ -14,16 +14,19 @@ const extractAuthData = (loginResponse) => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const sessionAuthKey = 'phimium_auth_session';
 
     // Khi F5 reload web, khôi phục lại trạng thái từ localStorage
     useEffect(() => {
+        const hasActiveSession = sessionStorage.getItem(sessionAuthKey) === 'true';
         const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
-        if (token && token !== 'undefined' && token !== 'null' && storedUser) {
+        if (hasActiveSession && token && token !== 'undefined' && token !== 'null' && storedUser) {
             setUser(JSON.parse(storedUser));
         } else {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            sessionStorage.removeItem(sessionAuthKey);
         }
     }, []);
 
@@ -37,6 +40,8 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token');
         }
 
+        sessionStorage.setItem(sessionAuthKey, 'true');
+
         // Lưu lại username và role
         const userInfo = {
             username: authData.username,
@@ -49,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        sessionStorage.removeItem(sessionAuthKey);
         setUser(null);
     };
 

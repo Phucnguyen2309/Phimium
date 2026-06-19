@@ -145,6 +145,7 @@ const HomePage = () => {
               <Link
                 key={activity.id}
                 to={`/activities/${activity.id}`}
+                state={{ activity }}
                 className="group overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="relative h-56 overflow-hidden">
