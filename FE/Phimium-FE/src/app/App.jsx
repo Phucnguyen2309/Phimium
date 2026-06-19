@@ -5,6 +5,7 @@ import { MainLayout } from '@/layouts/MainLayout.jsx';
 import HomePage from '@/pages/HomePage.jsx';
 import Login from '@/pages/Login.jsx';
 import Register from '@/pages/Register.jsx';
+import ActivityDetailPage from '@/pages/ActivityDetailPage.jsx';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -28,6 +29,12 @@ function App() {
                 <Route path="/" element={
                     <MainLayout>
                         <HomePage />
+                    </MainLayout>
+                } />
+
+                <Route path="/activities/:id" element={
+                    <MainLayout>
+                        <ActivityDetailPage />
                     </MainLayout>
                 } />
 
