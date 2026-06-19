@@ -8,6 +8,7 @@ import com.be.entity.ActivityGroup;
 import com.be.entity.InstructionAcknowledgement;
 import com.be.entity.Registration;
 import com.be.entity.User;
+import com.be.enums.CheckInStatus;
 import com.be.enums.GroupStatus;
 import com.be.enums.RegistrationStatus;
 import com.be.enums.UserRole;
@@ -22,10 +23,12 @@ import com.be.repository.InstructionAcknowledgementRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.repository.UserRepository;
 import com.be.service.RegistrationService;
+import com.be.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,6 +79,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .user(user)
                 .group(assignedGroup)
                 .status(RegistrationStatus.ASSIGNED)
+                .checkInStatus(CheckInStatus.NOT_YET)
                 .build();
 
         registration = registrationRepository.save(registration);
@@ -149,5 +153,73 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         // 4. Dùng Mapper chuyển list Entity sang list Response
         return activityGroupMapper.toResponseList(myGroups);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationResponse checkIn(
+            UUID registrationId,
+            User currentUser
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.REGISTRATION_NOT_FOUND)
+                );
+
+        if (!registration.getUser().getUserId()
+                .equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        Activity activity = registration.getActivity();
+
+        if (activity == null) {
+            throw new AppException(ErrorCode.ACTIVITY_NOT_FOUND);
+        }
+
+        LocalDateTime now = DateTimeUtils.nowVietnam();
+
+        if (now.isAfter(activity.getEndTime())) {
+            throw new AppException(ErrorCode.CHECKIN_CLOSED);
+        }
+
+        if (registration.getCheckInStatus() == CheckInStatus.PRESENT) {
+            throw new AppException(ErrorCode.ALREADY_CHECKED_IN);
+        }
+
+        if (registration.getCheckInStatus() == CheckInStatus.ABSENT) {
+            throw new AppException(ErrorCode.CHECKIN_CLOSED);
+        }
+
+        registration.setCheckInStatus(CheckInStatus.PRESENT);
+        registration.setCheckedInAt(now);
+
+        Registration savedRegistration =
+                registrationRepository.save(registration);
+
+        return registrationMapper.toResponse(savedRegistration);
+    }
+
+    @Override
+    @Transactional
+    public void autoMarkAbsentAfterActivityEndTime() {
+        LocalDateTime now = DateTimeUtils.nowVietnam();
+
+        List<Registration> registrations =
+                registrationRepository
+                        .findByCheckInStatusAndActivityEndTimeBefore(
+                                CheckInStatus.NOT_YET,
+                                now
+                        );
+
+        for (Registration registration : registrations) {
+            registration.setCheckInStatus(CheckInStatus.ABSENT);
+        }
+
+        registrationRepository.saveAll(registrations);
     }
 }

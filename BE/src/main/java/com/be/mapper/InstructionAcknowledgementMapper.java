@@ -33,7 +33,7 @@ public class InstructionAcknowledgementMapper {
 
         return InstructionAcknowledgementResponse.builder()
                 .id(acknowledgement.getId())
-                .registrationId(acknowledgement.getRegistration() == null ? null : acknowledgement.getRegistration().getRegistration_id())
+                .registrationId(acknowledgement.getRegistration() == null ? null : acknowledgement.getRegistration().getRegistrationId())
                 .userId(acknowledgement.getUser() == null ? null : acknowledgement.getUser().getUserId())
                 .activityId(acknowledgement.getActivity() == null ? null : acknowledgement.getActivity().getId())
                 .acknowledged(acknowledgement.getAcknowledged())

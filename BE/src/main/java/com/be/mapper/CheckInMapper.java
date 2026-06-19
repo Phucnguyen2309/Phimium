@@ -16,7 +16,7 @@ public class CheckInMapper {
 
         return CheckInResponse.builder()
                 .id(checkIn.getId())
-                .registrationId(checkIn.getRegistration() == null ? null : checkIn.getRegistration().getRegistration_id())
+                .registrationId(checkIn.getRegistration() == null ? null : checkIn.getRegistration().getRegistrationId())
                 .userId(checkIn.getUser() == null ? null : checkIn.getUser().getUserId())
                 .activityId(checkIn.getActivity() == null ? null : checkIn.getActivity().getId())
                 .checkedInAt(checkIn.getCheckedInAt())

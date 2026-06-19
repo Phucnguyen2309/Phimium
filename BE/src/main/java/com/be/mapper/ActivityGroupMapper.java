@@ -28,11 +28,6 @@ public class ActivityGroupMapper {
                 hostId = activity.getHost().getBuddyId();
             }
         }
-
-
-
-
-
         return ActivityGroupResponse.builder()
                 .groupId(group.getGroupId())
                 .groupName(group.getGroup_name())

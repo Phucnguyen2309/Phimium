@@ -1,9 +1,6 @@
 package com.be.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,13 +10,30 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class FeedBackResponse {
-    private UUID id;
+
+    private UUID feedbackId;
+
     private UUID reviewerId;
+
     private String reviewerName;
+
     private UUID buddyId;
+
+    private String buddyName;
+
     private UUID registrationId;
-    private Integer rating;
-    private String comment;
+
+    private UUID activityId;
+
+    private String activityTitle;
+
+    private Integer tripRating;
+
+    private String tripComment;
+
+    private Integer buddyRating;
+
+    private String buddyComment;
+
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

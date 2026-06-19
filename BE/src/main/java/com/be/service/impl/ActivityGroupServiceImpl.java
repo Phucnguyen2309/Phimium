@@ -10,11 +10,11 @@ import com.be.mapper.ActivityGroupMapper;
 import com.be.repository.ActivityGroupRepository;
 import com.be.repository.ActivityRepository;
 import com.be.service.ActivityGroupService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,7 +25,10 @@ public class ActivityGroupServiceImpl implements ActivityGroupService {
     private final ActivityGroupMapper activityGroupMapper;
 
     private final ActivityRepository activityRepository;
+
+
     @Override
+    @Transactional
     public ActivityGroupResponse createActivityGroup(ActivityGroupRequest activityGroupRequest, UUID activityId) {
         Activity activity =  activityRepository.findById(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));

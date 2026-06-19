@@ -1,5 +1,4 @@
 package com.be.entity;
-
 import com.be.util.DateTimeUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,8 +22,19 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
+import jakarta.persistence.*;
+
 @Entity
-@Table(name = "feedbacks")
+@Table(
+        name = "feedbacks",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_feedback_registration",
+                        columnNames = "registration_id"
+                )
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,9 +43,16 @@ public class FeedBack {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "feedback_id", updatable = false, nullable = false)
+    @Column(
+            name = "feedback_id",
+            updatable = false,
+            nullable = false
+    )
     private UUID id;
 
+    /*
+     * Người viết feedback.
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "reviewer_id",
@@ -44,6 +61,9 @@ public class FeedBack {
     )
     private User reviewer;
 
+    /*
+     * Buddy được đánh giá.
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "buddy_id",
@@ -52,22 +72,45 @@ public class FeedBack {
     )
     private Buddy buddy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*
+     * Một registration chỉ được feedback một lần.
+     */
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "registration_id",
+            nullable = false,
+            unique = true,
             foreignKey = @ForeignKey(name = "fk_feedback_registration")
     )
     private Registration registration;
 
+    /*
+     * Đánh giá chuyến đi / activity.
+     */
     @Min(1)
     @Max(5)
-    @Column(name = "rating", nullable = false)
-    private Integer rating;
+    @Column(name = "trip_rating", nullable = false)
+    private Integer tripRating;
 
-    @Column(name = "comment", columnDefinition = "TEXT")
-    private String comment;
+    @Column(name = "trip_comment", columnDefinition = "TEXT")
+    private String tripComment;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    /*
+     * Đánh giá Buddy.
+     */
+    @Min(1)
+    @Max(5)
+    @Column(name = "buddy_rating", nullable = false)
+    private Integer buddyRating;
+
+    @Column(name = "buddy_comment", columnDefinition = "TEXT")
+    private String buddyComment;
+
+    @Column(
+            name = "created_at",
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
@@ -76,6 +119,7 @@ public class FeedBack {
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = DateTimeUtils.nowVietnam();
+
         createdAt = now;
         updatedAt = now;
     }

@@ -15,7 +15,7 @@ public class RegistrationMapper {
         }
 
         return RegistrationResponse.builder()
-                .registrationId(registration.getRegistration_id())
+                .registrationId(registration.getRegistrationId())
                 .activityId(registration.getActivity() == null ? null : registration.getActivity().getId())
                 .userId(registration.getUser() == null ? null : registration.getUser().getUserId())
                 .groupId(registration.getGroup() == null ? null : registration.getGroup().getGroupId())
@@ -23,6 +23,7 @@ public class RegistrationMapper {
                 .registeredAt(registration.getRegisteredAt())
                 .cancelledAt(registration.getCancelledAt())
                 .checkedInAt(registration.getCheckedInAt())
+                .checkInStatus(registration.getCheckInStatus())
                 .build();
     }
 
