@@ -45,4 +45,12 @@ public class ActivityGuideline {
     protected void onUpdate() {
         updatedAt = DateTimeUtils.nowVietnam();
     }
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "activity_id",
+            nullable = false,
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_guideline_activity")
+    )
+    private Activity activity;
 }

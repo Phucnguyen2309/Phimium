@@ -143,6 +143,18 @@ public enum ErrorCode {
             HttpStatus.NOT_FOUND,
             "Activity not found"
     ),
+    // ================= GUIDELINE (6000 - 6999) =================
+    GUIDELINE_NOT_FOUND(
+            6001,
+            HttpStatus.NOT_FOUND,
+            "Sự kiện này chưa có hướng dẫn tham gia"
+    ),
+
+    GUIDELINE_ALREADY_EXISTS(
+            6002,
+            HttpStatus.CONFLICT,
+            "Sự kiện này đã có hướng dẫn tham gia, vui lòng dùng tính năng Cập nhật"
+    ),
     ;
 
     private final int code;
