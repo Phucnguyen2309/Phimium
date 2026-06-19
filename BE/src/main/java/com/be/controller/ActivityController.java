@@ -3,6 +3,7 @@ package com.be.controller;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
+import com.be.entity.Activity;
 import com.be.entity.User;
 import com.be.service.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -54,5 +56,11 @@ public class ActivityController {
         return ResponseEntity.ok(
                 ApiResponse.success("Success", activityResponse)
         );
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<ApiResponse<List<ActivityResponse>>> getAllActivity(){
+        List<ActivityResponse> activity = activityService.getAllActivities();
+        return  ResponseEntity.ok(ApiResponse.success("Success", activity));
     }
 }

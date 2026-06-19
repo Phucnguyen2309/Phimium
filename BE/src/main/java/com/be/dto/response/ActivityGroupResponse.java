@@ -20,4 +20,5 @@ public class ActivityGroupResponse {
     private Integer maximumParticipants;
     private UUID activityId;
     private LocalDateTime createdAt;
+    private UUID hostId;
 }

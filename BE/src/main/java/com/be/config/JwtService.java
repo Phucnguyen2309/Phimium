@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class JwtService {
@@ -21,6 +21,8 @@ public class JwtService {
 
     @Value("${TOKEN_EXPIRE_MS:86400000}")
     private long expireMs;
+
+    private final Map<String, Date> blacklistedTokens = new ConcurrentHashMap<>();
 
     private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretkey);
@@ -62,10 +64,32 @@ public class JwtService {
         return username == null ? null : username.toString();
     }
 
+    public Date extractExpiration(String token) {
+        return extractClaimsJws(token).getExpiration();
+    }
+
+    public void blacklistToken(String token) {
+        blacklistedTokens.put(token, extractExpiration(token));
+    }
+
+    public boolean isTokenBlacklisted(String token) {
+        Date expiration = blacklistedTokens.get(token);
+        if (expiration == null) {
+            return false;
+        }
+
+        if (expiration.before(new Date())) {
+            blacklistedTokens.remove(token);
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean isTokenValid(String token) {
         try{
             extractClaimsJws(token);
-            return true;
+            return !isTokenBlacklisted(token);
         }catch (Exception e){
             return false;
         }
