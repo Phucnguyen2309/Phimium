@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface BuddyRepository extends JpaRepository<Buddy, UUID> {
 
-    Optional<Buddy> findByUser(User user);
+    Optional<Buddy> findByUserUserId(UUID userId);
 
     boolean existsByUserUserId(UUID userId);
 }

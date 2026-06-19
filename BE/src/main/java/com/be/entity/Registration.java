@@ -1,5 +1,6 @@
 package com.be.entity;
 
+import com.be.enums.CheckInStatus;
 import com.be.enums.RegistrationStatus;
 import com.be.util.DateTimeUtils;
 import jakarta.persistence.*;
@@ -21,7 +22,8 @@ public class Registration {
 
     @Id
     @GeneratedValue
-    private UUID registration_id;
+    @Column(name = "registration_id")
+    private UUID registrationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activity_id")
@@ -37,6 +39,10 @@ public class Registration {
 
     @Enumerated(EnumType.STRING)
     private RegistrationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "checkin_status", nullable = false, length = 20)
+    private CheckInStatus checkInStatus = CheckInStatus.NOT_YET;
 
     @Column(
             name = "registered_at",
@@ -59,6 +65,9 @@ public class Registration {
 
         if (status == null) {
             status = RegistrationStatus.WAITING_FOR_GROUP;
+        }
+        if (checkInStatus == null) {
+            checkInStatus = CheckInStatus.NOT_YET;
         }
 
     }

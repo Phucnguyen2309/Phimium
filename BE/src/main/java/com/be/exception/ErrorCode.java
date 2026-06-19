@@ -155,6 +155,28 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "Sự kiện này đã có hướng dẫn tham gia, vui lòng dùng tính năng Cập nhật"
     ),
+    FEEDBACK_ALREADY_EXISTS(
+            7001,
+            HttpStatus.NOT_FOUND,
+            "Người dùng chỉ được feedback  1 lần  "
+    ),
+    CHECKIN_CLOSED(
+            8001,
+            HttpStatus.BAD_REQUEST,
+        "Check-in is closed"
+    ),
+
+    CHECKIN_NOT_OPEN(
+            8002,
+            HttpStatus.BAD_REQUEST,
+        "Check-in is not open yet"
+    ),
+
+    ALREADY_CHECKED_IN(
+            8003,
+            HttpStatus.CONFLICT,
+        "User already checked in"
+    )
     ;
 
     private final int code;
