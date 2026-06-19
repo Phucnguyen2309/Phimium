@@ -1,29 +1,18 @@
-import http from './http'
+import http from '@/services/http.js'
 
 const activityService = {
-  getAllActivities: () => {
-    return http.get('/activities')
-  },
+  getAllActivities: () => http.get('/activity/getAll'),
 
-  getActivityById: (id) => {
-    return http.get(`/activities/${id}`)
-  },
+  getActivityById: (id) => http.get(`/activities/${id}`),
 
-  joinActivity: (payload) => {
-    return http.post('/v1/registrations/join', payload)
-  },
+  joinActivity: (payload) => http.post('/v1/registrations/join', payload),
 
-  getMyRegistrations: () => {
-    return http.get('/v1/registrations/me')
-  },
+  getMyRegistrations: () => http.get('/activity/joined'),
 
-  getMyGroups: () => {
-    return http.get('/v1/registrations/my-groups')
-  },
+  getMyGroups: () => http.get('/v1/registrations/my-groups'),
 
-  getGuidelineByActivityId: (activityId) => {
-    return http.get(`/v1/activities/${activityId}/guidelines`)
-  }
+  getGuidelineByActivityId: (activityId) =>
+    http.get(`/v1/activities/${activityId}/guidelines`),
 }
 
 export default activityService

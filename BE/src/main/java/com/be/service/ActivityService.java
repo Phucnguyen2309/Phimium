@@ -18,4 +18,6 @@ public interface ActivityService {
     List<ActivityResponse> getAllActivities();
 
     List<ActivityResponse> getActivitiesByBuddy(UUID buddy);
+
+    List<ActivityResponse> getJoinedActivities(User currentUser);
 }

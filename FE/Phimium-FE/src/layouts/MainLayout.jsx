@@ -1,15 +1,17 @@
 import { APP_NAME } from '@/constants/app.js'
 import { Container } from '@/components/common/Container.jsx'
-import { AuthContext } from '@/context/AuthContext'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useAuth } from '@/context/authContext.js'
+import { ROUTES } from '@/routes/paths.js'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export function MainLayout({ children }) {
-  const { user, logout } = useContext(AuthContext)
+  const { user, logout } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
   const displayName = (user?.username || 'My Account').split('@')[0].trim()
   const userInitial = (displayName?.[0] || 'U').toUpperCase()
+  const userRole = String(user?.role ?? '').replace('ROLE_', '').toUpperCase()
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -35,7 +37,7 @@ export function MainLayout({ children }) {
     >
       <Container className="py-4">
         <header className="flex h-16 items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
-          <Link to="/" className="text-xl font-bold text-blue-700">
+          <Link to={ROUTES.home} className="text-xl font-bold text-blue-700">
             {APP_NAME}
           </Link>
 
@@ -55,7 +57,7 @@ export function MainLayout({ children }) {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/register" className="hidden text-sm font-semibold text-blue-700 lg:inline-flex">
+            <Link to={ROUTES.register} className="hidden text-sm font-semibold text-blue-700 lg:inline-flex">
               Become a Buddy
             </Link>
             {user ? (
@@ -78,7 +80,7 @@ export function MainLayout({ children }) {
                       <p className="mt-1 truncate text-sm font-semibold text-slate-900">{displayName}</p>
                     </div>
                     <Link
-                      to="/my-activities"
+                      to={ROUTES.myActivities}
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                     >
@@ -87,6 +89,30 @@ export function MainLayout({ children }) {
                       </svg>
                       My Activities
                     </Link>
+                    {userRole === 'BUDDY' && (
+                      <Link
+                        to={ROUTES.buddy}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        <svg aria-hidden="true" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                        </svg>
+                        Buddy Page
+                      </Link>
+                    )}
+                    {userRole === 'ADMIN' && (
+                      <Link
+                        to={ROUTES.admin}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        <svg aria-hidden="true" className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7h16M4 12h16M4 17h16" />
+                        </svg>
+                        Admin Page
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -104,7 +130,7 @@ export function MainLayout({ children }) {
                 )}
               </div>
             ) : (
-              <Link to="/login" className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">
+              <Link to={ROUTES.login} className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">
                 Log In
               </Link>
             )}

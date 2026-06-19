@@ -4,12 +4,14 @@ import com.be.dto.request.ActivityRequest;
 import com.be.dto.response.ActivityResponse;
 import com.be.entity.Activity;
 import com.be.entity.Buddy;
+import com.be.entity.Registration;
 import com.be.entity.User;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.mapper.ActivityMapper;
 import com.be.repository.ActivityRepository;
 import com.be.repository.BuddyRepository;
+import com.be.repository.RegistrationRepository;
 import com.be.repository.UserRepository;
 import com.be.service.ActivityService;
 import com.be.service.CloudinaryService;
@@ -31,6 +33,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityMapper activityMapper;
     private final CloudinaryService cloudinaryService;
     private final BuddyRepository buddyRepository;
+    private final RegistrationRepository registrationRepository;
 
     @Override
     @Transactional
@@ -61,6 +64,22 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public List<ActivityResponse> getActivitiesByBuddy(UUID buddy) {
         List<Activity> activities = activityRepository.findByHost_BuddyId(buddy);
+        return activityMapper.toResponseList(activities);
+    }
+
+    @Override
+    public List<ActivityResponse> getJoinedActivities(User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<Registration> registrations =
+                registrationRepository.findByUser(currentUser);
+
+        List<Activity> activities = registrations.stream()
+                .map(Registration::getActivity)
+                .toList();
+
         return activityMapper.toResponseList(activities);
     }
 
