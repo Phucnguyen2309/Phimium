@@ -71,4 +71,19 @@ public class AuthServiceImpl implements AuthService {
 
         );
     }
+
+    @Override
+    public void logout(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        if (!jwtService.isTokenValid(token)) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+
+        jwtService.blacklistToken(token);
+    }
 }

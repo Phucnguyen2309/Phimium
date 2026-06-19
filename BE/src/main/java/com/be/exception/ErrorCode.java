@@ -37,6 +37,12 @@ public enum ErrorCode {
             "Email already exists"
     ),
 
+    INVALID_TOKEN(
+            1006,
+            HttpStatus.UNAUTHORIZED,
+            "Invalid token"
+    ),
+
 // ================= GROUP (2000 - 2999) =================
 
     GROUP_NOT_FOUND(
@@ -130,7 +136,14 @@ public enum ErrorCode {
             4003,
             HttpStatus.NOT_FOUND,
             "Buddy not found"
-    );
+    ),
+    //==========ACTIVITY ===============
+    ACTIVITY_NOT_FOUND(
+            5001,
+            HttpStatus.NOT_FOUND,
+            "Activity not found"
+    ),
+    ;
 
     private final int code;
     private final HttpStatus httpStatus;

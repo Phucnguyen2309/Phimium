@@ -20,14 +20,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
-    private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final BuddyRepository buddyRepository;
 
@@ -50,4 +51,18 @@ public class ActivityServiceImpl implements ActivityService {
 
         return activityMapper.toResponse(createdActivity);
     }
+
+    @Override
+    public List<ActivityResponse> getAllActivities() {
+        List<Activity> activities = activityRepository.findAll();
+        return activityMapper.toResponseList(activities);
+    }
+
+    @Override
+    public List<ActivityResponse> getActivitiesByBuddy(UUID buddy) {
+        List<Activity> activities = activityRepository.findByHost_BuddyId(buddy);
+        return activityMapper.toResponseList(activities);
+    }
+
+
 }
