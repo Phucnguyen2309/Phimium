@@ -4,52 +4,40 @@ import { useAuth } from '@/context/authContext.js'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.js'
 import activityService from '@/services/activityService.js'
 
-const fallbackActivities = [
-  {
-    id: 'morning-vinyasa',
-    title: 'Morning Vinyasa Flow',
-    hostName: 'Sarah J.',
-    hostAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=120&auto=format&fit=crop',
-    imageUrl:
-      'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=1200&auto=format&fit=crop',
-    category: 'Yoga',
-    status: 'UPCOMING',
-    statusLabel: 'Tomorrow',
-    time: '8:00 AM - 9:30 AM',
-    location: 'Zenith Studio, Downtown',
-    action: 'upcoming',
-  },
-  {
-    id: 'pottery-workshop',
-    title: "Beginner's Pottery Workshop",
-    hostName: 'Mark T.',
-    hostAvatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=120&auto=format&fit=crop',
-    imageUrl:
-      'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?q=80&w=1200&auto=format&fit=crop',
-    category: 'Crafts',
-    status: 'IN_PROGRESS',
-    statusLabel: 'In Progress',
-    time: '2:00 PM - 5:00 PM (Ends in 1hr)',
-    location: 'The Clay House, Westside',
-    action: 'in-progress',
-  },
-  {
-    id: 'italian-pasta',
-    title: 'Italian Pasta Masterclass',
-    hostName: 'Chef Elena',
-    hostAvatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=120&auto=format&fit=crop',
-    imageUrl:
-      'https://images.unsplash.com/photo-1516211697506-8360dbcfe9a4?q=80&w=1200&auto=format&fit=crop',
-    category: 'Culinary',
-    status: 'COMPLETED',
-    statusLabel: 'Oct 12',
-    rating: 5,
-    action: 'completed',
-  },
-]
+const placeholderImage = `data:image/svg+xml;utf8,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="600" height="360">
+    <rect width="100%" height="100%" fill="#dbeafe"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+      font-family="Arial" font-size="24" fill="#1d4ed8">
+      PHIMIUM Activity
+    </text>
+  </svg>
+`)}`
+
+const placeholderAvatar = `data:image/svg+xml;utf8,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+    <rect width="100%" height="100%" rx="40" fill="#e0f2fe"/>
+    <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle"
+      font-family="Arial" font-size="24" fill="#0369a1">
+      P
+    </text>
+  </svg>
+`)}`
+
+const defaultActivity = {
+  id: '',
+  title: 'Untitled Activity',
+  hostName: 'Unknown host',
+  hostAvatar: placeholderAvatar,
+  imageUrl: placeholderImage,
+  category: 'ACTIVITY',
+  status: 'UPCOMING',
+  statusLabel: 'Upcoming',
+  time: 'TBA',
+  location: 'TBA',
+  rating: 5,
+  action: '',
+}
 
 const tabs = [
   { label: 'All Activities', value: 'ALL' },
@@ -62,15 +50,37 @@ const normalizeStatus = (value) => {
   const status = String(value ?? '').toUpperCase()
 
   if (status.includes('PROGRESS')) return 'IN_PROGRESS'
-  if (status.includes('COMPLETE') || status.includes('DONE')) return 'COMPLETED'
-  if (status.includes('UPCOMING') || status.includes('PENDING')) return 'UPCOMING'
+
+  if (
+    status.includes('COMPLETE') ||
+    status.includes('DONE') ||
+    status.includes('FINISHED')
+  ) {
+    return 'COMPLETED'
+  }
+
+  if (
+    status.includes('UPCOMING') ||
+    status.includes('PENDING') ||
+    status.includes('PUBLISHED') ||
+    status.includes('APPROVED') ||
+    status.includes('REGISTERED')
+  ) {
+    return 'UPCOMING'
+  }
 
   return 'UPCOMING'
 }
 
+const getStatusLabel = (status) => {
+  if (status === 'IN_PROGRESS') return 'In Progress'
+  if (status === 'COMPLETED') return 'Completed'
+  return 'Upcoming'
+}
+
 const pickActivity = (item) => item?.activity ?? item
 
-const formatTimeRange = (activity, fallback) => {
+const formatTimeRange = (activity, fallback = defaultActivity) => {
   if (activity?.time) return activity.time
 
   const startValue = activity?.startTime ?? activity?.startDate
@@ -83,51 +93,90 @@ const formatTimeRange = (activity, fallback) => {
 
   if (Number.isNaN(start.getTime())) return fallback.time
 
+  const dateText = start.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
   const startText = start.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
   })
 
-  if (!end || Number.isNaN(end.getTime())) return startText
+  if (!end || Number.isNaN(end.getTime())) {
+    return `${dateText}, ${startText}`
+  }
 
   const endText = end.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
   })
 
-  return `${startText} - ${endText}`
+  return `${dateText}, ${startText} - ${endText}`
 }
 
-const mapJoinedActivity = (item, index) => {
-  const activity = pickActivity(item)
-  const fallback = fallbackActivities[index % fallbackActivities.length]
-  const status = normalizeStatus(item?.status ?? activity?.status ?? fallback.status)
+const mapJoinedActivity = (item) => {
+  const activity = pickActivity(item) ?? {}
+  const status = normalizeStatus(item?.status ?? activity?.status)
+  const statusLabel =
+    activity?.statusLabel ??
+    item?.statusLabel ??
+    getStatusLabel(status)
 
   return {
-    id: activity?.id ?? activity?.activityId ?? item?.id ?? fallback.id,
-    title: activity?.title ?? activity?.name ?? fallback.title,
+    id:
+      activity?.id ??
+      activity?.activityId ??
+      item?.id ??
+      crypto.randomUUID(),
+
+    title:
+      activity?.title ??
+      activity?.name ??
+      defaultActivity.title,
+
     hostName:
       activity?.hostName ??
       activity?.hostBuddyName ??
       activity?.host?.name ??
-      fallback.hostName,
-    hostAvatar: activity?.hostAvatar ?? activity?.host?.avatarUrl ?? fallback.hostAvatar,
+      activity?.host?.fullName ??
+      defaultActivity.hostName,
+
+    hostAvatar:
+      activity?.hostAvatar ??
+      activity?.hostAvatarUrl ??
+      activity?.host?.avatarUrl ??
+      defaultActivity.hostAvatar,
+
     imageUrl:
       activity?.thumbnailUrl ??
       activity?.imageUrl ??
       activity?.coverUrl ??
-      fallback.imageUrl,
-    category: activity?.category ?? activity?.activityType ?? fallback.category,
+      defaultActivity.imageUrl,
+
+    category:
+      activity?.category ??
+      activity?.activityType ??
+      defaultActivity.category,
+
     status,
-    statusLabel: activity?.statusLabel ?? item?.statusLabel ?? fallback.statusLabel,
-    time: formatTimeRange(activity, fallback),
+    statusLabel,
+
+    time: formatTimeRange(activity, defaultActivity),
+
     location:
       activity?.locationName ??
       activity?.address ??
       activity?.location ??
-      fallback.location,
-    rating: item?.rating ?? activity?.rating ?? fallback.rating,
-    action: fallback.action,
+      defaultActivity.location,
+
+    rating:
+      item?.rating ??
+      activity?.rating ??
+      defaultActivity.rating,
+
+    action: defaultActivity.action,
   }
 }
 
@@ -158,10 +207,21 @@ const StatusBadge = ({ activity }) => {
       {isInProgress ? (
         <span className="h-1.5 w-1.5 rounded-full bg-white" />
       ) : (
-        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="h-3 w-3"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       )}
+
       {activity.statusLabel}
     </span>
   )
@@ -181,8 +241,14 @@ const ActivityCard = ({ activity }) => {
         <img
           src={activity.imageUrl}
           alt={activity.title}
-          className={`h-full w-full object-cover ${isCompleted ? 'opacity-70 saturate-[0.75]' : ''}`}
+          className={`h-full w-full object-cover ${
+            isCompleted ? 'opacity-70 saturate-[0.75]' : ''
+          }`}
+          onError={(event) => {
+            event.currentTarget.src = placeholderImage
+          }}
         />
+
         <StatusBadge activity={activity} />
       </div>
 
@@ -195,6 +261,7 @@ const ActivityCard = ({ activity }) => {
           >
             {activity.title}
           </h2>
+
           <span className="rounded bg-teal-100 px-2 py-1 text-[11px] font-medium text-teal-700">
             {activity.category}
           </span>
@@ -205,23 +272,46 @@ const ActivityCard = ({ activity }) => {
             src={activity.hostAvatar}
             alt=""
             className="h-5 w-5 rounded-full object-cover"
+            onError={(event) => {
+              event.currentTarget.src = placeholderAvatar
+            }}
           />
+
           <span>Hosted by {activity.hostName}</span>
         </div>
 
         {isCompleted ? (
           <div className="mt-auto">
             <div className="mb-5 flex items-center gap-2 text-sm text-slate-500">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.48 3.5l2.23 4.52 4.99.72-3.61 3.52.85 4.97-4.46-2.35-4.46 2.35.85-4.97-3.61-3.52 4.99-.72 2.23-4.52z" />
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M11.48 3.5l2.23 4.52 4.99.72-3.61 3.52.85 4.97-4.46-2.35-4.46 2.35.85-4.97-3.61-3.52 4.99-.72 2.23-4.52z"
+                />
               </svg>
+
               You rated {activity.rating ?? 5} stars
             </div>
+
             <div className="grid grid-cols-2 gap-2">
-              <button className="rounded-md border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm" type="button">
+              <button
+                className="rounded-md border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm"
+                type="button"
+              >
                 Leave Review
               </button>
-              <button className="rounded-md border border-blue-300 px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm" type="button">
+
+              <button
+                className="rounded-md border border-blue-300 px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm"
+                type="button"
+              >
                 Book Again
               </button>
             </div>
@@ -230,36 +320,96 @@ const ActivityCard = ({ activity }) => {
           <div className="mt-auto">
             <div className="space-y-2 text-sm text-slate-700">
               <div className="flex items-start gap-2">
-                <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
+                  />
                 </svg>
+
                 <span>{activity.time}</span>
               </div>
+
               <div className="flex items-start gap-2">
-                <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10.5a2 2 0 100-4 2 2 0 000 4z" />
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 10.5a2 2 0 100-4 2 2 0 000 4z"
+                  />
                 </svg>
+
                 <span>{activity.location}</span>
               </div>
             </div>
 
             {isInProgress ? (
-              <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-4 py-3 text-xs font-semibold text-white" type="button">
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" />
+              <button
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-4 py-3 text-xs font-semibold text-white"
+                type="button"
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"
+                  />
                 </svg>
+
                 Get Directions
               </button>
             ) : (
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <button className="rounded-md border border-blue-500 px-4 py-3 text-xs font-semibold text-blue-600" type="button">
+                <button
+                  className="rounded-md border border-blue-500 px-4 py-3 text-xs font-semibold text-blue-600"
+                  type="button"
+                >
                   View Details
                 </button>
-                <button className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-3 text-xs font-semibold text-white" type="button">
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4v8z" />
+
+                <button
+                  className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-3 text-xs font-semibold text-white"
+                  type="button"
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4v8z"
+                    />
                   </svg>
+
                   Chat
                 </button>
               </div>
@@ -273,48 +423,83 @@ const ActivityCard = ({ activity }) => {
 
 const MyActivitiesPage = () => {
   useDocumentTitle('My Activities')
+
   const { isAuthenticated } = useAuth()
-  const [activities, setActivities] = useState(fallbackActivities)
+
+  const [activities, setActivities] = useState([])
   const [activeTab, setActiveTab] = useState('ALL')
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
+  let cancelled = false
+
+  const fetchJoinedActivities = async () => {
+    // Tránh setState synchronous ngay trong effect body
+    await Promise.resolve()
+
+    if (cancelled) return
+
     if (!isAuthenticated) {
+      setActivities([])
+      setLoading(false)
+      setErrorMessage('')
       return
     }
 
-    const fetchJoinedActivities = async () => {
-      try {
-        setLoading(true)
-        const response = await activityService.getMyRegistrations()
-        const joinedActivities = getResponseList(response)
+    try {
+      setLoading(true)
+      setErrorMessage('')
 
-        if (joinedActivities.length > 0) {
-          setActivities(joinedActivities.map(mapJoinedActivity))
+      const response = await activityService.getMyRegistrations()
+      const joinedActivities = getResponseList(response)
+
+      if (!cancelled) {
+        setActivities(joinedActivities.map(mapJoinedActivity))
+      }
+    } catch (error) {
+      console.error('Failed to load joined activities:', error)
+
+      if (!cancelled) {
+        if (error?.response?.status === 403) {
+          setErrorMessage('You do not have permission to view these activities.')
+        } else {
+          setErrorMessage('Failed to load activities. Please try again later.')
         }
-      } catch (error) {
-        if (error?.response?.status !== 403) {
-          console.error('Failed to load joined activities:', error)
-        }
-      } finally {
+
+        setActivities([])
+      }
+    } finally {
+      if (!cancelled) {
         setLoading(false)
       }
     }
+  }
 
-    fetchJoinedActivities()
-  }, [isAuthenticated])
+  fetchJoinedActivities()
+
+  return () => {
+    cancelled = true
+  }
+}, [isAuthenticated])
 
   const filteredActivities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     return activities.filter((activity) => {
-      const matchesTab = activeTab === 'ALL' || activity.status === activeTab
+      const title = String(activity.title ?? '').toLowerCase()
+      const category = String(activity.category ?? '').toLowerCase()
+      const location = String(activity.location ?? '').toLowerCase()
+
+      const matchesTab =
+        activeTab === 'ALL' || activity.status === activeTab
+
       const matchesSearch =
         !normalizedSearch ||
-        activity.title.toLowerCase().includes(normalizedSearch) ||
-        activity.category.toLowerCase().includes(normalizedSearch) ||
-        activity.location?.toLowerCase().includes(normalizedSearch)
+        title.includes(normalizedSearch) ||
+        category.includes(normalizedSearch) ||
+        location.includes(normalizedSearch)
 
       return matchesTab && matchesSearch
     })
@@ -327,15 +512,27 @@ const MyActivitiesPage = () => {
           <h1 className="text-[25px] font-bold leading-none text-slate-950">
             My Activities
           </h1>
+
           <p className="mt-3 text-[13px] text-slate-700">
             Track and manage all your past, present, and future experiences.
           </p>
         </div>
 
         <label className="relative w-full sm:w-[200px]">
-          <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z"
+            />
           </svg>
+
           <input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
@@ -358,9 +555,11 @@ const MyActivitiesPage = () => {
               }`}
             >
               {tab.label}
+
               {tab.value === 'IN_PROGRESS' && (
-                <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-orange-500 align-middle" />
+                <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full  align-middle" />
               )}
+
               {activeTab === tab.value && (
                 <span className="absolute bottom-[-1px] left-0 h-0.5 w-full bg-blue-600" />
               )}
@@ -372,6 +571,10 @@ const MyActivitiesPage = () => {
       {loading ? (
         <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-white py-14 text-center text-sm text-slate-500">
           Loading your activities...
+        </div>
+      ) : errorMessage ? (
+        <div className="mt-5 rounded-lg border border-red-200 bg-red-50 py-14 text-center text-sm text-red-600">
+          {errorMessage}
         </div>
       ) : filteredActivities.length > 0 ? (
         <div className="mt-5 grid gap-5 md:grid-cols-3">
