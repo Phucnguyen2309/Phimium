@@ -1,24 +1,76 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useState, useContext } from 'react'
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom'
 import { Container } from '../components/common'
+import { AuthContext } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import activityService from '../services/activityService'
+import SafetyTermsModal from '../components/activity/SafetyTermsModal'
 
-const fallbackDetail = {
-  title: 'Artisanal Pottery Workshop',
-  description: 'Master the wheel with professional local ceramists and create your own ceramic piece.',
-  thumbnailUrl: 'https://images.unsplash.com/photo-1492496913980-501348b61469?q=80&w=1200&auto=format&fit=crop',
-  startTime: '2026-07-10T09:00:00',
-  locationName: 'Clay Studio District',
-  address: '12 Nguyen Trai, District 1, Ho Chi Minh City',
-  participationFee: 450000,
-  minimumParticipants: 4,
-  maximumParticipants: 6,
-  groupMinSize: 4,
-  groupMaxSize: 6,
-  hostBuddyName: 'Buddy Linh',
-  activityType: 'Workshop',
-  status: 'PUBLISHED',
+const fallbackDetails = {
+  pottery: {
+    title: 'Artisanal Pottery Workshop',
+    description: 'Master the wheel with professional local ceramists and create your own ceramic piece.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1492496913980-501348b61469?q=80&w=1200&auto=format&fit=crop',
+    startTime: '2026-07-10T09:00:00',
+    locationName: 'Clay Studio District',
+    address: '12 Nguyen Trai, District 1, Ho Chi Minh City',
+    participationFee: 450000,
+    minimumParticipants: 4,
+    maximumParticipants: 6,
+    groupMinSize: 4,
+    groupMaxSize: 6,
+    hostBuddyName: 'Buddy Linh',
+    activityType: 'Workshop',
+    status: 'PUBLISHED',
+  },
+  coffee: {
+    title: 'Urban Specialty Coffee',
+    description: 'Taste curated roasts and connect with nearby buddies in a relaxed cafe vibe.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop',
+    startTime: '2026-07-11T14:00:00',
+    locationName: 'District 1',
+    address: '88 Le Lai, District 1, Ho Chi Minh City',
+    participationFee: 0,
+    minimumParticipants: 4,
+    maximumParticipants: 6,
+    groupMinSize: 4,
+    groupMaxSize: 6,
+    hostBuddyName: 'Buddy Minh',
+    activityType: 'Coffee Chat',
+    status: 'PUBLISHED',
+  },
+  rooftop: {
+    title: 'Rooftop Socials',
+    description: 'Evening social events with skyline views and new companions.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop',
+    startTime: '2026-07-12T18:30:00',
+    locationName: 'Skyline Rooftop',
+    address: '2 Nguyen Hue, District 1, Ho Chi Minh City',
+    participationFee: 280000,
+    minimumParticipants: 4,
+    maximumParticipants: 6,
+    groupMinSize: 4,
+    groupMaxSize: 6,
+    hostBuddyName: 'Buddy An',
+    activityType: 'Social',
+    status: 'PUBLISHED',
+  },
+  cowork: {
+    title: 'Cowork & Connect',
+    description: 'A calm workspace for creators and remote workers to meet and collaborate.',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop',
+    startTime: '2026-07-13T10:00:00',
+    locationName: 'Shared Studio',
+    address: '45 Nguyen Thi Minh Khai, District 3, Ho Chi Minh City',
+    participationFee: 120000,
+    minimumParticipants: 4,
+    maximumParticipants: 6,
+    groupMinSize: 4,
+    groupMaxSize: 6,
+    hostBuddyName: 'Buddy Hoa',
+    activityType: 'Coworking',
+    status: 'PUBLISHED',
+  },
 }
 
 const formatDateTime = (dateValue) => {
@@ -41,14 +93,29 @@ const formatMoney = (value) => {
 
 const ActivityDetailPage = () => {
   const { id } = useParams()
-  const [activity, setActivity] = useState(fallbackDetail)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { user } = useContext(AuthContext)
+  const [activity, setActivity] = useState(
+    location.state?.activity ?? fallbackDetails[id] ?? fallbackDetails.pottery
+  )
   const [loading, setLoading] = useState(false)
+  const [joining, setJoining] = useState(false)
+  const [showSafetyTerms, setShowSafetyTerms] = useState(false)
+  const [safetyTermsAccepted, setSafetyTermsAccepted] = useState(false)
+  const [joinMessage, setJoinMessage] = useState('')
+  const isAuthenticated = Boolean(user) && Boolean(localStorage.getItem('token'))
 
   useDocumentTitle(activity?.title ? `${activity.title}` : 'Activity Detail')
 
   useEffect(() => {
+    if (!id) {
+      return
+    }
+
     const token = localStorage.getItem('token')
-    if (!token || token === 'undefined' || token === 'null' || !id) {
+    if (!token || token === 'undefined' || token === 'null') {
+      setActivity((currentActivity) => location.state?.activity ?? fallbackDetails[id] ?? currentActivity)
       return
     }
 
@@ -58,7 +125,7 @@ const ActivityDetailPage = () => {
         const response = await activityService.getActivityById(id)
         const detail = response?.data?.data ?? response?.data
         if (detail) {
-          setActivity({ ...fallbackDetail, ...detail })
+          setActivity({ ...(location.state?.activity ?? fallbackDetails[id] ?? fallbackDetails.pottery), ...detail })
         }
       } catch (error) {
         if (error?.response?.status !== 403) {
@@ -70,7 +137,43 @@ const ActivityDetailPage = () => {
     }
 
     fetchDetail()
-  }, [id])
+  }, [id, location.state])
+
+  const handleJoinActivity = async () => {
+    const token = localStorage.getItem('token')
+    if (!token || token === 'undefined' || token === 'null') {
+      setJoinMessage('Bạn cần đăng nhập trước khi tham gia hoạt động.')
+      return
+    }
+
+    try {
+      setJoining(true)
+      setJoinMessage('')
+      await activityService.joinActivity({
+        activityId: id,
+        isSafetyTermsAccepted: safetyTermsAccepted,
+      })
+      setShowSafetyTerms(false)
+      setSafetyTermsAccepted(false)
+      setJoinMessage('Đăng ký tham gia thành công.')
+    } catch (error) {
+      if (error?.response?.status !== 403) {
+        console.error('Lỗi khi join activity:', error)
+      }
+      setJoinMessage(error?.response?.data?.message ?? 'Không thể tham gia hoạt động.')
+    } finally {
+      setJoining(false)
+    }
+  }
+
+  const handleJoinClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/activities/${id}` } })
+      return
+    }
+
+    setShowSafetyTerms(true)
+  }
 
   return (
     <Container className="py-6 sm:py-10">
@@ -123,7 +226,11 @@ const ActivityDetailPage = () => {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600">
+                <button
+                  type="button"
+                  onClick={handleJoinClick}
+                  className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+                >
                   Join
                 </button>
                 <Link
@@ -135,10 +242,32 @@ const ActivityDetailPage = () => {
               </div>
 
               {loading && <p className="text-sm text-slate-500">Đang tải chi tiết...</p>}
+              {joinMessage && <p className="text-sm font-medium text-slate-600">{joinMessage}</p>}
+
+              <div className="flex flex-wrap gap-3 pt-1 text-sm font-semibold">
+                <Link to={`/activities/${id}/guidelines`} className="text-blue-700 transition hover:text-blue-600">
+                  Xem hướng dẫn an toàn
+                </Link>
+                <Link to="/my-activities" className="text-slate-700 transition hover:text-slate-950">
+                  My Activities
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <SafetyTermsModal
+        open={showSafetyTerms}
+        checked={safetyTermsAccepted}
+        onCheckedChange={setSafetyTermsAccepted}
+        onClose={() => {
+          setShowSafetyTerms(false)
+          setSafetyTermsAccepted(false)
+        }}
+        onConfirm={handleJoinActivity}
+        loading={joining}
+      />
     </Container>
   )
 }

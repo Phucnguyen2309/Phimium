@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { loginUser } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
 
@@ -11,7 +11,9 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useContext(AuthContext);
+    const fromPath = location.state?.from || '/';
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -21,7 +23,7 @@ const Login = () => {
         try {
             const responseData = await loginUser(email, password);
             login(responseData);
-            navigate('/'); 
+            navigate(fromPath, { replace: true }); 
         } catch (err) {
             setError(err.message || err.data?.message || 'Sai email hoặc mật khẩu. Vui lòng thử lại.');
         } finally {

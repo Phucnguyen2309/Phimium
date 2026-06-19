@@ -6,6 +6,8 @@ import HomePage from '@/pages/HomePage.jsx';
 import Login from '@/pages/Login.jsx';
 import Register from '@/pages/Register.jsx';
 import ActivityDetailPage from '@/pages/ActivityDetailPage.jsx';
+import ActivityGuidelinePage from '@/pages/ActivityGuidelinePage.jsx';
+import MyActivitiesPage from '@/pages/MyActivitiesPage.jsx';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -35,6 +37,18 @@ function App() {
                 <Route path="/activities/:id" element={
                     <MainLayout>
                         <ActivityDetailPage />
+                    </MainLayout>
+                } />
+
+                <Route path="/activities/:id/guidelines" element={
+                    <MainLayout>
+                        <ActivityGuidelinePage />
+                    </MainLayout>
+                } />
+
+                <Route path="/my-activities" element={
+                    <MainLayout>
+                        <MyActivitiesPage />
                     </MainLayout>
                 } />
 
