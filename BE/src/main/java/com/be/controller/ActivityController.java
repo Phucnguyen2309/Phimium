@@ -5,6 +5,8 @@ import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
 import com.be.entity.Activity;
 import com.be.entity.User;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
 import com.be.service.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -62,5 +64,21 @@ public class ActivityController {
     public ResponseEntity<ApiResponse<List<ActivityResponse>>> getAllActivity(){
         List<ActivityResponse> activity = activityService.getAllActivities();
         return  ResponseEntity.ok(ApiResponse.success("Success", activity));
+    }
+
+    @GetMapping("/joined")
+    public ResponseEntity<ApiResponse<List<ActivityResponse>>> getJoinedActivities(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<ActivityResponse> response =
+                activityService.getJoinedActivities(currentUser);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Success", response)
+        );
     }
 }
