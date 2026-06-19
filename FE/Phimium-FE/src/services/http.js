@@ -1,17 +1,24 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+import axios from 'axios'
 
-export async function httpRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  })
-
-  if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`)
+const http = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  headers: {
+    'Content-Type': 'application/json'
   }
+})
 
-  return response.json()
-}
+// Thêm interceptor để đính kèm token vào mỗi request nếu có
+http.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token') // Hoặc lấy token từ context/store
+    if (token && token !== 'undefined' && token !== 'null') {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+export default http
