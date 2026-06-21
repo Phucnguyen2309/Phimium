@@ -3,11 +3,13 @@ import http from '@/services/http.js'
 const activityService = {
   getAllActivities: () => http.get('/activity/getAll'),
 
-  getActivityById: (id) => http.get(`/activities/${id}`),
+  getActivityById: (activityId) => http.get(`/activity/${activityId}`),
 
   joinActivity: (payload) => http.post('/v1/registrations/join', payload),
 
   getMyRegistrations: () => http.get('/activity/joined'),
+
+  getMyActivities : () => http.get(`/activity/joined`) ,
 
   getMyGroups: () => http.get('/v1/registrations/my-groups'),
 

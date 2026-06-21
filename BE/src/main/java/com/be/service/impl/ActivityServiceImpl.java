@@ -1,6 +1,7 @@
 package com.be.service.impl;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.entity.Activity;
 import com.be.entity.Buddy;
@@ -8,6 +9,7 @@ import com.be.entity.Registration;
 import com.be.entity.User;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
+import com.be.mapper.ActivityDetailMapper;
 import com.be.mapper.ActivityMapper;
 import com.be.repository.ActivityRepository;
 import com.be.repository.BuddyRepository;
@@ -18,6 +20,7 @@ import com.be.service.CloudinaryService;
 import com.be.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +37,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final CloudinaryService cloudinaryService;
     private final BuddyRepository buddyRepository;
     private final RegistrationRepository registrationRepository;
+    private final ActivityDetailMapper  activityDetailMapper;
 
     @Override
     @Transactional
@@ -57,7 +61,10 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<ActivityResponse> getAllActivities() {
-        List<Activity> activities = activityRepository.findAll();
+        List<Activity> activities = activityRepository.findAll(
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
         return activityMapper.toResponseList(activities);
     }
 
@@ -81,6 +88,16 @@ public class ActivityServiceImpl implements ActivityService {
                 .toList();
 
         return activityMapper.toResponseList(activities);
+    }
+
+    @Override
+    public ActivityDetailResponse getActivityDetail(UUID activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.ACTIVITY_NOT_FOUND)
+                );
+
+        return activityDetailMapper.toResponse(activity);
     }
 
 

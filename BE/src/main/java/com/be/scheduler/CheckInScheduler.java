@@ -1,6 +1,7 @@
 package com.be.scheduler;
 
 import com.be.service.RegistrationService;
+import com.be.service.impl.StatusSchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -11,8 +12,13 @@ public class CheckInScheduler {
 
     private final RegistrationService registrationService;
 
+    private final StatusSchedulerService statusSchedulerService;
+
+
     @Scheduled(fixedRate = 60000)
     public void autoMarkAbsent() {
         registrationService.autoMarkAbsentAfterActivityEndTime();
     }
+
+
 }

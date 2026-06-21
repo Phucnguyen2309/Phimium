@@ -9,10 +9,12 @@ import BuddyPage from '@/pages/BuddyPage.jsx'
 import ForbiddenPage from '@/pages/ForbiddenPage.jsx'
 import HomePage from '@/pages/HomePage.jsx'
 import Login from '@/pages/Login.jsx'
-import MyActivitiesPage from '@/pages/MyActivitiesPage.jsx'
+import UserDashboard from '../pages/UserDashboard/UserDashboard'
 import Register from '@/pages/Register.jsx'
 import { ProtectedRoute } from '@/routes/ProtectedRoute.jsx'
 import { ROUTES } from '@/routes/paths.js'
+import ActivityView from '../pages/Activity/ActivityView'
+
 
 const withMainLayout = (page) => <MainLayout>{page}</MainLayout>
 
@@ -28,14 +30,18 @@ function App() {
           element={withMainLayout(<ActivityDetailPage />)}
         />
         <Route
+            path={ROUTES.activities}
+            element={withMainLayout(<ActivityView />)}
+          />
+        <Route
           path={ROUTES.activityGuidelines}
           element={withMainLayout(<ActivityGuidelinePage />)}
         />
         <Route
-          path={ROUTES.myActivities}
+          path={ROUTES.userDashboard}
           element={
-            <ProtectedRoute>
-              {withMainLayout(<MyActivitiesPage />)}
+            <ProtectedRoute allowedRoles={[USER_ROLES.user]}>
+              {withMainLayout(<UserDashboard />)}
             </ProtectedRoute>
           }
         />
