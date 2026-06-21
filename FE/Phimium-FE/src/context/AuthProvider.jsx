@@ -44,6 +44,8 @@ const extractAuthData = (loginResponse) => {
     token: normalizeToken(payload?.token ?? payload?.accessToken ?? payload?.jwt),
     username: payload?.username ?? payload?.name ?? payload?.email ?? '',
     role: String(rawRole).replace('ROLE_', '').toUpperCase(),
+    userId: payload?.userId,   // THÊM DÒNG NÀY
+    buddyId: payload?.buddyId,
   }
 }
 
@@ -64,6 +66,8 @@ export function AuthProvider({ children }) {
     const userInfo = {
       username: authData.username,
       role: authData.role,
+      userId: authData.userId,   // THÊM DÒNG NÀY
+      buddyId: authData.buddyId, // THÊM DÒNG NÀY
     }
 
     localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userInfo))
