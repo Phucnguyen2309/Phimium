@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom'
-
 import SafetyTermsModal from '@/components/activity/SafetyTermsModal.jsx'
 import { Container } from '@/components/common'
-import { buildActivityGuidelinesPath, ROUTES } from '@/routes/paths.js'
 
-import { formatDateTime, formatMoney } from './activityDetailData.js'
+import { ActivityHero } from './components/ActivityHero.jsx'
+import { ActivityHostBookingCard } from './components/ActivityHostBookingCard.jsx'
+import { ActivityIncludedSection } from './components/ActivityIncludedSection.jsx'
+import { ActivityLocationSection } from './components/ActivityLocationSection.jsx'
+import { ActivityQuickLinks } from './components/ActivityQuickLinks.jsx'
 
 export function ActivityDetailView({
   activity,
@@ -20,124 +21,51 @@ export function ActivityDetailView({
   showSafetyTerms,
 }) {
   return (
-    <Container className="py-6 sm:py-10">
-      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-        <div className="grid gap-0 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="relative min-h-[360px] bg-slate-900">
-            <img
-              src={activity.thumbnailUrl}
-              alt={activity.title}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
-                Chi tiết hoạt động
-              </p>
-              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
-                {activity.title}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85">
-                {activity.description}
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50">
+      <Container className="py-8">
+        <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+          <ActivityHero activity={activity} />
 
-          <div className="p-6 sm:p-8">
-            <div className="space-y-5">
-              <div>
-                <p className="text-sm font-semibold text-slate-500">
-                  Thời gian
-                </p>
-                <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {formatDateTime(activity.startTime)}
-                </p>
-              </div>
+          <div className="grid gap-8 p-6 lg:grid-cols-[1fr_360px] lg:p-8">
+            <main>
+              <section>
+                <h2 className="text-2xl font-black text-slate-950">
+                  About this experience
+                </h2>
 
-              <div>
-                <p className="text-sm font-semibold text-slate-500">
-                  Địa điểm
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+                  {activity?.description ||
+                    'Thông tin mô tả hoạt động chưa được cập nhật.'}
                 </p>
-                <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {activity.locationName}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  {activity.address}
-                </p>
-              </div>
+              </section>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-sm text-slate-500">Phí tham gia</p>
-                  <p className="mt-1 text-lg font-bold text-slate-950">
-                    {formatMoney(activity.participationFee)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-sm text-slate-500">Quy mô nhóm</p>
-                  <p className="mt-1 text-lg font-bold text-slate-950">
-                    {activity.groupMinSize ?? 4}-{activity.groupMaxSize ?? 6}
-                  </p>
-                </div>
-              </div>
+              <ActivityIncludedSection activity={activity} />
 
-              <div className="rounded-2xl border border-slate-200 p-4">
-                <p className="text-sm font-semibold text-slate-500">
-                  Buddy dẫn đoàn
-                </p>
-                <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {activity.hostBuddyName ?? 'Chưa có Buddy phụ trách'}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Loại: {activity.activityType ?? 'Chưa xác định'}
-                </p>
-              </div>
+              <ActivityLocationSection activity={activity} />
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleJoinClick}
-                  className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
-                >
-                  Tham gia
-                </button>
-                <Link
-                  to={ROUTES.home}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Quay lại
-                </Link>
-              </div>
+              <ActivityQuickLinks id={id} />
 
               {loading && (
-                <p className="text-sm text-slate-500">
+                <p className="mt-5 text-sm text-slate-500">
                   Đang tải chi tiết...
                 </p>
               )}
+
               {joinMessage && (
-                <p className="text-sm font-medium text-slate-600">
+                <p className="mt-5 rounded-xl bg-blue-50 px-4 py-3 text-sm font-semibold text-slate-700">
                   {joinMessage}
                 </p>
               )}
+            </main>
 
-              <div className="flex flex-wrap gap-3 pt-1 text-sm font-semibold">
-                <Link
-                  to={buildActivityGuidelinesPath(id)}
-                  className="text-blue-700 transition hover:text-blue-600"
-                >
-                  Xem hướng dẫn an toàn
-                </Link>
-                <Link
-                  to={ROUTES.myActivities}
-                  className="text-slate-700 transition hover:text-slate-950"
-                >
-                  Hoạt động của tôi
-                </Link>
-              </div>
-            </div>
+            <ActivityHostBookingCard
+              activity={activity}
+              joining={joining}
+              handleJoinClick={handleJoinClick}
+            />
           </div>
         </div>
-      </div>
+      </Container>
 
       <SafetyTermsModal
         open={showSafetyTerms}
@@ -150,6 +78,6 @@ export function ActivityDetailView({
         onConfirm={handleJoinActivity}
         loading={joining}
       />
-    </Container>
+    </div>
   )
 }

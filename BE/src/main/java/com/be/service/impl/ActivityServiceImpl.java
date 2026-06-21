@@ -3,6 +3,7 @@ package com.be.service.impl;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.MyActivityResponse;
 import com.be.entity.Activity;
 import com.be.entity.Buddy;
 import com.be.entity.Registration;
@@ -11,6 +12,7 @@ import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.mapper.ActivityDetailMapper;
 import com.be.mapper.ActivityMapper;
+import com.be.mapper.MyActivityMapper;
 import com.be.repository.ActivityRepository;
 import com.be.repository.BuddyRepository;
 import com.be.repository.RegistrationRepository;
@@ -38,6 +40,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final BuddyRepository buddyRepository;
     private final RegistrationRepository registrationRepository;
     private final ActivityDetailMapper  activityDetailMapper;
+    private final MyActivityMapper myActivityMapper;
 
     @Override
     @Transactional
@@ -75,7 +78,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public List<ActivityResponse> getJoinedActivities(User currentUser) {
+    public List<MyActivityResponse> getJoinedActivities(User currentUser) {
         if (currentUser == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
@@ -83,11 +86,7 @@ public class ActivityServiceImpl implements ActivityService {
         List<Registration> registrations =
                 registrationRepository.findByUser(currentUser);
 
-        List<Activity> activities = registrations.stream()
-                .map(Registration::getActivity)
-                .toList();
-
-        return activityMapper.toResponseList(activities);
+        return myActivityMapper.toResponseList(registrations);
     }
 
     @Override

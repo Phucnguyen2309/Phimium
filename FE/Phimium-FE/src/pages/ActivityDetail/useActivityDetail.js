@@ -6,16 +6,13 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle.js'
 import { ROUTES } from '@/routes/paths.js'
 import activityService from '@/services/activityService.js'
 
-import { getFallbackActivity } from './activityDetailData.js'
-
 export function useActivityDetail() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const [activity, setActivity] = useState(() =>
-    getFallbackActivity(id, location.state?.activity),
-  )
+
+  const [activity, setActivity] = useState(location.state?.activity ?? null)
   const [loading, setLoading] = useState(false)
   const [joining, setJoining] = useState(false)
   const [showSafetyTerms, setShowSafetyTerms] = useState(false)
@@ -25,61 +22,41 @@ export function useActivityDetail() {
   useDocumentTitle(activity?.title ? activity.title : 'Chi tiết hoạt động')
 
   useEffect(() => {
-    if (!id || !isAuthenticated) {
-      return
-    }
+    if (!id) return
+
+    let isMounted = true
 
     const fetchDetail = async () => {
       try {
         setLoading(true)
+
         const response = await activityService.getActivityById(id)
         const detail = response?.data?.data ?? response?.data
 
-        if (detail) {
-          setActivity({
-            ...getFallbackActivity(id, location.state?.activity),
-            ...detail,
-          })
+        if (isMounted && detail) {
+          setActivity(detail)
         }
       } catch (error) {
         if (error?.response?.status !== 403) {
           console.error('Lỗi khi lấy chi tiết hoạt động:', error)
         }
+
+        if (isMounted) {
+          setActivity(null)
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchDetail()
-  }, [id, isAuthenticated, location.state])
 
-  const handleJoinActivity = async () => {
-    if (!isAuthenticated) {
-      setJoinMessage('Bạn cần đăng nhập trước khi tham gia hoạt động.')
-      return
+    return () => {
+      isMounted = false
     }
-
-    try {
-      setJoining(true)
-      setJoinMessage('')
-      await activityService.joinActivity({
-        activityId: id,
-        isSafetyTermsAccepted: safetyTermsAccepted,
-      })
-      setShowSafetyTerms(false)
-      setSafetyTermsAccepted(false)
-      setJoinMessage('Đăng ký tham gia thành công.')
-    } catch (error) {
-      if (error?.response?.status !== 403) {
-        console.error('Lỗi khi join activity:', error)
-      }
-      setJoinMessage(
-        error?.response?.data?.message ?? 'Không thể tham gia hoạt động.',
-      )
-    } finally {
-      setJoining(false)
-    }
-  }
+  }, [id])
 
   const handleJoinClick = () => {
     if (!isAuthenticated) {
@@ -87,7 +64,51 @@ export function useActivityDetail() {
       return
     }
 
+    setJoinMessage('')
     setShowSafetyTerms(true)
+  }
+
+  const handleJoinActivity = async () => {
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location.pathname } })
+      return
+    }
+
+    if (!safetyTermsAccepted) {
+      setJoinMessage('Bạn cần đồng ý điều khoản an toàn trước khi tham gia.')
+      return
+    }
+
+    try {
+      setJoining(true)
+      setJoinMessage('')
+
+      await activityService.joinActivity({
+        activityId: id,
+        isSafetyTermsAccepted: true,
+      })
+
+      setShowSafetyTerms(false)
+      setSafetyTermsAccepted(false)
+
+      navigate(ROUTES.userDashboard, {
+        replace: true,
+        state: {
+          activeTab: 'ACTIVITIES',
+          message: 'Đăng ký tham gia thành công.',
+        },
+      })
+    } catch (error) {
+      if (error?.response?.status !== 403) {
+        console.error('Lỗi khi join activity:', error)
+      }
+
+      setJoinMessage(
+        error?.response?.data?.message ?? 'Không thể tham gia hoạt động.',
+      )
+    } finally {
+      setJoining(false)
+    }
   }
 
   return {

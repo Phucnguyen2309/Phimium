@@ -1,11 +1,13 @@
 package com.be.config;
 
 import com.be.entity.User;
+import com.be.repository.BuddyRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
@@ -15,7 +17,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
+    private final BuddyRepository buddyRepository;
+
     @Value("${TOKEN_SECRET_KEY}")
     private String secretkey;
 
@@ -33,12 +38,21 @@ public class JwtService {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expireMs);
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .setSubject(user.getUserId().toString())
                 .claim("username", user.getEmail())
                 .claim("role", user.getRole().name())
                 .setIssuedAt(now)
-                .setExpiration(exp)
+                .setExpiration(exp);
+
+        if ("BUDDY".equals(user.getRole().name())) {
+            buddyRepository.findByUser_UserId(user.getUserId())
+                    .ifPresent(buddy ->
+                            builder.claim("buddyId", buddy.getBuddyId().toString())
+                    );
+        }
+
+        return builder
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -57,6 +71,11 @@ public class JwtService {
     public String extractRole(String token) {
         Object role = extractClaimsJws(token).get("role");
         return role == null ? null : role.toString();
+    }
+
+    public String extractBuddyId(String token) {
+        Object buddyId = extractClaimsJws(token).get("buddyId");
+        return buddyId == null ? null : buddyId.toString();
     }
 
     public String extractUsername(String token) {

@@ -75,8 +75,7 @@ export const mapActivity = (activity) => {
     hostBuddyId: activity?.hostBuddyId ?? null,
     createdById: activity?.createdById ?? null,
 
-    hostAvatar: DEFAULT_ACTIVITY.hostAvatar,
-
+    hostAvatar: activity?.avatarUrl,
     imageUrl: activity?.thumbnailUrl || DEFAULT_ACTIVITY.imageUrl,
 
     category: activity?.activityType ?? DEFAULT_ACTIVITY.category,

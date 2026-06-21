@@ -35,6 +35,7 @@ public class ActivityDetailMapper {
                                 ? null
                                 : activity.getHost().getUser().getFullName()
                 )
+                .avatarUrl(activity.getHost().getAvatarUrl())
                 .introduction(activity.getHost().getIntroduction())
                 .averageRating(activity.getHost().getAverageRating())
                 .build();

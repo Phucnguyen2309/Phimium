@@ -1,19 +1,19 @@
 package com.be.dto.response;
 
-import com.be.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class LoginResponse {
-    private String username;
-    private String token;
-    private String buddyId;
-    private UserRole role;
+public class ParticipantResponse {
+    private UUID userId;
+    private String fullName;
+    private String avatarUrl;
 
 }

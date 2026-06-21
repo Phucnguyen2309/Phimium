@@ -9,10 +9,14 @@ export const ROUTES = {
   buddy: '/buddy',
   admin: '/admin',
   forbidden: '/403',
+  myGroup : '/mygroup',
+    groupDetail: '/groups/:groupId',
   userDashboard: '/user-dashboard'
 }
 
 export const buildActivityDetailPath = (id) => `${ROUTES.activities}/${id}`
+
+export const buildGroupDetailPath = (groupId) => `/groups/${groupId}`
 
 export const buildActivityGuidelinesPath = (id) =>
   `${ROUTES.activities}/${id}/guidelines`

@@ -12,4 +12,6 @@ public interface BuddyRepository extends JpaRepository<Buddy, UUID> {
     Optional<Buddy> findByUserUserId(UUID userId);
 
     boolean existsByUserUserId(UUID userId);
+
+    Optional<Buddy> findByUser_UserId(UUID userId);
 }
