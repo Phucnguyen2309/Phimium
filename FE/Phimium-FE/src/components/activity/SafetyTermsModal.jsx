@@ -29,7 +29,7 @@ const SafetyTermsModal = ({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
-              Safety Terms
+              Điều khoản an toàn
             </p>
             <h2 className="mt-2 text-2xl font-bold text-slate-950">
               Xác nhận điều khoản an toàn
@@ -40,7 +40,7 @@ const SafetyTermsModal = ({
             onClick={onClose}
             className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
-            Close
+            Đóng
           </button>
         </div>
 
@@ -84,7 +84,7 @@ const SafetyTermsModal = ({
             onClick={onConfirm}
             className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? 'Đang xử lý...' : 'Xác nhận & Join'}
+            {loading ? 'Đang xử lý...' : 'Xác nhận & tham gia'}
           </button>
         </div>
       </div>

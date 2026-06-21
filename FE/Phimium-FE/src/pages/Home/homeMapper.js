@@ -11,13 +11,13 @@ export const getResponseList = (response) =>
   )
 
 export const formatTime = (value) => {
-  if (!value) return 'TBA'
+  if (!value) return 'Sắp cập nhật'
 
   const date = new Date(value)
 
-  if (Number.isNaN(date.getTime())) return 'TBA'
+  if (Number.isNaN(date.getTime())) return 'Sắp cập nhật'
 
-  return date.toLocaleString('en-US', {
+  return date.toLocaleString('vi-VN', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

@@ -14,7 +14,7 @@ export const getValidImage = (url) => {
 }
 
 export const formatActivityType = (type) => {
-  if (!type) return 'Activity'
+  if (!type) return 'Hoạt động'
 
   return String(type)
     .replaceAll('_', ' ')
@@ -23,7 +23,18 @@ export const formatActivityType = (type) => {
 }
 
 export const formatStatus = (status) => {
-  if (!status) return 'Published'
+  if (!status) return 'Đã đăng'
+
+  const labels = {
+    PUBLISHED: 'Đã đăng',
+    UPCOMING: 'Sắp diễn ra',
+    ONGOING: 'Đang diễn ra',
+    COMPLETED: 'Đã hoàn thành',
+    CANCELLED: 'Đã hủy',
+  }
+
+  const key = String(status).toUpperCase()
+  if (labels[key]) return labels[key]
 
   return String(status)
     .replaceAll('_', ' ')
@@ -34,24 +45,21 @@ export const formatStatus = (status) => {
 export const formatPrice = (price) => {
   const value = Number(price ?? 0)
 
-  if (value <= 0) return 'Free'
+  if (value <= 0) return 'Miễn phí'
 
   return `${value.toLocaleString('vi-VN')} VND`
 }
 
 export const formatDateTime = (value) => {
-  if (!value) return 'TBA'
+  if (!value) return 'Sắp cập nhật'
 
   const date = new Date(value)
 
-  if (Number.isNaN(date.getTime())) return 'TBA'
+  if (Number.isNaN(date.getTime())) return 'Sắp cập nhật'
 
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+  return date.toLocaleString('vi-VN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   })
 }
 
@@ -71,7 +79,7 @@ export const getRemainingSlots = (activity) => {
 
 export const mapActivity = (activity) => ({
   id: activity?.id ?? '',
-  title: activity?.title ?? 'Untitled Activity',
+  title: activity?.title ?? 'Hoạt động chưa đặt tên',
   description: activity?.description ?? '',
   activityType: activity?.activityType ?? 'ACTIVITY',
   thumbnailUrl: activity?.thumbnailUrl ?? '',
@@ -88,7 +96,7 @@ export const mapActivity = (activity) => ({
   longitude: activity?.longitude ?? null,
   latitude: activity?.latitude ?? null,
   hostBuddyId: activity?.hostBuddyId ?? null,
-  hostBuddyName: activity?.hostBuddyName ?? 'Unknown host',
+  hostBuddyName: activity?.hostBuddyName ?? 'Buddy chưa xác định',
   createdById: activity?.createdById ?? null,
   createdAt: activity?.createdAt ?? null,
   updatedAt: activity?.updatedAt ?? null,

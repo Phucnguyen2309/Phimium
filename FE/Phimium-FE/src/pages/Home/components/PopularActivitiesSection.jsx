@@ -16,11 +16,11 @@ export function PopularActivitiesSection({ activities = [], loading = false }) {
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-black tracking-tight text-slate-950">
-              Popular Activities
+              Hoạt động nổi bật
             </h2>
 
             <p className="mt-2 text-sm text-slate-600">
-              Top experiences chosen by the PHIMIUM community this week.
+              Những trải nghiệm được cộng đồng PHIMIUM yêu thích tuần này.
             </p>
           </div>
 
@@ -28,7 +28,7 @@ export function PopularActivitiesSection({ activities = [], loading = false }) {
             to={ROUTES.activities}
             className="hidden items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-800 sm:inline-flex"
           >
-            View all <span>→</span>
+            Xem tất cả <span>→</span>
           </Link>
         </div>
 
@@ -43,7 +43,7 @@ export function PopularActivitiesSection({ activities = [], loading = false }) {
             </h3>
 
             <p className="mt-2 text-sm text-slate-500">
-              Khi backend trả activity, danh sách sẽ hiện ở đây.
+              Khi hệ thống có hoạt động, danh sách sẽ hiện ở đây.
             </p>
           </div>
         ) : (

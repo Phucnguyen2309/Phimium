@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { label: 'Home', to: ROUTES.home },
-  { label: 'Activity', to: ROUTES.activities },
+  { label: 'Trang chủ', to: ROUTES.home },
+  { label: 'Hoạt động', to: ROUTES.activities },
 ]
 
 export function MainLayout({ children }) {

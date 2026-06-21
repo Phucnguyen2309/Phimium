@@ -2,19 +2,19 @@ import { Container } from '@/components/common'
 
 const TESTIMONIALS = [
   {
-    name: 'Jessica R.',
-    role: 'University Student',
-    text: 'PHIMIUM helped me find people to join workshops with. It feels easier than going alone.',
+    name: 'Lan N.',
+    role: 'Sinh viên',
+    text: 'PHIMIUM giúp mình tìm được người cùng tham gia workshop. Đi một mình không còn ngại nữa.',
   },
   {
-    name: 'Marcus T.',
-    role: 'Office Worker',
-    text: 'I discovered cozy cafes and board game groups through PHIMIUM. The experience is simple and fun.',
+    name: 'Minh T.',
+    role: 'Nhân viên văn phòng',
+    text: 'Mình khám phá được mấy quán cafe chill và nhóm board game qua PHIMIUM. Trải nghiệm đơn giản mà vui.',
   },
   {
-    name: 'Sarah L.',
-    role: 'Creative Learner',
-    text: 'The activities feel friendly and real. I like that everything focuses on offline experiences.',
+    name: 'Hà L.',
+    role: 'Người yêu sáng tạo',
+    text: 'Các hoạt động cảm giác thân thiện và thật. Mình thích vì mọi thứ đều tập trung vào trải nghiệm offline.',
   },
 ]
 
@@ -23,7 +23,7 @@ export function TestimonialsSection() {
     <section className="bg-emerald-50/70 py-16">
       <Container>
         <h2 className="text-center text-2xl font-black text-slate-950">
-          What Our Community Says
+          Cộng đồng nói gì?
         </h2>
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">

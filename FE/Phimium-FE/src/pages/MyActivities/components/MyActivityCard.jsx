@@ -51,7 +51,7 @@ const MyActivityCard = ({ activity }) => {
             }}
           />
 
-          <span>Hosted by {activity.hostName}</span>
+          <span>Dẫn bởi {activity.hostName}</span>
         </div>
 
         {isCompleted ? (
@@ -71,7 +71,7 @@ const MyActivityCard = ({ activity }) => {
                 />
               </svg>
 
-              You rated {activity.rating ?? 5} stars
+              Bạn đã đánh giá {activity.rating ?? 5} sao
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -79,14 +79,14 @@ const MyActivityCard = ({ activity }) => {
                 className="rounded-md border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm"
                 type="button"
               >
-                Leave Review
+                Viết đánh giá
               </button>
 
               <button
                 className="rounded-md border border-blue-300 px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm"
                 type="button"
               >
-                Book Again
+                Đặt lại
               </button>
             </div>
           </div>
@@ -141,7 +141,7 @@ const MyActivityCard = ({ activity }) => {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-4 py-3 text-xs font-semibold text-white"
                 type="button"
               >
-                Get Directions
+                Chỉ đường
               </button>
             ) : (
               <div className="mt-5 grid grid-cols-2 gap-2">
@@ -149,14 +149,14 @@ const MyActivityCard = ({ activity }) => {
                   className="rounded-md border border-blue-500 px-4 py-3 text-xs font-semibold text-blue-600"
                   type="button"
                 >
-                  View Details
+                  Xem chi tiết
                 </button>
 
                 <button
                   className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-3 text-xs font-semibold text-white"
                   type="button"
                 >
-                  Chat
+                  Nhắn tin
                 </button>
               </div>
             )}
