@@ -18,65 +18,65 @@ export function HomeFooter() {
             </Link>
 
             <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
-              Connecting people through workshops, cafes, board games, and
-              shared real-world experiences.
+              Kết nối mọi người qua workshop, cafe, board game và những trải
+              nghiệm thực tế cùng nhau.
             </p>
 
             <p className="mt-6 text-xs font-semibold text-slate-400">
-              © 2026 {APP_NAME}. All rights reserved.
+              © 2026 {APP_NAME}. Bảo lưu mọi quyền.
             </p>
           </div>
 
           <div>
-            <h3 className="text-sm font-black text-slate-950">Company</h3>
+            <h3 className="text-sm font-black text-slate-950">Công ty</h3>
 
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <Link
                 to={ROUTES.home}
                 className="block transition hover:text-emerald-700"
               >
-                About Us
+                Về chúng tôi
               </Link>
 
               <Link
                 to={ROUTES.activities}
                 className="block transition hover:text-emerald-700"
               >
-                Activities
+                Hoạt động
               </Link>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-black text-slate-950">Support</h3>
+            <h3 className="text-sm font-black text-slate-950">Hỗ trợ</h3>
 
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <a
                 href="#popular-activities"
                 className="block transition hover:text-emerald-700"
               >
-                Help Center
+                Trung tâm trợ giúp
               </a>
 
               <a
                 href="#popular-activities"
                 className="block transition hover:text-emerald-700"
               >
-                Safety Guidelines
+                Hướng dẫn an toàn
               </a>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-black text-slate-950">Legal</h3>
+            <h3 className="text-sm font-black text-slate-950">Pháp lý</h3>
 
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <a href="#" className="block transition hover:text-emerald-700">
-                Privacy Policy
+                Chính sách bảo mật
               </a>
 
               <a href="#" className="block transition hover:text-emerald-700">
-                Contact
+                Liên hệ
               </a>
             </div>
           </div>

@@ -15,7 +15,7 @@ export function ActivityGuidelineView({
       <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
         <div className="border-b border-slate-200 px-6 py-5 sm:px-8">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
-            Activity Guidelines
+            Hướng dẫn hoạt động
           </p>
           <h1 className="mt-2 text-3xl font-bold text-slate-950">
             Hướng dẫn và quy tắc an toàn
@@ -25,14 +25,14 @@ export function ActivityGuidelineView({
         <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="bg-slate-50 p-6 sm:p-8">
             <h2 className="text-xl font-bold text-slate-950">
-              Instructions
+              Hướng dẫn
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               {guideline.instructions}
             </p>
 
             <h2 className="mt-8 text-xl font-bold text-slate-950">
-              Safety Guidelines
+              Quy tắc an toàn
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               {guideline.safetyGuidelines}
@@ -63,7 +63,7 @@ export function ActivityGuidelineView({
           <div className="p-6 sm:p-8">
             <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
               <h3 className="text-lg font-bold text-slate-950">
-                Activity Preview
+                Xem trước hoạt động
               </h3>
               <p className="mt-2 text-sm text-slate-600">{id}</p>
               {loading && (
@@ -78,13 +78,13 @@ export function ActivityGuidelineView({
                 to={buildActivityDetailPath(id)}
                 className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                Back to detail
+                Quay lại chi tiết
               </Link>
               <Link
                 to={ROUTES.myActivities}
                 className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                My Activities
+                Hoạt động của tôi
               </Link>
             </div>
           </div>

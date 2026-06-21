@@ -7,7 +7,7 @@ export function HeroSection() {
     <section className="relative -mt-4 min-h-[620px] overflow-hidden">
       <img
   src={heroBackground}
-  alt="PHIMIUM community"
+  alt="Cộng đồng PHIMIUM"
   className="absolute inset-0 h-full w-full object-cover opacity-95"
 />
 
@@ -18,13 +18,12 @@ export function HeroSection() {
       <Container className="relative z-10 flex min-h-[620px] items-center py-16">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-            Find Your Perfect Companion for Any Experience
+            Tìm bạn đồng hành cho mọi trải nghiệm
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-7 text-slate-700">
-            Discover curated real-life workshops, cozy cafes, board game
-            nights, and unique city experiences with buddies who share your
-            vibe.
+            Khám phá workshop, quán cafe chill, board game và những trải nghiệm
+            độc đáo trong thành phố cùng những Buddy cùng vibe với bạn.
           </p>
 
           <div className="mt-8 flex max-w-2xl flex-col gap-3 rounded-full bg-white p-2 shadow-[0_18px_50px_rgba(15,23,42,0.18)] ring-1 ring-slate-100 sm:flex-row sm:items-center">
@@ -47,7 +46,7 @@ export function HeroSection() {
 
               <input
                 className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-                placeholder="Activity e.g. Pottery"
+                placeholder="Hoạt động, VD: Làm gốm"
               />
             </div>
 
@@ -78,7 +77,7 @@ export function HeroSection() {
 
               <input
                 className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-                placeholder="Where to?"
+                placeholder="Ở đâu?"
               />
             </div>
 
@@ -86,7 +85,7 @@ export function HeroSection() {
               href="#popular-activities"
               className="rounded-full bg-emerald-600 px-8 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-700"
             >
-              Explore
+              Khám phá
             </a>
           </div>
         </div>

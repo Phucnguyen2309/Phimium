@@ -1,19 +1,20 @@
 import { Container } from '@/components/common'
 import whyPhimiumImage from '@/asset/items.jpg'
+
 const FEATURES = [
   {
-    title: 'Friendly Activities',
-    text: 'PHIMIUM focuses on workshops, cafes, board game nights, and casual offline experiences.',
+    title: 'Hoạt động thân thiện',
+    text: 'PHIMIUM tập trung vào workshop, cafe, board game và các trải nghiệm offline nhẹ nhàng.',
     color: 'bg-emerald-100 text-emerald-700',
   },
   {
-    title: 'Group-Based Joining',
-    text: 'Users can join activities and be connected through groups instead of attending alone.',
+    title: 'Tham gia theo nhóm',
+    text: 'Bạn có thể tham gia hoạt động và được kết nối qua nhóm thay vì đi một mình.',
     color: 'bg-orange-100 text-orange-700',
   },
   {
-    title: 'Interest-Based Discovery',
-    text: 'Activities are organized by interests, making it easier to find the right experience.',
+    title: 'Khám phá theo sở thích',
+    text: 'Hoạt động được sắp xếp theo sở thích, giúp bạn dễ tìm trải nghiệm phù hợp.',
     color: 'bg-blue-100 text-blue-700',
   },
 ]
@@ -25,7 +26,7 @@ export function WhyPhimiumSection() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <h2 className="text-4xl font-black text-slate-950">
-              Why Phimium?
+              Vì sao chọn Phimium?
             </h2>
 
             <div className="mt-8 space-y-6">
@@ -54,17 +55,17 @@ export function WhyPhimiumSection() {
            <div className="relative overflow-hidden rounded-[32px] bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-emerald-100">
             <img
               src={whyPhimiumImage}
-              alt="PHIMIUM community illustration"
+              alt="Minh họa cộng đồng PHIMIUM"
               className="h-[360px] w-full rounded-[24px] object-contain"
             />
 
             <div className="absolute bottom-6 right-6 rounded-2xl bg-white px-4 py-3 shadow-xl">
               <p className="text-xs font-bold text-slate-400">
-                PHIMIUM style
+                Phong cách PHIMIUM
               </p>
 
               <p className="text-lg font-black text-emerald-700">
-                Real-life fun
+                Vui ngoài đời thật
               </p>
             </div>
           </div>

@@ -2,8 +2,8 @@ import { Container } from '@/components/common'
 
 const STEPS = [
   {
-    title: 'Choose Activity',
-    text: 'Browse workshops, cozy cafes, board game nights, and city experiences.',
+    title: 'Chọn hoạt động',
+    text: 'Duyệt workshop, quán cafe, board game và các trải nghiệm trong thành phố.',
     icon: (
       <path
         strokeLinecap="round"
@@ -14,8 +14,8 @@ const STEPS = [
     ),
   },
   {
-    title: 'Join Group',
-    text: 'Register for an activity and join a suitable group with other participants.',
+    title: 'Tham gia nhóm',
+    text: 'Đăng ký hoạt động và được ghép vào nhóm phù hợp cùng các thành viên khác.',
     icon: (
       <path
         strokeLinecap="round"
@@ -26,8 +26,8 @@ const STEPS = [
     ),
   },
   {
-    title: 'Experience',
-    text: 'Meet your buddies in real life and enjoy the activity safely.',
+    title: 'Trải nghiệm',
+    text: 'Gặp gỡ Buddy ngoài đời thực và tận hưởng hoạt động một cách an toàn.',
     icon: (
       <path
         strokeLinecap="round"
@@ -44,7 +44,7 @@ export function HowItWorksSection() {
     <section className="bg-emerald-50/70 py-16">
       <Container>
         <h2 className="text-center text-2xl font-black text-slate-950">
-          How It Works
+          Cách hoạt động
         </h2>
 
         <div className="mt-10 grid gap-8 md:grid-cols-3">

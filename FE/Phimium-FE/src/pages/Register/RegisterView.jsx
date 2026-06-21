@@ -18,31 +18,31 @@ export function RegisterView({
 
         <div className="relative z-10 max-w-md">
           <h2 className="mb-6 text-5xl leading-tight font-bold text-slate-900">
-            Discover the world with a Buddy.
+            Khám phá thế giới cùng Buddy.
           </h2>
           <p className="mb-8 text-lg text-slate-600">
-            Join our community of explorers and experience local life like never
-            before. Real connections, real adventures.
+            Tham gia cộng đồng những người yêu khám phá và trải nghiệm cuộc sống
+            địa phương theo cách mới. Kết nối thật, trải nghiệm thật.
           </p>
 
           <div className="space-y-4">
             <div className="flex w-max items-center rounded-xl bg-white p-4 shadow-sm">
               <span className="mr-3 text-blue-500">✓</span>
               <span className="font-medium text-slate-700">
-                Verified Safety Protocols
+                Quy trình an toàn đã xác minh
               </span>
             </div>
             <div className="flex w-max items-center rounded-xl bg-white p-4 shadow-sm">
               <span className="mr-3 text-blue-500">12k+</span>
               <span className="font-medium text-slate-700">
-                Active Buddies
+                Buddy đang hoạt động
               </span>
             </div>
           </div>
         </div>
 
         <div className="text-sm text-slate-500">
-          © 2026 Phimium. Connecting people through real-world discovery.
+          © 2026 Phimium. Kết nối mọi người qua những trải nghiệm thực tế.
         </div>
 
         <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center opacity-10" />
@@ -52,10 +52,10 @@ export function RegisterView({
         <div className="mx-auto w-full max-w-md">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-slate-900">
-              Create your account
+              Tạo tài khoản
             </h2>
             <p className="mt-2 text-slate-500">
-              Fill in your basic information to get started.
+              Điền thông tin cơ bản để bắt đầu.
             </p>
           </div>
 
@@ -68,14 +68,14 @@ export function RegisterView({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Full Name
+                Họ và tên
               </label>
               <input
                 type="text"
                 name="fullname"
                 value={formData.fullname}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="Nguyễn Văn A"
                 className="w-full rounded-lg border border-slate-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 required
               />
@@ -83,14 +83,14 @@ export function RegisterView({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Email Address
+                Email
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="john@example.com"
+                placeholder="email@example.com"
                 className="w-full rounded-lg border border-slate-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 required
               />
@@ -98,7 +98,7 @@ export function RegisterView({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Password
+                Mật khẩu
               </label>
               <input
                 type="password"
@@ -114,7 +114,7 @@ export function RegisterView({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Phone Number
+                  Số điện thoại
                 </label>
                 <input
                   type="tel"
@@ -128,7 +128,7 @@ export function RegisterView({
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Birth Date
+                  Ngày sinh
                 </label>
                 <input
                   type="date"
@@ -146,17 +146,17 @@ export function RegisterView({
               disabled={isLoading}
               className="mt-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-70"
             >
-              {isLoading ? 'Processing...' : 'Continue'}
+              {isLoading ? 'Đang xử lý...' : 'Tiếp tục'}
             </button>
           </form>
 
           <p className="mt-8 text-center text-sm text-slate-600">
-            Already have an account?{' '}
+            Đã có tài khoản?{' '}
             <Link
               to={ROUTES.login}
               className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
             >
-              Log In
+              Đăng nhập
             </Link>
           </p>
         </div>
