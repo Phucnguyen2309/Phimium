@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
-import MyActivitiesView from '@/pages/MyActivities/MyActivitiesView.jsx'
 import { HomeFooter } from '@/pages/Home/components/HomeFooter.jsx'
+import MyActivitiesView from '@/pages/MyActivities/MyActivitiesView.jsx'
+import MyGroupsView from '../MyGroup/MyGroupView'
 
 const DASHBOARD_TABS = [
   { label: 'Hoạt động', value: 'ACTIVITIES' },
-  { label: 'Đăng ký', value: 'REGISTRATIONS' },
   { label: 'Nhóm', value: 'GROUPS' },
   { label: 'Phản hồi', value: 'FEEDBACK' },
 ]
@@ -42,25 +42,7 @@ export default function UserDashboard() {
         <main className="min-w-0 flex-1 rounded-2xl bg-white p-6 shadow-sm">
           {activeTab === 'ACTIVITIES' && <MyActivitiesView />}
 
-          {activeTab === 'REGISTRATIONS' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900">
-                Đăng ký
-              </h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Nội dung đăng ký sẽ hiển thị tại đây.
-              </p>
-            </div>
-          )}
-
-          {activeTab === 'GROUPS' && (
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900">Nhóm</h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Nội dung nhóm sẽ hiển thị tại đây.
-              </p>
-            </div>
-          )}
+          {activeTab === 'GROUPS' && <MyGroupsView />}
 
           {activeTab === 'FEEDBACK' && (
             <div>

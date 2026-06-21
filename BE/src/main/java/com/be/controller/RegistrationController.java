@@ -51,6 +51,22 @@ public class RegistrationController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/groups/{groupId}")
+    public ResponseEntity<ApiResponse<ActivityGroupResponse>> viewGroupDetail(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable UUID groupId
+    ) {
+        ActivityGroupResponse response =
+                registrationService.getGroupDetail(
+                        groupId,
+                        currentUser
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Success", response)
+        );
+    }
+
     @PatchMapping("/{registrationId}/check-in")
     public ResponseEntity<ApiResponse<RegistrationResponse>> checkIn(
             @AuthenticationPrincipal User currentUser,

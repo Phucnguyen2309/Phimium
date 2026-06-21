@@ -14,6 +14,7 @@ import Register from '@/pages/Register.jsx'
 import { ProtectedRoute } from '@/routes/ProtectedRoute.jsx'
 import { ROUTES } from '@/routes/paths.js'
 import ActivityView from '../pages/Activity/ActivityView'
+import GroupDetailPage from '../pages/MyGroup/GroupDetailPage'
 
 
 const withMainLayout = (page) => <MainLayout>{page}</MainLayout>
@@ -45,6 +46,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTES.groupDetail}
+          element={
+    <ProtectedRoute allowedRoles={[USER_ROLES.user]}>
+      {withMainLayout(<GroupDetailPage />)}
+    </ProtectedRoute>
+  }
+/>
         <Route
           path={ROUTES.buddy}
           element={

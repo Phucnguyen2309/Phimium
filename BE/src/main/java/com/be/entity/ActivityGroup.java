@@ -5,12 +5,11 @@ import com.be.enums.GroupStatus;
 import com.be.util.DateTimeUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,8 +24,8 @@ public class ActivityGroup {
     @Column(name = "group_id")
     private UUID groupId;
 
-    @Column
-    private String group_name;
+    @Column(name="group_name")
+    private String groupName;
 
     @Enumerated(EnumType.STRING)
     private GroupStatus status;
@@ -38,6 +37,12 @@ public class ActivityGroup {
     @ManyToOne
     @JoinColumn(name = "activity_id")
     private Activity activity;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Registration> registrations = new ArrayList<>();
 
     @Column
     private LocalDateTime created_at;

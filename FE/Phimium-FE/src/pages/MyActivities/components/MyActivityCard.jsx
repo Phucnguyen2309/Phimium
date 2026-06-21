@@ -43,13 +43,14 @@ const MyActivityCard = ({ activity }) => {
 
         <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-600">
           <img
-            src={activity.hostAvatar}
-            alt=""
+            src={activity.hostAvatar || PLACEHOLDER_AVATAR}
+            alt={activity.hostName || 'Host'}
             className="h-5 w-5 rounded-full object-cover"
             onError={(event) => {
-              event.currentTarget.src = PLACEHOLDER_AVATAR
-            }}
-          />
+            event.currentTarget.onerror = null
+            event.currentTarget.src = PLACEHOLDER_AVATAR
+          }}
+/>
 
           <span>Dẫn bởi {activity.hostName}</span>
         </div>

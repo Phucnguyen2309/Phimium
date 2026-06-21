@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .username(user.getEmail())
                 .role(user.getRole())
+                .buddyId(jwtService.extractBuddyId(token))
                 .build();
     }
 

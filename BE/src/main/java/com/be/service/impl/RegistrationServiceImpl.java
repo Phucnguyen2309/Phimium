@@ -128,7 +128,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         ActivityGroup newGroup = ActivityGroup.builder()
                 .activity(activity)
-                .group_name("Nhóm " + (existingGroups.size() + 1) + " - " + activity.getTitle())
+                .groupName("Nhóm " + (existingGroups.size() + 1) + " - " + activity.getTitle())
                 .maximumParticipants(maxParticipants)
                 .status(GroupStatus.READY)
                 .build();
@@ -138,21 +138,29 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public List<ActivityGroupResponse> getMyGroups(UUID userId) {
-        // 1. Tìm User
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_ID_NOT_FOUND));
 
-        // 2. Lấy tất cả lịch sử đăng ký của User này
-        List<Registration> registrations = registrationRepository.findByUser(user);
+        List<Registration> registrations =
+                registrationRepository.findByUser(user);
 
-        // 3. Trích xuất Group từ mỗi Registration
         List<ActivityGroup> myGroups = registrations.stream()
-                .filter(reg -> reg.getGroup() != null) // Chỉ lấy những đăng ký đã được xếp nhóm
-                .map(Registration::getGroup)           // Rút trích Entity Group ra
+                .filter(reg -> reg.getGroup() != null)
+                .map(Registration::getGroup)
+                .distinct()
                 .toList();
 
-        // 4. Dùng Mapper chuyển list Entity sang list Response
-        return activityGroupMapper.toResponseList(myGroups);
+        return myGroups.stream()
+                .map(group -> {
+                    List<Registration> groupRegistrations =
+                            registrationRepository.findByGroup(group);
+
+                    return activityGroupMapper.toResponse(
+                            group,
+                            groupRegistrations
+                    );
+                })
+                .toList();
     }
 
     @Override
@@ -221,5 +229,53 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         registrationRepository.saveAll(registrations);
+    }
+
+    @Override
+    public ActivityGroupResponse getGroupDetail(
+            UUID groupId,
+            User currentUser
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        ActivityGroup group = activityGroupRepository.findById(groupId)
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.GROUP_NOT_FOUND)
+                );
+
+        boolean isParticipant =
+                registrationRepository.existsByGroupGroupIdAndUserUserId(
+                        groupId,
+                        currentUser.getUserId()
+                );
+
+        boolean isHost = false;
+
+        if (group.getActivity() != null
+                && group.getActivity().getHost() != null
+                && group.getActivity().getHost().getUser() != null) {
+
+            isHost = group.getActivity()
+                    .getHost()
+                    .getUser()
+                    .getUserId()
+                    .equals(currentUser.getUserId());
+        }
+
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+
+        if (!isParticipant && !isHost && !isAdmin) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        List<Registration> groupRegistrations =
+                registrationRepository.findByGroup(group);
+
+        return activityGroupMapper.toResponse(
+                group,
+                groupRegistrations
+        );
     }
 }

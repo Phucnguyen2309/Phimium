@@ -26,4 +26,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             CheckInStatus checkInStatus,
             LocalDateTime now
     );
+
+    boolean existsByGroupGroupIdAndUserUserId(
+            UUID groupId,
+            UUID userId
+    );
 }

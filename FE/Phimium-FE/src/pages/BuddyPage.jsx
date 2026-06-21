@@ -4,11 +4,7 @@ import { BuddyView } from './Buddy/BuddyView.jsx'
 import { useBuddy } from './Buddy/useBuddy.js'
 
 const BuddyPage = () => {
-<<<<<<< HEAD
-  useDocumentTitle('Buddy Dashboard')
-=======
   useDocumentTitle('Bảng điều khiển Buddy')
->>>>>>> main
 
   // Lấy thông tin user từ Context
   const { user } = useAuth()

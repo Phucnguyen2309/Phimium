@@ -7,31 +7,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class ActivityDetailResponse {
+@AllArgsConstructor
+@NoArgsConstructor
+public class MyActivityResponse {
+    private UUID id;
     private String title;
-    private String description;
+    private ActivityType activityType;
     private String thumbnailUrl;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String locationName;
     private String address;
-    private BigDecimal participationFee;
-    private Integer maximumParticipants;
-    private BigDecimal longitude;
-    private BigDecimal latitude;
+    private ActivityStatus status;
+    private UUID registrationId;
     private UUID hostBuddyId;
     private String hostBuddyName;
     private String avatarUrl;
-    private String introduction;
-    private int averageRating;
-
 
 }

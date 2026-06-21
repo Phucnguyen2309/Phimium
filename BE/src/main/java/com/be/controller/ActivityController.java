@@ -4,6 +4,7 @@ import com.be.dto.request.ActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
+import com.be.dto.response.MyActivityResponse;
 import com.be.entity.Activity;
 import com.be.entity.User;
 import com.be.exception.AppException;
@@ -70,14 +71,14 @@ public class ActivityController {
     }
 
     @GetMapping("/joined")
-    public ResponseEntity<ApiResponse<List<ActivityResponse>>> getJoinedActivities(
+    public ResponseEntity<ApiResponse<List<MyActivityResponse>>> getJoinedActivities(
             @AuthenticationPrincipal User currentUser
     ) {
         if (currentUser == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<ActivityResponse> response =
+        List<MyActivityResponse> response =
                 activityService.getJoinedActivities(currentUser);
 
         return ResponseEntity.ok(

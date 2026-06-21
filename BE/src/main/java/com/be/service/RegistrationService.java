@@ -21,4 +21,9 @@ public interface RegistrationService {
     );
 
     void autoMarkAbsentAfterActivityEndTime();
+
+    ActivityGroupResponse getGroupDetail(
+            UUID groupId,
+            User currentUser
+    );
 }

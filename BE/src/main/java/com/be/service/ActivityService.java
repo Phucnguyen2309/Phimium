@@ -3,6 +3,7 @@ package com.be.service;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.MyActivityResponse;
 import com.be.entity.Buddy;
 import com.be.entity.User;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +21,7 @@ public interface ActivityService {
 
     List<ActivityResponse> getActivitiesByBuddy(UUID buddy);
 
-    List<ActivityResponse> getJoinedActivities(User currentUser);
+    List<MyActivityResponse> getJoinedActivities(User currentUser);
 
     ActivityDetailResponse getActivityDetail(UUID activityId);
 }
