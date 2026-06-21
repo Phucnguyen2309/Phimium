@@ -1,6 +1,7 @@
 package com.be.service;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.entity.Buddy;
 import com.be.entity.User;
@@ -20,4 +21,6 @@ public interface ActivityService {
     List<ActivityResponse> getActivitiesByBuddy(UUID buddy);
 
     List<ActivityResponse> getJoinedActivities(User currentUser);
+
+    ActivityDetailResponse getActivityDetail(UUID activityId);
 }

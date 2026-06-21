@@ -1,6 +1,7 @@
 package com.be.controller;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
 import com.be.entity.Activity;
@@ -15,6 +16,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/activity")
@@ -76,6 +79,18 @@ public class ActivityController {
 
         List<ActivityResponse> response =
                 activityService.getJoinedActivities(currentUser);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Success", response)
+        );
+    }
+
+    @GetMapping("/{activityId}")
+    public ResponseEntity<ApiResponse<ActivityDetailResponse>> getActivityDetail(
+            @PathVariable UUID activityId
+    ) {
+        ActivityDetailResponse response =
+                activityService.getActivityDetail(activityId);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Success", response)

@@ -5,10 +5,11 @@ export const ROUTES = {
   activities: '/activities',
   activityDetail: '/activities/:id',
   activityGuidelines: '/activities/:id/guidelines',
-  myActivities: '/my-activities',
+  // myActivities: '/my-activities',
   buddy: '/buddy',
   admin: '/admin',
   forbidden: '/403',
+  userDashboard: '/user-dashboard'
 }
 
 export const buildActivityDetailPath = (id) => `${ROUTES.activities}/${id}`

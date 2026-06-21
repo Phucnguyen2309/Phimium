@@ -2,7 +2,7 @@ package com.be.enums;
 
 public enum ActivityStatus {
     PUBLISHED,
-    REGISTRATION_CLOSED,
+    UPCOMING,
     ONGOING,
     COMPLETED,
     CANCELLED
