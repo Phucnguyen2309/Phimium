@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { label: 'Home', to: ROUTES.home },
-  { label: 'Activity', to: ROUTES.activities },
+  { label: 'Trang chủ', to: ROUTES.home },
+  { label: 'Hoạt động', to: ROUTES.activities },
 ]
 
 export function MainLayout({ children }) {
@@ -14,7 +14,7 @@ export function MainLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
-  const displayName = (user?.username || 'My Account').split('@')[0].trim()
+  const displayName = (user?.username || 'Tài khoản của tôi').split('@')[0].trim()
   const userInitial = (displayName?.[0] || 'U').toUpperCase()
   const userRole = String(user?.role ?? '').replace('ROLE_', '').toUpperCase()
 
@@ -85,7 +85,7 @@ export function MainLayout({ children }) {
                     to={ROUTES.register}
                     className="hidden text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 lg:inline-flex"
                   >
-                    Become a Buddy
+                    Trở thành Buddy
                   </Link>
                 )}
 
@@ -109,7 +109,7 @@ export function MainLayout({ children }) {
                       <div className="absolute right-0 top-full z-[9999] mt-3 w-56 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
                         <div className="border-b border-slate-100 px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                            Signed in as
+                            Đang đăng nhập với
                           </p>
 
                           <p className="mt-1 truncate text-sm font-semibold text-slate-900">
@@ -136,7 +136,7 @@ export function MainLayout({ children }) {
                               d="M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 1116 0"
                             />
                           </svg>
-                          User Dashboard
+                          Bảng điều khiển
                         </Link>
 
                         {userRole === 'BUDDY' && (
@@ -159,7 +159,7 @@ export function MainLayout({ children }) {
                                 d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
                               />
                             </svg>
-                            Buddy Page
+                            Trang Buddy
                           </Link>
                         )}
 
@@ -183,7 +183,7 @@ export function MainLayout({ children }) {
                                 d="M4 7h16M4 12h16M4 17h16"
                               />
                             </svg>
-                            Admin Page
+                            Trang Admin
                           </Link>
                         )}
 
@@ -209,7 +209,7 @@ export function MainLayout({ children }) {
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
                             />
                           </svg>
-                          Logout
+                          Đăng xuất
                         </button>
                       </div>
                     )}
@@ -219,7 +219,7 @@ export function MainLayout({ children }) {
                     to={ROUTES.login}
                     className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
                   >
-                    Log In
+                    Đăng nhập
                   </Link>
                 )}
 

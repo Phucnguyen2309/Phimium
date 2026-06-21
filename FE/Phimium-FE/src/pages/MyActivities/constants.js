@@ -3,7 +3,7 @@ const placeholderImage = `data:image/svg+xml;utf8,${encodeURIComponent(`
     <rect width="100%" height="100%" fill="#dbeafe"/>
     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
       font-family="Arial" font-size="24" fill="#1d4ed8">
-      PHIMIUM Activity
+      Hoạt động PHIMIUM
     </text>
   </svg>
 `)}`
@@ -30,25 +30,25 @@ export const ACTIVITY_STATUS_UI = {
 }
 
 export const ACTIVITY_STATUS_LABELS = {
-  PUBLISHED: 'Published',
-  UPCOMING: 'Upcoming',
-  ONGOING: 'Ongoing',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
+  PUBLISHED: 'Đã đăng',
+  UPCOMING: 'Sắp diễn ra',
+  ONGOING: 'Đang diễn ra',
+  COMPLETED: 'Đã hoàn thành',
+  CANCELLED: 'Đã hủy',
 }
 
 export const DEFAULT_ACTIVITY = {
   id: '',
-  title: 'Untitled Activity',
+  title: 'Hoạt động chưa đặt tên',
   description: '',
-  hostName: 'Unknown host',
+  hostName: 'Buddy chưa xác định',
   hostAvatar: PLACEHOLDER_AVATAR,
   imageUrl: PLACEHOLDER_IMAGE,
   category: 'ACTIVITY',
   status: 'PUBLISHED',
-  statusLabel: 'Published',
-  time: 'TBA',
-  location: 'TBA',
+  statusLabel: 'Đã đăng',
+  time: 'Sắp cập nhật',
+  location: 'Sắp cập nhật',
   address: '',
   rating: 5,
   action: '',
@@ -62,8 +62,8 @@ export const DEFAULT_ACTIVITY = {
 }
 
 export const ACTIVITY_TABS = [
-  { label: 'All Activities', value: 'ALL' },
-  { label: 'Upcoming', value: 'UPCOMING' },
-  { label: 'Ongoing', value: 'ONGOING' },
-  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Tất cả', value: 'ALL' },
+  { label: 'Sắp diễn ra', value: 'UPCOMING' },
+  { label: 'Đang diễn ra', value: 'ONGOING' },
+  { label: 'Đã hoàn thành', value: 'COMPLETED' },
 ]

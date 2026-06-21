@@ -29,12 +29,12 @@ export function ActivityView() {
           <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <h1 className="text-4xl font-black tracking-tight text-slate-950">
-                Discover Local Experiences
+                Khám phá trải nghiệm địa phương
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                Curated local gatherings designed for fun afternoon vibes. Join
-                workshops, cafes, and activities with people who share your mood.
+                Những buổi gặp gỡ được chọn lọc cho vibe chiều vui vẻ. Tham gia
+                workshop, cafe và hoạt động cùng những người cùng gu với bạn.
               </p>
             </div>
 
@@ -72,7 +72,7 @@ export function ActivityView() {
               <input
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
-                placeholder="Search activity..."
+                placeholder="Tìm hoạt động..."
                 className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
               />
             </div>
@@ -92,7 +92,7 @@ export function ActivityView() {
                         : 'border border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
                     }`}
                   >
-                    {type === 'ALL' ? 'All Types' : formatActivityType(type)}
+                    {type === 'ALL' ? 'Tất cả loại' : formatActivityType(type)}
                   </button>
                 )
               })}
@@ -105,12 +105,12 @@ export function ActivityView() {
             </div>
           ) : error ? (
             <div className="rounded-3xl border border-dashed border-red-200 bg-red-50 py-20 text-center text-red-500">
-              Không thể tải danh sách activity.
+              Không thể tải danh sách hoạt động.
             </div>
           ) : paginatedActivities.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 py-20 text-center">
               <h3 className="text-lg font-black text-slate-950">
-                Không có activity phù hợp
+                Không có hoạt động phù hợp
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">

@@ -1,23 +1,23 @@
 export const fallbackGuidelines = {
   pottery: {
     instructions:
-      'Wear comfortable clothes and follow the instructor step by step.',
+      'Mặc trang phục thoải mái và làm theo hướng dẫn của người hướng dẫn từng bước.',
     safetyGuidelines:
-      'Keep hands away from the wheel when it is spinning. Stay hydrated and follow venue rules.',
+      'Giữ tay xa bàn xoay khi đang quay. Uống đủ nước và tuân thủ quy tắc của địa điểm.',
   },
   coffee: {
-    instructions: 'Arrive on time and be open to conversation with the group.',
-    safetyGuidelines: 'Respect personal space and follow cafe staff guidance.',
+    instructions: 'Đến đúng giờ và sẵn sàng trò chuyện cùng nhóm.',
+    safetyGuidelines: 'Tôn trọng không gian cá nhân và làm theo hướng dẫn của nhân viên quán.',
   },
   rooftop: {
-    instructions: 'Bring your best energy and be ready for social networking.',
+    instructions: 'Mang theo năng lượng tích cực và sẵn sàng kết nối với mọi người.',
     safetyGuidelines:
-      'Stay within designated areas and avoid any unsafe edge zones.',
+      'Ở trong khu vực được chỉ định và tránh các vị trí mép không an toàn.',
   },
   cowork: {
     instructions:
-      'Bring your laptop or notebook and keep the workspace tidy.',
-    safetyGuidelines: 'Respect quiet zones and shared equipment.',
+      'Mang theo laptop hoặc sổ tay và giữ không gian làm việc gọn gàng.',
+    safetyGuidelines: 'Tôn trọng khu vực yên tĩnh và thiết bị dùng chung.',
   },
 }
 

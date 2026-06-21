@@ -6,7 +6,7 @@ export function AdminView() {
           Admin
         </p>
         <h1 className="mt-3 text-3xl font-bold text-slate-950">
-          Admin Dashboard
+          Bảng điều khiển Admin
         </h1>
         <p className="mt-3 text-sm text-slate-600">
           Trang này chỉ dành cho tài khoản ADMIN.

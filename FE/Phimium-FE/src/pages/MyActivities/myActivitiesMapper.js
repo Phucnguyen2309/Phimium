@@ -27,13 +27,13 @@ const formatTimeRange = (activity, fallback = DEFAULT_ACTIVITY) => {
 
   if (Number.isNaN(start.getTime())) return fallback.time
 
-  const dateText = start.toLocaleDateString('en-US', {
-    month: 'short',
+  const dateText = start.toLocaleDateString('vi-VN', {
     day: 'numeric',
+    month: 'short',
     year: 'numeric',
   })
 
-  const startText = start.toLocaleTimeString('en-US', {
+  const startText = start.toLocaleTimeString('vi-VN', {
     hour: 'numeric',
     minute: '2-digit',
   })
@@ -42,7 +42,7 @@ const formatTimeRange = (activity, fallback = DEFAULT_ACTIVITY) => {
     return `${dateText}, ${startText}`
   }
 
-  const endText = end.toLocaleTimeString('en-US', {
+  const endText = end.toLocaleTimeString('vi-VN', {
     hour: 'numeric',
     minute: '2-digit',
   })

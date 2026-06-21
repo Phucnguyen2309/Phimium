@@ -15,7 +15,7 @@ export function useActivityGuideline() {
   const [loading, setLoading] = useState(false)
   const [acknowledged, setAcknowledged] = useState(false)
 
-  useDocumentTitle('Guidelines')
+  useDocumentTitle('Hướng dẫn hoạt động')
 
   useEffect(() => {
     if (!id || !isAuthenticated) {

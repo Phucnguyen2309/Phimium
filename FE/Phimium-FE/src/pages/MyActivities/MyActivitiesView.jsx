@@ -19,8 +19,8 @@ export default function MyActivitiesView() {
   if (loading) {
     return (
       <section className="w-full">
-        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
-        <p className="mt-4 text-sm text-slate-500">Loading activities...</p>
+        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
+        <p className="mt-4 text-sm text-slate-500">Đang tải hoạt động...</p>
       </section>
     )
   }
@@ -28,9 +28,9 @@ export default function MyActivitiesView() {
   if (error) {
     return (
       <section className="w-full">
-        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
         <p className="mt-4 text-sm text-red-500">
-          Cannot load activities. Please try again.
+          Không thể tải hoạt động. Vui lòng thử lại.
         </p>
       </section>
     )
@@ -39,9 +39,9 @@ export default function MyActivitiesView() {
   return (
     <section className="w-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Manage the activities you joined.
+          Quản lý các hoạt động bạn đã tham gia.
         </p>
       </div>
 
@@ -69,10 +69,10 @@ export default function MyActivitiesView() {
       {activityList.length === 0 ? (
         <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">
-            No activities found
+            Chưa có hoạt động nào
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            There are no activities in this tab.
+            Không có hoạt động nào trong tab này.
           </p>
         </div>
       ) : (

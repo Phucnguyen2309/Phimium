@@ -22,7 +22,7 @@ export function useActivityDetail() {
   const [safetyTermsAccepted, setSafetyTermsAccepted] = useState(false)
   const [joinMessage, setJoinMessage] = useState('')
 
-  useDocumentTitle(activity?.title ? activity.title : 'Activity Detail')
+  useDocumentTitle(activity?.title ? activity.title : 'Chi tiết hoạt động')
 
   useEffect(() => {
     if (!id || !isAuthenticated) {

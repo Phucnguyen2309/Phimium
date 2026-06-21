@@ -32,7 +32,7 @@ export function ActivityDetailView({
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
-                Activity Detail
+                Chi tiết hoạt động
               </p>
               <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
                 {activity.title}
@@ -74,7 +74,7 @@ export function ActivityDetailView({
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-sm text-slate-500">Group size</p>
+                  <p className="text-sm text-slate-500">Quy mô nhóm</p>
                   <p className="mt-1 text-lg font-bold text-slate-950">
                     {activity.groupMinSize ?? 4}-{activity.groupMaxSize ?? 6}
                   </p>
@@ -86,10 +86,10 @@ export function ActivityDetailView({
                   Buddy dẫn đoàn
                 </p>
                 <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {activity.hostBuddyName ?? 'Not assigned yet'}
+                  {activity.hostBuddyName ?? 'Chưa có Buddy phụ trách'}
                 </p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Type: {activity.activityType ?? 'N/A'}
+                  Loại: {activity.activityType ?? 'Chưa xác định'}
                 </p>
               </div>
 
@@ -99,13 +99,13 @@ export function ActivityDetailView({
                   onClick={handleJoinClick}
                   className="flex-1 rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
                 >
-                  Join
+                  Tham gia
                 </button>
                 <Link
                   to={ROUTES.home}
                   className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
-                  Back
+                  Quay lại
                 </Link>
               </div>
 
@@ -131,7 +131,7 @@ export function ActivityDetailView({
                   to={ROUTES.myActivities}
                   className="text-slate-700 transition hover:text-slate-950"
                 >
-                  My Activities
+                  Hoạt động của tôi
                 </Link>
               </div>
             </div>

@@ -10,13 +10,13 @@ const getValidImage = (url) => {
 const getFeeLabel = (fee) => {
   const value = Number(fee ?? 0)
 
-  if (value <= 0) return 'Free'
+  if (value <= 0) return 'Miễn phí'
 
   return `${value.toLocaleString('vi-VN')} VND`
 }
 
 const getActivityTypeLabel = (type) => {
-  if (!type) return 'Activity'
+  if (!type) return 'Hoạt động'
 
   return String(type)
     .replaceAll('_', ' ')
@@ -45,7 +45,7 @@ function ActivityImageFallback({ title }) {
         </div>
 
         <p className="mt-3 text-sm font-bold text-emerald-800">
-          {title || 'PHIMIUM Activity'}
+          {title || 'Hoạt động PHIMIUM'}
         </p>
       </div>
     </div>
@@ -88,7 +88,7 @@ export default function PopularActivityCard({
       {isFeature && (
         <div className="absolute left-5 top-5">
           <span className="rounded-md bg-orange-500 px-3 py-1.5 text-[11px] font-black text-white shadow-sm">
-            New Trend
+            Xu hướng mới
           </span>
         </div>
       )}
@@ -96,7 +96,7 @@ export default function PopularActivityCard({
       {!isFeature && (
         <div className="absolute right-4 top-4">
           <span className="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-black text-white shadow-sm">
-            Verified
+            Đã xác minh
           </span>
         </div>
       )}
@@ -124,9 +124,9 @@ export default function PopularActivityCard({
           }`}
         >
           {isFeature
-            ? activity.description || 'Join this activity with new buddies.'
+            ? activity.description || 'Tham gia hoạt động này cùng Buddy mới.'
             : isWide
-              ? activity.locationName || activity.address || 'Join this activity'
+              ? activity.locationName || activity.address || 'Tham gia hoạt động'
               : activity.title}
         </p>
 
@@ -135,7 +135,7 @@ export default function PopularActivityCard({
             <span>
               {activity.participationFee > 0
                 ? getFeeLabel(activity.participationFee)
-                : 'Free'}
+                : 'Miễn phí'}
             </span>
           </div>
         )}

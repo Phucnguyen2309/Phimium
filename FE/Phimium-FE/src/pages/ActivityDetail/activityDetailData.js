@@ -1,13 +1,13 @@
 export const fallbackDetails = {
   pottery: {
-    title: 'Artisanal Pottery Workshop',
+    title: 'Workshop làm gốm thủ công',
     description:
-      'Master the wheel with professional local ceramists and create your own ceramic piece.',
+      'Học cách dùng bàn xoay cùng nghệ nhân địa phương và tạo sản phẩm gốm của riêng bạn.',
     thumbnailUrl:
       'https://images.unsplash.com/photo-1492496913980-501348b61469?q=80&w=1200&auto=format&fit=crop',
     startTime: '2026-07-10T09:00:00',
-    locationName: 'Clay Studio District',
-    address: '12 Nguyen Trai, District 1, Ho Chi Minh City',
+    locationName: 'Khu Clay Studio',
+    address: '12 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh',
     participationFee: 450000,
     groupMinSize: 4,
     groupMaxSize: 6,
@@ -15,14 +15,14 @@ export const fallbackDetails = {
     activityType: 'Workshop',
   },
   coffee: {
-    title: 'Urban Specialty Coffee',
+    title: 'Cafe specialty trong thành phố',
     description:
-      'Taste curated roasts and connect with nearby buddies in a relaxed cafe vibe.',
+      'Thưởng thức các loại cà phê được chọn lọc và kết nối với Buddy gần đó trong không gian cafe thư giãn.',
     thumbnailUrl:
       'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop',
     startTime: '2026-07-11T14:00:00',
-    locationName: 'District 1',
-    address: '88 Le Lai, District 1, Ho Chi Minh City',
+    locationName: 'Quận 1',
+    address: '88 Lê Lai, Quận 1, TP. Hồ Chí Minh',
     participationFee: 0,
     groupMinSize: 4,
     groupMaxSize: 6,
@@ -30,13 +30,13 @@ export const fallbackDetails = {
     activityType: 'Coffee Chat',
   },
   rooftop: {
-    title: 'Rooftop Socials',
-    description: 'Evening social events with skyline views and new companions.',
+    title: 'Gặp gỡ trên sân thượng',
+    description: 'Buổi tối social với view skyline và những người bạn mới.',
     thumbnailUrl:
       'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop',
     startTime: '2026-07-12T18:30:00',
     locationName: 'Skyline Rooftop',
-    address: '2 Nguyen Hue, District 1, Ho Chi Minh City',
+    address: '2 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
     participationFee: 280000,
     groupMinSize: 4,
     groupMaxSize: 6,
@@ -46,12 +46,12 @@ export const fallbackDetails = {
   cowork: {
     title: 'Cowork & Connect',
     description:
-      'A calm workspace for creators and remote workers to meet and collaborate.',
+      'Không gian làm việc yên tĩnh cho creator và remote worker gặp gỡ, cộng tác.',
     thumbnailUrl:
       'https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop',
     startTime: '2026-07-13T10:00:00',
     locationName: 'Shared Studio',
-    address: '45 Nguyen Thi Minh Khai, District 3, Ho Chi Minh City',
+    address: '45 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh',
     participationFee: 120000,
     groupMinSize: 4,
     groupMaxSize: 6,
@@ -64,10 +64,10 @@ export const getFallbackActivity = (id, stateActivity) =>
   stateActivity ?? fallbackDetails[id] ?? fallbackDetails.pottery
 
 export const formatDateTime = (dateValue) => {
-  if (!dateValue) return 'TBA'
+  if (!dateValue) return 'Sắp cập nhật'
 
   const date = new Date(dateValue)
-  if (Number.isNaN(date.getTime())) return 'TBA'
+  if (Number.isNaN(date.getTime())) return 'Sắp cập nhật'
 
   return date.toLocaleString('vi-VN', {
     dateStyle: 'medium',
@@ -77,6 +77,6 @@ export const formatDateTime = (dateValue) => {
 
 export const formatMoney = (value) => {
   const amount = Number(value)
-  if (!amount || amount <= 0) return 'Free'
+  if (!amount || amount <= 0) return 'Miễn phí'
   return `${amount.toLocaleString('vi-VN')} VND`
 }

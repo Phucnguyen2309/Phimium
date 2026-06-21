@@ -6,7 +6,7 @@ export function BuddyView() {
           Buddy
         </p>
         <h1 className="mt-3 text-3xl font-bold text-slate-950">
-          Buddy Dashboard
+          Bảng điều khiển Buddy
         </h1>
         <p className="mt-3 text-sm text-slate-600">
           Trang này chỉ dành cho tài khoản BUDDY.

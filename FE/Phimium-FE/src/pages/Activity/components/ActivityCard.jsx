@@ -71,9 +71,9 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
 
           <div className="mt-5 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
             <p> {formatDateTime(activity.startTime)}</p>
-            <p> {activity.locationName || activity.address || 'TBA'}</p>
-            <p> Hosted by {activity.hostBuddyName}</p>
-            <p>{remainingSlots} slots left</p>
+            <p> {activity.locationName || activity.address || 'Sắp cập nhật'}</p>
+            <p> Dẫn bởi {activity.hostBuddyName}</p>
+            <p>Còn {remainingSlots} chỗ</p>
           </div>
         </div>
       </Link>
@@ -111,7 +111,7 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
           </span>
 
           <span className="text-xs font-bold text-orange-600">
-            {remainingSlots} left
+            {remainingSlots} chỗ
           </span>
         </div>
 
@@ -126,12 +126,12 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
         <div className="mt-4 space-y-2 text-xs text-slate-600">
           <p className="line-clamp-1"> {formatDateTime(activity.startTime)}</p>
           <p className="line-clamp-1">
-             {activity.locationName || activity.address || 'TBA'}
+             {activity.locationName || activity.address || 'Sắp cập nhật'}
           </p>
         </div>
 
         <div className="mt-5 rounded-xl bg-emerald-600 px-4 py-3 text-center text-sm font-black text-white transition group-hover:bg-emerald-700">
-          Join Activity
+          Tham gia hoạt động
         </div>
       </div>
     </Link>

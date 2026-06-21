@@ -13,7 +13,7 @@ export function ForbiddenView() {
           Bạn không có quyền truy cập
         </h1>
         <p className="mt-3 text-sm text-slate-600">
-          Route này yêu cầu role khác với tài khoản hiện tại.
+          Route này yêu cầu quyền khác với tài khoản hiện tại.
         </p>
         <Link
           to={ROUTES.home}

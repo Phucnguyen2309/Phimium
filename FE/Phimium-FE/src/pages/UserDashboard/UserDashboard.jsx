@@ -4,10 +4,10 @@ import MyActivitiesView from '@/pages/MyActivities/MyActivitiesView.jsx'
 import { HomeFooter } from '@/pages/Home/components/HomeFooter.jsx'
 
 const DASHBOARD_TABS = [
-  { label: 'Activities', value: 'ACTIVITIES' },
-  { label: 'Registrations', value: 'REGISTRATIONS' },
-  { label: 'Groups', value: 'GROUPS' },
-  { label: 'Feedback', value: 'FEEDBACK' },
+  { label: 'Hoạt động', value: 'ACTIVITIES' },
+  { label: 'Đăng ký', value: 'REGISTRATIONS' },
+  { label: 'Nhóm', value: 'GROUPS' },
+  { label: 'Phản hồi', value: 'FEEDBACK' },
 ]
 
 export default function UserDashboard() {
@@ -45,19 +45,19 @@ export default function UserDashboard() {
           {activeTab === 'REGISTRATIONS' && (
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Registrations
+                Đăng ký
               </h2>
               <p className="mt-2 text-sm text-slate-500">
-                Registration content will be shown here.
+                Nội dung đăng ký sẽ hiển thị tại đây.
               </p>
             </div>
           )}
 
           {activeTab === 'GROUPS' && (
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">Groups</h2>
+              <h2 className="text-xl font-semibold text-slate-900">Nhóm</h2>
               <p className="mt-2 text-sm text-slate-500">
-                Group content will be shown here.
+                Nội dung nhóm sẽ hiển thị tại đây.
               </p>
             </div>
           )}
@@ -65,10 +65,10 @@ export default function UserDashboard() {
           {activeTab === 'FEEDBACK' && (
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Feedback
+                Phản hồi
               </h2>
               <p className="mt-2 text-sm text-slate-500">
-                Feedback content will be shown here.
+                Nội dung phản hồi sẽ hiển thị tại đây.
               </p>
             </div>
           )}
