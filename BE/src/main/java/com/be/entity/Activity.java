@@ -1,7 +1,7 @@
 package com.be.entity;
 
 import com.be.enums.ActivityStatus;
-import com.be.enums.ActivityType;
+import com.be.enums.TourType;
 import com.be.util.DateTimeUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
@@ -15,12 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "activities",
-        indexes = {
-                @Index(name = "idx_activity_type", columnList = "activity_type"),
-                @Index(name = "idx_activity_status", columnList = "status"),
-                @Index(name = "idx_activity_start_time", columnList = "start_time")
-        }
+        name = "activities"
 )
 @Getter
 @Setter
@@ -42,7 +37,7 @@ public class Activity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_type", nullable = false, length = 30)
-    private ActivityType activityType;
+    private TourType activityType;
 
     @Column(name = "thumbnail_url", length = 500)
     private String thumbnailUrl;

@@ -26,15 +26,7 @@ import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
-@Table(
-        name = "feedbacks",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_feedback_registration",
-                        columnNames = "registration_id"
-                )
-        }
-)
+@Table(name = "feedbacks")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,10 +41,6 @@ public class FeedBack {
             nullable = false
     )
     private UUID id;
-
-    /*
-     * Người viết feedback.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "reviewer_id",
@@ -60,10 +48,6 @@ public class FeedBack {
             foreignKey = @ForeignKey(name = "fk_feedback_reviewer")
     )
     private User reviewer;
-
-    /*
-     * Buddy được đánh giá.
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "buddy_id",
@@ -71,10 +55,6 @@ public class FeedBack {
             foreignKey = @ForeignKey(name = "fk_feedback_buddy")
     )
     private Buddy buddy;
-
-    /*
-     * Một registration chỉ được feedback một lần.
-     */
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "registration_id",
@@ -84,27 +64,13 @@ public class FeedBack {
     )
     private Registration registration;
 
-    /*
-     * Đánh giá chuyến đi / activity.
-     */
     @Min(1)
     @Max(5)
-    @Column(name = "trip_rating", nullable = false)
-    private Integer tripRating;
+    @Column(name = "tour_rating", nullable = false)
+    private Integer tourRating;
 
-    @Column(name = "trip_comment", columnDefinition = "TEXT")
-    private String tripComment;
-
-    /*
-     * Đánh giá Buddy.
-     */
-    @Min(1)
-    @Max(5)
-    @Column(name = "buddy_rating", nullable = false)
-    private Integer buddyRating;
-
-    @Column(name = "buddy_comment", columnDefinition = "TEXT")
-    private String buddyComment;
+    @Column(name = "tour_comment", columnDefinition = "TEXT")
+    private String tourComment;
 
     @Column(
             name = "created_at",
