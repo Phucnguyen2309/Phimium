@@ -1,12 +1,10 @@
 package com.be.enums;
 
 public enum RegistrationStatus {
-    PENDING_PAYMENT,
-    WAITING_FOR_GROUP,
-    ASSIGNED,
-    CHECKED_IN,
+    WAITING_FOR_BUDDY,
+    BUDDY_ASSIGNED,
+    CONFIRMED,
+    IN_PROGRESS,
     COMPLETED,
-    CANCELLED,
-    WAITLISTED,
-    NO_SHOW
+    CANCELLED
 }

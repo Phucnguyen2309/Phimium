@@ -1,7 +1,7 @@
 package com.be.dto.response;
 
 import com.be.enums.ActivityStatus;
-import com.be.enums.ActivityType;
+import com.be.enums.TourType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class ActivityResponse {
     private UUID id;
     private String title;
     private String description;
-    private ActivityType activityType;
+    private TourType activityType;
     private String thumbnailUrl;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

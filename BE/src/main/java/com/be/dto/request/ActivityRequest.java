@@ -1,7 +1,7 @@
 package com.be.dto.request;
 
 import com.be.enums.ActivityStatus;
-import com.be.enums.ActivityType;
+import com.be.enums.TourType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -29,7 +29,7 @@ public class ActivityRequest {
     private String description;
 
     @NotNull(message = "Activity type is required")
-    private ActivityType activityType;
+    private TourType activityType;
 
     @NotNull(message = "Start time is required")
     private LocalDateTime startTime;

@@ -78,7 +78,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .activity(activity)
                 .user(user)
                 .group(assignedGroup)
-                .status(RegistrationStatus.ASSIGNED)
+                .status(RegistrationStatus.WAITING_FOR_BUDDY)
                 .checkInStatus(CheckInStatus.NOT_YET)
                 .build();
 
@@ -204,7 +204,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         registration.setCheckInStatus(CheckInStatus.PRESENT);
-        registration.setCheckedInAt(now);
 
         Registration savedRegistration =
                 registrationRepository.save(registration);

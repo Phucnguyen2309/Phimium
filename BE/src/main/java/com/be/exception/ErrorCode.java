@@ -22,7 +22,7 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(
             1002,
             HttpStatus.UNAUTHORIZED,
-            "Tên đăng nhập hoặc mật khẩu sai"
+            "Incorrect username or password"
     ),
 
     USER_NOT_AUTHORIZED(

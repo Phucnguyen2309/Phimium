@@ -1,7 +1,5 @@
 package com.be.dto.response;
 
-import com.be.enums.ActivityStatus;
-import com.be.enums.ActivityType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
