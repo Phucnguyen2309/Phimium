@@ -1,5 +1,6 @@
 package com.be.entity;
 
+import com.be.enums.AvailabilityStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
