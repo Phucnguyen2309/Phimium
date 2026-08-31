@@ -1,6 +1,7 @@
 package com.be.entity;
 
 
+import com.be.enums.BuddyStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,9 +43,14 @@ public class Buddy {
     @Column
     private String avatarUrl;
 
-    @Column
-    private int averageRating;
+    @Column(name = "average_rating", precision = 3, scale = 2)
+    private BigDecimal averageRating;
 
-    @Column
-    private BigDecimal totalReviews;
+    @Column(name = "total_reviews")
+    private Integer totalReviews;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private BuddyStatus status = BuddyStatus.ACTIVE;
 }

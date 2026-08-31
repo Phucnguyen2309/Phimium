@@ -45,7 +45,7 @@ public class BuddyServiceImpl implements BuddyService {
             throw new AppException(ErrorCode.USER_ALREADY_BUDDY);
         }
 
-        if (buddyRepository.existsByUserUserId(currentUserId)) {
+        if (buddyRepository.existsByUser_UserId(currentUserId)) {
             throw new AppException(ErrorCode.BUDDY_ALREADY_EXISTS);
         }
 

@@ -53,7 +53,7 @@ public class ActivityDeparture {
     )
     private LocalDateTime endTime;
 
-    @Min(1)
+    @Min(0)
     @Column(
             name = "capacity",
             nullable = false

@@ -87,6 +87,7 @@ public class Registration {
     private RegistrationStatus status;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "checkin_status", nullable = false)
     private CheckInStatus checkInStatus;
 
     @Column(name = "registered_at")
@@ -95,6 +96,8 @@ public class Registration {
     @Column(name = "buddy_assigned_at")
     private LocalDateTime buddyAssignedAt;
 
+    @Column(name = "checked_in_at")
+    private LocalDateTime checkedInAt;
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 }

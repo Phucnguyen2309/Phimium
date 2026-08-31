@@ -11,6 +11,7 @@ import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.service.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -39,6 +40,8 @@ public class ActivityController {
             value = "/createActivity",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Tạo tour/hoạt động mới (Chỉ Admin)")
     public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
             @RequestPart("request") String requestJson,
             @RequestPart(value = "image", required = false) MultipartFile image,

@@ -89,6 +89,12 @@ public class FeedBack {
         createdAt = now;
         updatedAt = now;
     }
+    @Min(1) @Max(5)
+    @Column(name = "buddy_rating", nullable = false)
+    private Integer buddyRating;
+
+    @Column(name = "buddy_comment", columnDefinition = "TEXT")
+    private String buddyComment;
 
     @PreUpdate
     protected void onUpdate() {

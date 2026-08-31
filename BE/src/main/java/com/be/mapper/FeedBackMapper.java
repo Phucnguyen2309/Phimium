@@ -1,7 +1,6 @@
 package com.be.mapper;
 
 import com.be.dto.request.FeedBackRequest;
-import com.be.dto.response.CheckInResponse;
 import com.be.dto.response.FeedBackResponse;
 import com.be.entity.*;
 import org.springframework.stereotype.Component;
@@ -25,8 +24,8 @@ public class FeedBackMapper {
                 .reviewer(reviewer)
                 .buddy(buddy)
                 .registration(registration)
-                .tripRating(request.getTripRating())
-                .tripComment(request.getTripComment())
+                .tourRating(request.getTourRating())
+                .tourComment(request.getTourComment())
                 .buddyRating(request.getBuddyRating())
                 .buddyComment(request.getBuddyComment())
                 .build();
@@ -43,56 +42,47 @@ public class FeedBackMapper {
 
         return FeedBackResponse.builder()
                 .feedbackId(feedback.getId())
-
                 .reviewerId(
-                        reviewer == null
-                                ? null
-                                : reviewer.getUserId()
+                        reviewer == null ? null : reviewer.getUserId()
                 )
                 .reviewerName(
-                        reviewer == null
-                                ? null
-                                : reviewer.getFullName()
+                        reviewer == null ? null : reviewer.getFullName()
                 )
-
                 .buddyId(
-                        buddy == null
-                                ? null
-                                : buddy.getBuddyId()
+                        buddy == null ? null : buddy.getBuddyId()
                 )
                 .buddyName(
                         buddy == null || buddy.getUser() == null
                                 ? null
                                 : buddy.getUser().getFullName()
                 )
-
                 .registrationId(
-                        registration == null
-                                ? null
-                                : registration.getRegistrationId()
+                        registration == null ? null : registration.getRegistrationId()
                 )
-
                 .activityId(
                         registration == null
-                                || registration.getActivity() == null
+                                || registration.getDeparture() == null
+                                || registration.getDeparture().getActivity() == null
                                 ? null
-                                : registration.getActivity().getId()
+                                : registration.getDeparture().getActivity().getId()
                 )
                 .activityTitle(
                         registration == null
-                                || registration.getActivity() == null
+                                || registration.getDeparture() == null
+                                || registration.getDeparture().getActivity() == null
                                 ? null
-                                : registration.getActivity().getTitle()
+                                : registration.getDeparture().getActivity().getTitle()
                 )
-
-                .tripRating(feedback.getTripRating())
-                .tripComment(feedback.getTripComment())
+                .tripRating(feedback.getTourRating())
+                .tripComment(feedback.getTourComment())
                 .buddyRating(feedback.getBuddyRating())
                 .buddyComment(feedback.getBuddyComment())
                 .createdAt(feedback.getCreatedAt())
                 .build();
     }
+
     public List<FeedBackResponse> toResponseList(List<FeedBack> feedBacks) {
+        if (feedBacks == null) return List.of();
         return feedBacks.stream().map(this::toResponse).toList();
     }
 }

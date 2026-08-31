@@ -21,16 +21,10 @@ public class ActivityGroupMapper {
         }
 
         Activity activity = group.getActivity();
-
         UUID activityId = null;
-        UUID hostId = null;
 
         if (activity != null) {
             activityId = activity.getId();
-
-            if (activity.getHost() != null) {
-                hostId = activity.getHost().getBuddyId();
-            }
         }
 
         return ActivityGroupResponse.builder()
@@ -40,7 +34,7 @@ public class ActivityGroupMapper {
                 .maximumParticipants(group.getMaximumParticipants())
                 .currentParticipants(0)
                 .activityId(activityId)
-                .hostId(hostId)
+                // Đã bỏ hostId theo SRS mới
                 .createdAt(group.getCreated_at())
                 .participants(List.of())
                 .build();
@@ -55,25 +49,12 @@ public class ActivityGroupMapper {
         }
 
         Activity activity = group.getActivity();
-
         UUID activityId = null;
-        UUID hostId = null;
-        String hostName = null;
-        String hostAvatarUrl = null;
         String thumbnailUrl = null;
 
         if (activity != null) {
             activityId = activity.getId();
             thumbnailUrl = activity.getThumbnailUrl();
-
-            if (activity.getHost() != null) {
-                hostId = activity.getHost().getBuddyId();
-                hostAvatarUrl = activity.getHost().getAvatarUrl();
-
-                if (activity.getHost().getUser() != null) {
-                    hostName = activity.getHost().getUser().getFullName();
-                }
-            }
         }
 
         List<Registration> safeRegistrations =
@@ -94,9 +75,7 @@ public class ActivityGroupMapper {
                 .thumbnailUrl(thumbnailUrl)
                 .createdAt(group.getCreated_at())
                 .participants(participants)
-                .hostId(hostId)
-                .hostName(hostName)
-                .avatarUrl(hostAvatarUrl)
+                // Đã bỏ hostId, hostName, avatarUrl theo SRS mới
                 .build();
     }
 

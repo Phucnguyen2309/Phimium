@@ -11,12 +11,12 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "activities"
-)
+@Table(name = "activities")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -42,50 +42,27 @@ public class Activity {
     @Column(name = "thumbnail_url", length = 500)
     private String thumbnailUrl;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
-
-    @Column(name = "registration_deadline", nullable = false)
-    private LocalDateTime registrationDeadline;
-
     @Column(name = "location_name", nullable = false, length = 255)
     private String locationName;
 
     @Column(name = "address", nullable = false, length = 500)
     private String address;
 
-    @DecimalMin(
-            value = "-180.0",
-            message = "Longitude must be greater than or equal to -180"
-    )
-    @DecimalMax(
-            value = "180.0",
-            message = "Longitude must be less than or equal to 180"
-    )
+    @DecimalMin(value = "-180.0", message = "Longitude must be greater than or equal to -180")
+    @DecimalMax(value = "180.0", message = "Longitude must be less than or equal to 180")
     private BigDecimal longitude;
 
-    @DecimalMin(
-            value = "-90.0",
-            message = "Latitude must be greater than or equal to -90"
-    )
-    @DecimalMax(
-            value = "90.0",
-            message = "Latitude must be less than or equal to 90"
-    )
+    @DecimalMin(value = "-90.0", message = "Latitude must be greater than or equal to -90")
+    @DecimalMax(value = "90.0", message = "Latitude must be less than or equal to 90")
     private BigDecimal latitude;
 
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(
-            name = "participation_fee",
-            nullable = false,
-            precision = 12,
-            scale = 2
-    )
-
+    @Column(name = "participation_fee", nullable = false, precision = 12, scale = 2)
     private BigDecimal participationFee;
+
+    @DecimalMin(value = "0.0", inclusive = true)
+    @Column(name = "child_participation_fee", precision = 12, scale = 2)
+    private BigDecimal childParticipationFee;
 
     @Min(1)
     @Column(name = "minimum_participants", nullable = false)
@@ -97,34 +74,23 @@ public class Activity {
 
     @Min(1)
     @Column(name = "group_min_size", nullable = false)
-
     private Integer groupMinSize = 4;
 
     @Min(1)
     @Column(name = "group_max_size", nullable = false)
-
     private Integer groupMaxSize = 6;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-
     private ActivityStatus status = ActivityStatus.PUBLISHED;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "created_by",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_activity_created_by")
-    )
+    @JoinColumn(name = "created_by", nullable = false, foreignKey = @ForeignKey(name = "fk_activity_created_by"))
     private User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "host_id",
-            nullable = true,
-            foreignKey = @ForeignKey(name = "fk_activity_host")
-    )
-    private Buddy host;
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ActivityDeparture> departures = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -135,25 +101,12 @@ public class Activity {
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = DateTimeUtils.nowVietnam();
-
         createdAt = now;
         updatedAt = now;
-
-        if (status == null) {
-            status = ActivityStatus.PUBLISHED;
-        }
-
-        if (participationFee == null) {
-            participationFee = BigDecimal.ZERO;
-        }
-
-        if (groupMinSize == null) {
-            groupMinSize = 4;
-        }
-
-        if (groupMaxSize == null) {
-            groupMaxSize = 6;
-        }
+        if (status == null) status = ActivityStatus.PUBLISHED;
+        if (participationFee == null) participationFee = BigDecimal.ZERO;
+        if (groupMinSize == null) groupMinSize = 4;
+        if (groupMaxSize == null) groupMaxSize = 6;
     }
 
     @PreUpdate

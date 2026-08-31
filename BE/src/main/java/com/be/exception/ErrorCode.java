@@ -100,7 +100,88 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "Registration has already been checked in"
     ),
+    INVALID_GUEST_COUNT(
+            3007,
+            HttpStatus.BAD_REQUEST,
+            "Must have at least 1 guest"
+    ),
+    INVALID_REGISTRATION_STATUS(
+            3008,
+            HttpStatus.BAD_REQUEST,
+            "Registration status is not valid for this operation"
+    ),
+    AT_LEAST_ONE_ADULT_REQUIRED(
+            3009,
+            HttpStatus.BAD_REQUEST,
+            "At least one adult (>= 1) is required to book a tour"
+    ),
+// ================= COUPON (4500 - 4599) =================
 
+    COUPON_NOT_FOUND(
+            4501,
+            HttpStatus.NOT_FOUND,
+            "Coupon code not found"
+    ),
+
+    COUPON_INACTIVE(
+            4502,
+            HttpStatus.BAD_REQUEST,
+            "Coupon is currently inactive"
+    ),
+
+    COUPON_EXPIRED(
+            4503,
+            HttpStatus.BAD_REQUEST,
+            "Coupon has expired or is not yet valid"
+    ),
+
+    COUPON_USAGE_LIMIT_REACHED(
+            4504,
+            HttpStatus.BAD_REQUEST,
+            "Coupon usage limit has been reached"
+    ),
+
+    COUPON_MINIMUM_NOT_MET(
+            4505,
+            HttpStatus.BAD_REQUEST,
+            "Order subtotal does not meet the minimum amount required for this coupon"
+    ),
+    COUPON_NOT_APPLICABLE(
+            4506,
+            HttpStatus.BAD_REQUEST,
+            "The provided coupon cannot be applied to this booking"
+    ),
+    // ================= ACTIVITY & DEPARTURE (5000 - 5999) =================
+
+    ACTIVITY_NOT_FOUND(
+            5001,
+            HttpStatus.NOT_FOUND,
+            "Activity not found"
+    ),
+
+    DEPARTURE_NOT_FOUND(
+            5002,
+            HttpStatus.NOT_FOUND,
+            "Activity departure not found"
+    ),
+
+    DEPARTURE_NOT_AVAILABLE(
+            5003,
+            HttpStatus.CONFLICT,
+            "Activity departure is closed or cancelled"
+    ),
+
+    DEPARTURE_IN_PAST(
+            5004,
+            HttpStatus.BAD_REQUEST,
+            "Cannot register for a past departure"
+    ),
+
+    INSUFFICIENT_CAPACITY(
+            5005,
+            HttpStatus.CONFLICT,
+            "Insufficient departure capacity"
+    ),
 // ================= COMMON (9000 - 9999) =================
 
     VALIDATION_ERROR(
@@ -137,28 +218,28 @@ public enum ErrorCode {
             HttpStatus.NOT_FOUND,
             "Buddy not found"
     ),
-    //==========ACTIVITY ===============
-    ACTIVITY_NOT_FOUND(
-            5001,
-            HttpStatus.NOT_FOUND,
-            "Activity not found"
+    BUDDY_SCHEDULE_CONFLICT(
+            4004,
+            HttpStatus.CONFLICT,
+            "Buddy has a schedule conflict with this tour"
     ),
     // ================= GUIDELINE (6000 - 6999) =================
     GUIDELINE_NOT_FOUND(
             6001,
             HttpStatus.NOT_FOUND,
-            "Sự kiện này chưa có hướng dẫn tham gia"
+            "Guideline not found for this activity"
     ),
 
     GUIDELINE_ALREADY_EXISTS(
             6002,
             HttpStatus.CONFLICT,
-            "Sự kiện này đã có hướng dẫn tham gia, vui lòng dùng tính năng Cập nhật"
+            "Guideline already exists for this activity. Please use update instead"
     ),
+
     FEEDBACK_ALREADY_EXISTS(
             7001,
-            HttpStatus.NOT_FOUND,
-            "Người dùng chỉ được feedback  1 lần  "
+            HttpStatus.CONFLICT,
+            "Feedback has already been submitted for this registration"
     ),
     CHECKIN_CLOSED(
             8001,

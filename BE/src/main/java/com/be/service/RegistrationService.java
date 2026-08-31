@@ -2,6 +2,7 @@ package com.be.service;
 
 import com.be.dto.request.RegistrationRequest;
 import com.be.dto.response.ActivityGroupResponse;
+import com.be.dto.response.BuddyResponse;
 import com.be.dto.response.RegistrationResponse;
 import com.be.entity.User;
 import org.springframework.stereotype.Service;
@@ -26,4 +27,7 @@ public interface RegistrationService {
             UUID groupId,
             User currentUser
     );
+    RegistrationResponse cancelRegistration(UUID registrationId, User currentUser);
+    List<BuddyResponse> getAvailableBuddyCandidates(UUID registrationId);
+    RegistrationResponse adminAssignBuddy(UUID registrationId, UUID buddyId, User adminUser);
 }
