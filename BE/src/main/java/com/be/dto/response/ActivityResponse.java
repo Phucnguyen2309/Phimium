@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -21,12 +22,10 @@ public class ActivityResponse {
     private String description;
     private TourType activityType;
     private String thumbnailUrl;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private LocalDateTime registrationDeadline;
     private String locationName;
     private String address;
     private BigDecimal participationFee;
+    private BigDecimal childParticipationFee;
     private Integer minimumParticipants;
     private Integer maximumParticipants;
     private Integer groupMinSize;
@@ -34,9 +33,9 @@ public class ActivityResponse {
     private BigDecimal longitude;
     private BigDecimal latitude;
     private ActivityStatus status;
-    private UUID hostBuddyId;
-    private String hostBuddyName;
     private UUID createdById;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<ActivityDepartureResponse> departures;
 }

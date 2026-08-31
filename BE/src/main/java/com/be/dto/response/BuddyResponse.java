@@ -20,6 +20,6 @@ public class BuddyResponse {
     private String experience;
     private String introduction;
     private String avatarUrl;
-    private int averageRating;
-    private BigDecimal totalReviews;
+    private BigDecimal averageRating;
+    private Integer totalReviews;
 }

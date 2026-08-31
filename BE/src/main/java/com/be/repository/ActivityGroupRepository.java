@@ -16,16 +16,5 @@ public interface ActivityGroupRepository extends JpaRepository<ActivityGroup, UU
 
     List<ActivityGroup> findByStatus(GroupStatus status);
 
-    List<ActivityGroup> findByStatusAndActivityStartTimeLessThanEqualAndActivityEndTimeAfter(
-            GroupStatus status,
-            LocalDateTime nowStart,
-            LocalDateTime nowEnd
-    );
-
-    List<ActivityGroup> findByStatusInAndActivityEndTimeLessThanEqual(
-            Collection<GroupStatus> statuses,
-            LocalDateTime now
-    );
-
 
 }

@@ -2,8 +2,11 @@ package com.be.exception;
 
 import com.be.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +33,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
+                .body(response);
+    }
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(
+            Exception exception,
+            HttpServletRequest request
+    ) {
+        ApiResponse<?> response = ApiResponse.builder()
+                .success(false)
+                .code(ErrorCode.USER_NOT_AUTHORIZED.getCode())
+                .message(ErrorCode.USER_NOT_AUTHORIZED.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(response);
     }
 
