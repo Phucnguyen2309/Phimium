@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/activity/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/activity/**").permitAll()
+                        .requestMatchers("/api/payments/**").authenticated()
+                        .requestMatchers("/api/webhooks/sepay").permitAll()
                         .anyRequest().authenticated())
 
                 .sessionManagement(sessionManagement -> sessionManagement

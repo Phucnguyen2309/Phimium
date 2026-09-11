@@ -257,7 +257,64 @@ public enum ErrorCode {
             8003,
             HttpStatus.CONFLICT,
         "User already checked in"
-    )
+    ),
+
+    PAYMENT_NOT_FOUND(
+            9001,
+            HttpStatus.NOT_FOUND,
+            "Payment not found"
+
+    ),
+
+    PAYMENT_ALREADY_PAID(
+            9002,
+            HttpStatus.BAD_REQUEST,
+            "Registration has already been paid"
+
+    ),
+
+    PAYMENT_AMOUNT_MISMATCH(
+            9003,
+            HttpStatus.BAD_REQUEST,
+            "Payment amount mismatch"
+    ),
+
+    PAYMENT_CURRENCY_MISMATCH(
+            9004,
+            HttpStatus.BAD_REQUEST,
+            "Payment currency mismatch"
+    ),
+
+    PAYMENT_ACCESS_DENIED(
+            9005,
+            HttpStatus.FORBIDDEN,
+            "You do not have permission to access this payment"
+    ),
+
+    PAYMENT_INVALID_STATUS(
+            9006,
+            HttpStatus.BAD_REQUEST,
+            "Invalid payment status"
+    ),
+
+    PAYMENT_SIGNATURE_INVALID(
+            9007,
+            HttpStatus.BAD_REQUEST,
+            "Invalid SePay signature"
+    ),
+
+    PAYMENT_TRANSACTION_DUPLICATED(
+            9008,
+            HttpStatus.CONFLICT,
+            "Payment transaction already exists"
+    ),
+
+    PAYMENT_PROVIDER_ERROR(
+            9009,
+            HttpStatus.BAD_GATEWAY,
+            "Payment provider error"
+    ),
+
     ;
 
     private final int code;

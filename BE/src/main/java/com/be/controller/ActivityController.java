@@ -41,7 +41,7 @@ public class ActivityController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tạo tour/hoạt động mới (Chỉ Admin)")
+    @Operation(summary = "Tạo tour/hoạt động  mới(Chỉ Admin)")
     public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
             @RequestPart("request") String requestJson,
             @RequestPart(value = "image", required = false) MultipartFile image,
