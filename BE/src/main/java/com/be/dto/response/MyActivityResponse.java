@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -19,8 +21,9 @@ public class MyActivityResponse {
     private String title;
     private TourType activityType;
     private String thumbnailUrl;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDate departureDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private String locationName;
     private String address;
     private ActivityStatus status;

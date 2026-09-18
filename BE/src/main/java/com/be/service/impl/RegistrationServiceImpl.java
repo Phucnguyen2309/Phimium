@@ -201,38 +201,75 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     @Transactional
-    public RegistrationResponse checkIn(UUID registrationId, User currentUser) {
-        if (currentUser == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
+    public RegistrationResponse checkIn(
+            UUID registrationId,
+            User currentUser
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        Registration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+        Registration registration = registrationRepository
+                .findById(registrationId)
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.REGISTRATION_NOT_FOUND)
+                );
 
-        if (!registration.getUser().getUserId().equals(currentUser.getUserId())) {
+        // Chỉ user sở hữu registration mới được check-in
+        if (!registration.getUser()
+                .getUserId()
+                .equals(currentUser.getUserId())) {
+
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
-        if (registration.getStatus() != RegistrationStatus.BUDDY_ASSIGNED) {
-            throw new AppException(ErrorCode.REGISTRATION_CANNOT_CHECK_IN);
+
+        // Chỉ check-in khi đã được assign buddy
+        if (registration.getStatus()
+                != RegistrationStatus.BUDDY_ASSIGNED) {
+
+            throw new AppException(
+                    ErrorCode.REGISTRATION_CANNOT_CHECK_IN
+            );
         }
 
-        LocalDateTime now = DateTimeUtils.nowVietnam();
-        LocalDateTime startTime = registration.getDeparture().getStartTime();
-        LocalDateTime endTime = registration.getDeparture().getEndTime();
+        // Không cho check-in lần 2
+        if (registration.getCheckInStatus()
+                == CheckInStatus.PRESENT) {
 
-        if (now.isBefore(startTime.minusMinutes(60))) {
+            throw new AppException(ErrorCode.ALREADY_CHECKED_IN);
+        }
+
+        ActivityDeparture departure =
+                registration.getDeparture();
+
+        LocalDateTime now =
+                DateTimeUtils.nowVietnam();
+
+        LocalDateTime startDateTime =
+                departure.getStartDateTime();
+
+        LocalDateTime endDateTime =
+                departure.getEndDateTime();
+
+        // Mở check-in trước giờ bắt đầu 60 phút
+        LocalDateTime checkInOpenTime =
+                startDateTime.minusMinutes(60);
+
+        if (now.isBefore(checkInOpenTime)) {
             throw new AppException(ErrorCode.CHECKIN_NOT_OPEN);
         }
 
-        if (now.isAfter(endTime)) {
+        // Đóng check-in sau khi tour kết thúc
+        if (now.isAfter(endDateTime)) {
             throw new AppException(ErrorCode.CHECKIN_CLOSED);
-        }
-
-        if (registration.getCheckInStatus() == CheckInStatus.PRESENT) {
-            throw new AppException(ErrorCode.ALREADY_CHECKED_IN);
         }
 
         registration.setCheckInStatus(CheckInStatus.PRESENT);
         registration.setCheckedInAt(now);
-        Registration savedRegistration = registrationRepository.save(registration);
+
+        Registration savedRegistration =
+                registrationRepository.save(registration);
+
         return registrationMapper.toResponse(savedRegistration);
     }
 
@@ -241,7 +278,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     public void autoMarkAbsentAfterActivityEndTime() {
         LocalDateTime now = DateTimeUtils.nowVietnam();
         List<Registration> registrations = registrationRepository
-                .findByCheckInStatusAndDepartureEndTimeBefore(CheckInStatus.NOT_YET, now);
+                .findByCheckInStatusAndDepartureEndedBefore(
+                        CheckInStatus.NOT_YET, now.toLocalDate(), now.toLocalTime());
 
         List<Registration> validAbsents = registrations.stream()
                 .filter(reg -> reg.getStatus() != RegistrationStatus.CANCELLED)
@@ -273,113 +311,218 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     @Transactional
-    public RegistrationResponse cancelRegistration(UUID registrationId, User currentUser) {
-        if (currentUser == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
+    public RegistrationResponse cancelRegistration(
+            UUID registrationId,
+            User currentUser
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
 
         Registration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.REGISTRATION_NOT_FOUND)
+                );
 
-        boolean isOwner = registration.getUser().getUserId().equals(currentUser.getUserId());
-        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+        boolean isOwner = registration.getUser()
+                .getUserId()
+                .equals(currentUser.getUserId());
+
+        boolean isAdmin =
+                currentUser.getRole() == UserRole.ADMIN;
+
         if (!isOwner && !isAdmin) {
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
 
         if (registration.getStatus() == RegistrationStatus.CANCELLED) {
-            throw new AppException(ErrorCode.REGISTRATION_ALREADY_CANCELLED);
+            throw new AppException(
+                    ErrorCode.REGISTRATION_ALREADY_CANCELLED
+            );
         }
 
         if (registration.getCheckInStatus() == CheckInStatus.PRESENT
                 || registration.getStatus() == RegistrationStatus.IN_PROGRESS
                 || registration.getStatus() == RegistrationStatus.COMPLETED) {
-            throw new AppException(ErrorCode.REGISTRATION_CANNOT_BE_CANCELLED);
+
+            throw new AppException(
+                    ErrorCode.REGISTRATION_CANNOT_BE_CANCELLED
+            );
         }
 
         LocalDateTime now = DateTimeUtils.nowVietnam();
-        if (now.isAfter(registration.getDeparture().getStartTime())) {
-            throw new AppException(ErrorCode.REGISTRATION_CANNOT_BE_CANCELLED);
+
+        ActivityDeparture departure =
+                registration.getDeparture();
+
+        if (!now.isBefore(departure.getStartDateTime())) {
+            throw new AppException(
+                    ErrorCode.REGISTRATION_CANNOT_BE_CANCELLED
+            );
         }
 
         registration.setStatus(RegistrationStatus.CANCELLED);
-        registration.setCancelledAt(DateTimeUtils.nowVietnam());
+        registration.setCancelledAt(now);
 
-        ActivityDeparture departure = departureRepository.findByIdWithLock(registration.getDeparture().getDepartureId())
-                .orElse(registration.getDeparture());
+        ActivityDeparture lockedDeparture =
+                departureRepository
+                        .findByIdWithLock(departure.getDepartureId())
+                        .orElse(departure);
 
-        int totalGuests = (registration.getAdultCount() != null ? registration.getAdultCount() : 0)
-                + (registration.getChildCount() != null ? registration.getChildCount() : 0);
+        int totalGuests =
+                safeInt(registration.getAdultCount())
+                        + safeInt(registration.getChildCount());
 
-        departure.setCapacity(departure.getCapacity() + totalGuests);
+        lockedDeparture.setCapacity(
+                lockedDeparture.getCapacity() + totalGuests
+        );
 
-        if (departure.getStatus() == DepartureStatus.FULL && departure.getCapacity() > 0) {
-            departure.setStatus(DepartureStatus.AVAILABLE);
+        if (lockedDeparture.getStatus() == DepartureStatus.FULL
+                && lockedDeparture.getCapacity() > 0) {
+
+            lockedDeparture.setStatus(
+                    DepartureStatus.AVAILABLE
+            );
         }
-        departureRepository.save(departure);
 
-        if (registration.getCoupon() != null) {
-            Coupon coupon = registration.getCoupon();
-            if (coupon.getUsedCount() != null && coupon.getUsedCount() > 0) {
-                coupon.setUsedCount(coupon.getUsedCount() - 1);
-                couponRepository.save(coupon);
-            }
-        }
+        departureRepository.save(lockedDeparture);
 
-        Registration savedRegistration = registrationRepository.save(registration);
+        restoreCouponIfNeeded(registration);
+
+        Registration savedRegistration =
+                registrationRepository.save(registration);
+
         return registrationMapper.toResponse(savedRegistration);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BuddyResponse> getAvailableBuddyCandidates(UUID registrationId) {
-        Registration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+    public List<BuddyResponse> getAvailableBuddyCandidates(
+            UUID registrationId
+    ) {
+        Registration registration =
+                registrationRepository.findById(registrationId)
+                        .orElseThrow(() ->
+                                new AppException(
+                                        ErrorCode.REGISTRATION_NOT_FOUND
+                                )
+                        );
 
-        LocalDateTime startTime = registration.getDeparture().getStartTime();
-        LocalDateTime endTime = registration.getDeparture().getEndTime();
+        ActivityDeparture departure =
+                registration.getDeparture();
 
-        List<UUID> busyBuddyIds = registrationRepository.findBusyBuddyIdsInTimeRange(
-                startTime, endTime, RegistrationStatus.CANCELLED
-        );
+        List<UUID> busyBuddyIds =
+                registrationRepository.findBusyBuddyIdsInTimeRange(
+                        departure.getDepartureDate(),
+                        departure.getStartTime(),
+                        departure.getEndTime(),
+                        RegistrationStatus.CANCELLED
+                );
 
-        List<Buddy> availableBuddies = buddyRepository.findByStatus(BuddyStatus.ACTIVE).stream()
-                .filter(b -> !busyBuddyIds.contains(b.getBuddyId()))
-                .toList();
+        List<Buddy> availableBuddies =
+                buddyRepository.findByStatus(BuddyStatus.ACTIVE)
+                        .stream()
+                        .filter(buddy ->
+                                !busyBuddyIds.contains(
+                                        buddy.getBuddyId()
+                                )
+                        )
+                        .toList();
 
         return buddyMapper.toResponseList(availableBuddies);
     }
 
     @Override
     @Transactional
-    public RegistrationResponse adminAssignBuddy(UUID registrationId, UUID buddyId, User adminUser) {
-        if (adminUser.getRole() != UserRole.ADMIN) {
-            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+    public RegistrationResponse adminAssignBuddy(
+            UUID registrationId,
+            UUID buddyId,
+            User adminUser
+    ) {
+        if (adminUser == null
+                || adminUser.getRole() != UserRole.ADMIN) {
+
+            throw new AppException(
+                    ErrorCode.USER_NOT_AUTHORIZED
+            );
         }
 
-        Registration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+        Registration registration =
+                registrationRepository.findById(registrationId)
+                        .orElseThrow(() ->
+                                new AppException(
+                                        ErrorCode.REGISTRATION_NOT_FOUND
+                                )
+                        );
 
-        if (registration.getStatus() != RegistrationStatus.WAITING_FOR_BUDDY) {
-            throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
+        if (registration.getStatus()
+                != RegistrationStatus.WAITING_FOR_BUDDY) {
+
+            throw new AppException(
+                    ErrorCode.INVALID_REGISTRATION_STATUS
+            );
         }
 
-        Buddy buddy = buddyRepository.findById(buddyId)
-                .orElseThrow(() -> new AppException(ErrorCode.BUDDY_NOT_FOUND));
+        Buddy buddy =
+                buddyRepository.findById(buddyId)
+                        .orElseThrow(() ->
+                                new AppException(
+                                        ErrorCode.BUDDY_NOT_FOUND
+                                )
+                        );
 
-        boolean isBusy = registrationRepository.existsByBuddyAndDepartureTimeOverlap(
-                buddy,
-                registration.getDeparture().getStartTime(),
-                registration.getDeparture().getEndTime(),
-                RegistrationStatus.CANCELLED
-        );
+        ActivityDeparture departure =
+                registration.getDeparture();
+
+        boolean isBusy =
+                registrationRepository
+                        .existsByBuddyAndDepartureTimeOverlap(
+                                buddy,
+                                departure.getDepartureDate(),
+                                departure.getStartTime(),
+                                departure.getEndTime(),
+                                RegistrationStatus.CANCELLED
+                        );
 
         if (isBusy) {
-            throw new AppException(ErrorCode.BUDDY_SCHEDULE_CONFLICT);
+            throw new AppException(
+                    ErrorCode.BUDDY_SCHEDULE_CONFLICT
+            );
         }
 
         registration.setBuddy(buddy);
-        registration.setBuddyAssignedAt(DateTimeUtils.nowVietnam());
-        registration.setStatus(RegistrationStatus.BUDDY_ASSIGNED);
+        registration.setBuddyAssignedAt(
+                DateTimeUtils.nowVietnam()
+        );
+        registration.setStatus(
+                RegistrationStatus.BUDDY_ASSIGNED
+        );
 
-        return registrationMapper.toResponse(registrationRepository.save(registration));
+        Registration savedRegistration =
+                registrationRepository.save(registration);
+
+        return registrationMapper.toResponse(savedRegistration);
+    }
+
+
+    private void restoreCouponIfNeeded(
+            Registration registration
+    ) {
+        Coupon coupon = registration.getCoupon();
+
+        if (coupon == null) {
+            return;
+        }
+
+        Integer usedCount = coupon.getUsedCount();
+
+        if (usedCount != null && usedCount > 0) {
+            coupon.setUsedCount(usedCount - 1);
+            couponRepository.save(coupon);
+        }
+    }
+
+    private int safeInt(Integer value) {
+        return value != null ? value : 0;
     }
 }

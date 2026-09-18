@@ -1,6 +1,7 @@
 package com.be.controller;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.request.CreateActivityMultipartRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
@@ -12,8 +13,12 @@ import com.be.exception.ErrorCode;
 import com.be.service.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -37,33 +42,56 @@ public class ActivityController {
     private final Validator validator;
 
     @PostMapping(
-            value = "/createActivity",
+            value = "/activities",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tạo tour/hoạt động  mới(Chỉ Admin)")
+    @Operation(
+            summary = "Tạo tour/hoạt động mới (Chỉ Admin)",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(
+                                    implementation = CreateActivityMultipartRequest.class
+                            ),
+                            encoding = {
+                                    @Encoding(
+                                            name = "request",
+                                            contentType = MediaType.APPLICATION_JSON_VALUE
+                                    ),
+                                    @Encoding(
+                                            name = "image",
+                                            contentType = "image/*"
+                                    )
+                            }
+                    )
+            )
+    )
     public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
-            @RequestPart("request") String requestJson,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal User currentUser
-            ) throws IOException {
-        ActivityRequest activityRequest =
-                objectMapper.readValue(requestJson, ActivityRequest.class);
-        Set<ConstraintViolation<ActivityRequest>> violations =
-                validator.validate(activityRequest);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
 
-        ActivityResponse activityResponse =
+            @Valid
+            @RequestPart("request")
+            ActivityRequest request,
+
+            @RequestPart(
+                    value = "image",
+                    required = false
+            )
+            MultipartFile image,
+
+            @AuthenticationPrincipal User currentUser
+
+    ) throws IOException {
+
+        ActivityResponse response =
                 activityService.createActivity(
-                        activityRequest,
+                        request,
                         image,
                         currentUser
                 );
 
         return ResponseEntity.ok(
-                ApiResponse.success("Success", activityResponse)
+                ApiResponse.success("Success", response)
         );
     }
 

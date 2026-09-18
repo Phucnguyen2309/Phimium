@@ -32,6 +32,7 @@ public class RegistrationMapper {
 
             departureInfo = RegistrationResponse.DepartureInfo.builder()
                     .departureId(departure.getDepartureId())
+                    .departureDate(departure.getDepartureDate())
                     .startTime(departure.getStartTime())
                     .endTime(departure.getEndTime())
                     .activity(activityInfo)
