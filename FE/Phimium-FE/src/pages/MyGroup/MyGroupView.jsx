@@ -9,9 +9,9 @@ export default function MyGroupsView() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-2xl font-black text-slate-950">Nhóm</h1>
+        <h1 className="text-2xl font-black text-slate-950">Groups</h1>
         <p className="mt-2 text-sm text-slate-500">
-          Đang tải danh sách nhóm...
+          Loading groups...
         </p>
 
         <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -29,10 +29,10 @@ export default function MyGroupsView() {
   if (error) {
     return (
       <div>
-        <h1 className="text-2xl font-black text-slate-950">Nhóm</h1>
+        <h1 className="text-2xl font-black text-slate-950">Groups</h1>
 
         <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-5 text-sm font-semibold text-red-600">
-          Không thể tải danh sách nhóm.
+          Failed to load groups.
         </div>
       </div>
     )
@@ -41,14 +41,14 @@ export default function MyGroupsView() {
   if (groupList.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-black text-slate-950">Nhóm</h1>
+        <h1 className="text-2xl font-black text-slate-950">Groups</h1>
 
-        <div className="mt-5 rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 p-8 text-center">
+        <div className="mt-5 rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 p-8 text-center">
           <h2 className="text-lg font-black text-slate-950">
-            Bạn chưa tham gia nhóm nào
+            You haven't joined any groups yet
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Khi bạn join activity và được xếp nhóm, nhóm sẽ hiển thị ở đây.
+            When you join an activity and get assigned to a group, it will appear here.
           </p>
         </div>
       </div>
@@ -58,9 +58,9 @@ export default function MyGroupsView() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-slate-950">Nhóm</h1>
+        <h1 className="text-2xl font-black text-slate-950">Groups</h1>
         <p className="mt-2 text-sm text-slate-500">
-          Danh sách nhóm bạn đã tham gia.
+          List of groups you have joined.
         </p>
       </div>
 

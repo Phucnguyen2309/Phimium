@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 
 import { USER_ROLES } from '@/constants/app.js'
 import { MainLayout } from '@/layouts/MainLayout.jsx'
@@ -15,6 +15,11 @@ import { ProtectedRoute } from '@/routes/ProtectedRoute.jsx'
 import { ROUTES } from '@/routes/paths.js'
 import ActivityView from '../pages/Activity/ActivityView'
 import GroupDetailPage from '../pages/MyGroup/GroupDetailPage'
+import PersonalizeTourPage from '@/pages/PersonalizeTourPage.jsx'
+import ChatPage from '../pages/Chat/ChatPage.jsx'
+import ReviewFeedbackPage from '@/pages/Review/ReviewFeedbackPage.jsx'
+import ActivityBookingPage from '@/pages/Booking/ActivityBookingPage.jsx'
+import BookingConfirmationPage from '@/pages/BookingConfirmation/BookingConfirmationPage.jsx'
 
 
 const withMainLayout = (page) => <MainLayout>{page}</MainLayout>
@@ -31,20 +36,36 @@ function App() {
           element={withMainLayout(<ActivityDetailPage />)}
         />
         <Route
-            path={ROUTES.activities}
-            element={withMainLayout(<ActivityView />)}
-          />
+          path={ROUTES.activities}
+          element={withMainLayout(<ActivityView />)}
+        />
+        <Route
+          path={ROUTES.personalizeTour}
+          element={<PersonalizeTourPage />}
+        />
         <Route
           path={ROUTES.activityGuidelines}
           element={withMainLayout(<ActivityGuidelinePage />)}
         />
         <Route
           path={ROUTES.userDashboard}
-          element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.user]}>
-              {withMainLayout(<UserDashboard />)}
-            </ProtectedRoute>
-          }
+          element={withMainLayout(<UserDashboard />)}
+        />
+        <Route
+          path={ROUTES.chat}
+          element={<ChatPage />}
+        />
+        <Route
+          path={ROUTES.activityBooking}
+          element={<ActivityBookingPage />}
+        />
+        <Route
+          path={ROUTES.bookingConfirmation}
+          element={<BookingConfirmationPage />}
+        />
+        <Route
+          path={ROUTES.review}
+          element={<ReviewFeedbackPage />}
         />
         <Route
           path={ROUTES.groupDetail}

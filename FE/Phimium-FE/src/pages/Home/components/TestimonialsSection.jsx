@@ -20,7 +20,7 @@ const TESTIMONIALS = [
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-emerald-50/70 py-16">
+    <section className="bg-blue-50/70 py-16">
       <Container>
         <h2 className="text-center text-2xl font-black text-slate-950">
           Cộng đồng nói gì?
@@ -39,7 +39,7 @@ export function TestimonialsSection() {
               </p>
 
               <div className="mt-5 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-sm font-black text-emerald-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-black text-blue-700">
                   {item.name[0]}
                 </div>
 

@@ -25,16 +25,15 @@ export function ActivityView() {
   return (
     <div className="bg-slate-50">
       <Container className="py-10">
-        <section className="rounded-[32px] border border-emerald-100 bg-white/95 p-6 shadow-[0_20px_70px_rgba(15,23,42,0.08)] sm:p-8">
+        <section className="rounded-[32px] border border-blue-100 bg-white/95 p-6 shadow-[0_20px_70px_rgba(15,23,42,0.08)] sm:p-8">
           <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <h1 className="text-4xl font-black tracking-tight text-slate-950">
-                Khám phá trải nghiệm địa phương
+                Discover Local Experiences
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                Những buổi gặp gỡ được chọn lọc cho vibe chiều vui vẻ. Tham gia
-                workshop, cafe và hoạt động cùng những người cùng gu với bạn.
+                Curated culinary experiences. Join our bespoke food tours and discover the hidden tastes of the city.
               </p>
             </div>
 
@@ -44,8 +43,8 @@ export function ActivityView() {
                 onClick={() => setViewMode('GRID')}
                 className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-black transition ${
                   viewMode === 'GRID'
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-emerald-100 bg-white text-slate-500 hover:bg-emerald-50'
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-blue-100 bg-white text-slate-500 hover:bg-blue-50'
                 }`}
               >
                 ▦
@@ -56,8 +55,8 @@ export function ActivityView() {
                 onClick={() => setViewMode('LIST')}
                 className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-black transition ${
                   viewMode === 'LIST'
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-emerald-100 bg-white text-slate-500 hover:bg-emerald-50'
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-blue-100 bg-white text-slate-500 hover:bg-blue-50'
                 }`}
               >
                 ☰
@@ -66,13 +65,13 @@ export function ActivityView() {
           </div>
 
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex max-w-md items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
-              <span className="text-emerald-700">⌕</span>
+            <div className="flex max-w-md items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 px-4 py-3">
+              <span className="text-blue-700">⌕</span>
 
               <input
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
-                placeholder="Tìm hoạt động..."
+                placeholder="Search activities..."
                 className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
               />
             </div>
@@ -88,11 +87,11 @@ export function ActivityView() {
                     onClick={() => setSelectedType(type)}
                     className={`rounded-full px-4 py-2 text-xs font-black transition ${
                       isActive
-                        ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'border border-emerald-100 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'border border-blue-100 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-700'
                     }`}
                   >
-                    {type === 'ALL' ? 'Tất cả loại' : formatActivityType(type)}
+                    {type === 'ALL' ? 'All Types' : formatActivityType(type)}
                   </button>
                 )
               })}
@@ -100,21 +99,21 @@ export function ActivityView() {
           </div>
 
           {loading ? (
-            <div className="rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 py-20 text-center text-slate-500">
-              Đang tải hoạt động...
+            <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 py-20 text-center text-slate-500">
+              Loading activities...
             </div>
           ) : error ? (
             <div className="rounded-3xl border border-dashed border-red-200 bg-red-50 py-20 text-center text-red-500">
-              Không thể tải danh sách hoạt động.
+              Failed to load activities.
             </div>
           ) : paginatedActivities.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 py-20 text-center">
+            <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 py-20 text-center">
               <h3 className="text-lg font-black text-slate-950">
-                Không có hoạt động phù hợp
+                No matching activities found
               </h3>
 
               <p className="mt-2 text-sm text-slate-500">
-                Thử đổi bộ lọc hoặc tìm kiếm từ khóa khác.
+                Try changing your filters or searching with different keywords.
               </p>
             </div>
           ) : (
@@ -136,12 +135,12 @@ export function ActivityView() {
           )}
 
           <div className="mt-10 flex justify-center">
-            <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-2">
               <button
                 type="button"
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-slate-600 shadow-sm transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-slate-600 shadow-sm transition hover:bg-blue-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ‹
               </button>
@@ -154,8 +153,8 @@ export function ActivityView() {
                     onClick={() => setPage(item)}
                     className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-black transition ${
                       page === item
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-white text-slate-600 shadow-sm hover:bg-emerald-100'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-slate-600 shadow-sm hover:bg-blue-100'
                     }`}
                   >
                     {item}
@@ -167,7 +166,7 @@ export function ActivityView() {
                 type="button"
                 disabled={page >= totalPages}
                 onClick={() => setPage(page + 1)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-slate-600 shadow-sm transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-black text-slate-600 shadow-sm transition hover:bg-blue-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ›
               </button>

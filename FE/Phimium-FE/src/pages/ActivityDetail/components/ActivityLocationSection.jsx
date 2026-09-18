@@ -16,11 +16,11 @@ export function ActivityLocationSection({ activity }) {
 
           <div>
             <p className="font-black text-slate-950">
-              {activity?.locationName || 'Chưa cập nhật địa điểm'}
+              {activity?.locationName || 'Location not updated'}
             </p>
 
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              {activity?.address || 'Chưa cập nhật địa chỉ'}
+              {activity?.address || 'Address not updated'}
             </p>
 
             {hasValidCoordinates(activity) && (

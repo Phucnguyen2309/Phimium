@@ -5,7 +5,8 @@ const activityService = {
 
   getActivityById: (activityId) => http.get(`/activity/${activityId}`),
 
-  joinActivity: (payload) => http.post('/v1/registrations/join', payload),
+  joinActivity: (payload) => http.post('/v1/registrations', payload),
+  registerActivity: (payload) => http.post('/v1/registrations', payload),
 
   getMyRegistrations: () => http.get('/activity/joined'),
 

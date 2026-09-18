@@ -1,33 +1,26 @@
-import { CtaSection } from "./components/CtaSection"
 import { HeroSection } from "./components/HeroSection"
-import { HomeFooter } from "./components/HomeFooter"
-import { HowItWorksSection } from "./components/HowItWorksSection"
 import { PopularActivitiesSection } from "./components/PopularActivitiesSection"
-import { TestimonialsSection } from "./components/TestimonialsSection"
-import { WhyPhimiumSection } from "./components/WhyPhimiumSection"
-
+import { HomeCollections } from "./components/HomeCollections"
+import { HomeLocalGuides } from "./components/HomeLocalGuides"
 
 export function HomeView({ activities = [], loading = false }) {
   const activityList = Array.isArray(activities) ? activities : []
 
   return (
-    <div className="bg-slate-50">
-      < HeroSection />
+    <div className="min-h-screen bg-slate-50 font-sans pb-12">
+      <HeroSection />
 
-      <PopularActivitiesSection
-        activities={activityList}
-        loading={loading}
-      />
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-12 space-y-16">
+        <HomeCollections />
 
-      <HowItWorksSection />
+        <PopularActivitiesSection
+          activities={activityList}
+          loading={loading}
+        />
 
-      <WhyPhimiumSection />
-
-      <TestimonialsSection />
-
-      <CtaSection />
-
-      <HomeFooter />
+        <HomeLocalGuides />
+      </main>
     </div>
   )
 }
+

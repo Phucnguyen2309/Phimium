@@ -19,8 +19,8 @@ export default function MyActivitiesView() {
   if (loading) {
     return (
       <section className="w-full">
-        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
-        <p className="mt-4 text-sm text-slate-500">Đang tải hoạt động...</p>
+        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
+        <p className="mt-4 text-sm text-slate-500">Loading activities...</p>
       </section>
     )
   }
@@ -28,9 +28,9 @@ export default function MyActivitiesView() {
   if (error) {
     return (
       <section className="w-full">
-        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
+        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
         <p className="mt-4 text-sm text-red-500">
-          Không thể tải hoạt động. Vui lòng thử lại.
+          Failed to load activities. Please try again.
         </p>
       </section>
     )
@@ -39,9 +39,9 @@ export default function MyActivitiesView() {
   return (
     <section className="w-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Hoạt động của tôi</h1>
+        <h1 className="text-2xl font-bold text-slate-900">My Activities</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Quản lý các hoạt động bạn đã tham gia.
+          Manage your joined activities.
         </p>
       </div>
 
@@ -56,7 +56,7 @@ export default function MyActivitiesView() {
               onClick={() => setActiveTab(tab.value)}
               className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                 isActive
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-indigo-600 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -69,10 +69,10 @@ export default function MyActivitiesView() {
       {activityList.length === 0 ? (
         <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">
-            Chưa có hoạt động nào
+            No activities yet
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Không có hoạt động nào trong tab này.
+            There are no activities in this tab.
           </p>
         </div>
       ) : (

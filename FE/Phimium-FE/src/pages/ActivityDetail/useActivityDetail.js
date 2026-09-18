@@ -64,8 +64,9 @@ export function useActivityDetail() {
       return
     }
 
-    setJoinMessage('')
-    setShowSafetyTerms(true)
+    // Instead of showing the safety terms modal directly,
+    // we now route the user to the "Personalize Tour" flow
+    navigate(`/activities/${id}/personalize`)
   }
 
   const handleJoinActivity = async () => {

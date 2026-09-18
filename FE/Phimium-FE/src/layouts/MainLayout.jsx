@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { label: 'Trang chủ', to: ROUTES.home },
-  { label: 'Hoạt động', to: ROUTES.activities },
+  { label: 'Home', to: ROUTES.home },
+  { label: 'Activities', to: ROUTES.activities },
 ]
 
 export function MainLayout({ children }) {
@@ -36,10 +36,10 @@ export function MainLayout({ children }) {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-950">
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-slate-950">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-emerald-200/50 blur-3xl" />
-        <div className="absolute right-0 top-40 h-96 w-96 rounded-full bg-teal-200/50 blur-3xl" />
+        <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-blue-200/50 blur-3xl" />
+        <div className="absolute right-0 top-40 h-96 w-96 rounded-full bg-indigo-200/50 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-lime-100/70 blur-3xl" />
       </div>
 
@@ -58,10 +58,10 @@ export function MainLayout({ children }) {
         {!isBuddyDashboard && (
           <div className="fixed inset-x-0 top-0 z-[999] px-6 py-6 sm:px-8 lg:px-10">
             <div className="mx-auto w-full max-w-[1760px]">
-              <header className="relative z-[100] grid h-20 grid-cols-[1fr_auto_1fr] items-center gap-6 rounded-[26px] border border-emerald-100 bg-white/90 px-9 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur">
+              <header className="relative z-[100] grid h-20 grid-cols-[1fr_auto_1fr] items-center gap-6 rounded-[26px] border border-blue-100 bg-white/90 px-9 shadow-[0_18px_50px_rgba(15,23,42,0.10)] backdrop-blur">
                 <Link
                   to={ROUTES.home}
-                  className="justify-self-start text-2xl font-black tracking-tight text-emerald-700"
+                  className="justify-self-start text-2xl font-black tracking-tight text-blue-700"
                 >
                   {APP_NAME}
                 </Link>
@@ -75,8 +75,8 @@ export function MainLayout({ children }) {
                       className={({ isActive }) =>
                         `pb-1 transition ${
                           isActive
-                            ? 'border-b-2 border-emerald-600 text-emerald-700'
-                            : 'text-slate-500 hover:text-emerald-700'
+                            ? 'border-b-2 border-blue-600 text-blue-700'
+                            : 'text-slate-500 hover:text-blue-700'
                         }`
                       }
                     >
@@ -89,7 +89,7 @@ export function MainLayout({ children }) {
                   {!user && (
                     <Link
                       to={ROUTES.register}
-                      className="hidden text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 lg:inline-flex"
+                      className="hidden text-sm font-semibold text-blue-700 transition hover:text-blue-800 lg:inline-flex"
                     >
                       Become a Buddy
                     </Link>
@@ -100,9 +100,9 @@ export function MainLayout({ children }) {
                       <button
                         type="button"
                         onClick={() => setMenuOpen((current) => !current)}
-                        className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                        className="flex items-center gap-2 rounded-full border border-blue-100 bg-blue-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
                       >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-emerald-700">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-blue-700">
                           {userInitial}
                         </span>
 
@@ -112,7 +112,7 @@ export function MainLayout({ children }) {
                       </button>
 
                       {menuOpen && (
-                        <div className="absolute right-0 top-full z-[9999] mt-3 w-56 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+                        <div className="absolute right-0 top-full z-[9999] mt-3 w-56 overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
                           <div className="border-b border-slate-100 px-4 py-3">
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                               Signed in as
@@ -126,7 +126,7 @@ export function MainLayout({ children }) {
                           <Link
                             to={ROUTES.userDashboard}
                             onClick={() => setMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
                           >
                             <svg
                               aria-hidden="true"
@@ -149,7 +149,7 @@ export function MainLayout({ children }) {
                             <Link
                               to={ROUTES.buddy}
                               onClick={() => setMenuOpen(false)}
-                              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
                             >
                               <svg
                                 aria-hidden="true"
@@ -173,7 +173,7 @@ export function MainLayout({ children }) {
                             <Link
                               to={ROUTES.admin}
                               onClick={() => setMenuOpen(false)}
-                              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
                             >
                               <svg
                                 aria-hidden="true"
@@ -199,7 +199,7 @@ export function MainLayout({ children }) {
                               setMenuOpen(false)
                               logout()
                             }}
-                            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
                           >
                             <svg
                               aria-hidden="true"
@@ -223,14 +223,14 @@ export function MainLayout({ children }) {
                   ) : (
                     <Link
                       to={ROUTES.login}
-                      className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                      className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
                     >
                       Log In
                     </Link>
                   )}
 
                   <button
-                    className="hidden h-11 w-11 items-center justify-center rounded-full border border-emerald-100 bg-white/80 text-slate-500 transition hover:bg-emerald-50 hover:text-emerald-700 sm:inline-flex"
+                    className="hidden h-11 w-11 items-center justify-center rounded-full border border-blue-100 bg-white/80 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700 sm:inline-flex"
                     type="button"
                   >
                     <svg
@@ -250,7 +250,7 @@ export function MainLayout({ children }) {
                   </button>
 
                   <button
-                    className="hidden h-11 w-11 items-center justify-center rounded-full border border-emerald-100 bg-white/80 text-slate-500 transition hover:bg-emerald-50 hover:text-emerald-700 sm:inline-flex"
+                    className="hidden h-11 w-11 items-center justify-center rounded-full border border-blue-100 bg-white/80 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700 sm:inline-flex"
                     type="button"
                   >
                     <svg

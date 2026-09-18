@@ -30,25 +30,25 @@ export const ACTIVITY_STATUS_UI = {
 }
 
 export const ACTIVITY_STATUS_LABELS = {
-  PUBLISHED: 'Đã đăng',
-  UPCOMING: 'Sắp diễn ra',
-  ONGOING: 'Đang diễn ra',
-  COMPLETED: 'Đã hoàn thành',
-  CANCELLED: 'Đã hủy',
+  PUBLISHED: 'Published',
+  UPCOMING: 'Upcoming',
+  ONGOING: 'In Progress',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
 }
 
 export const DEFAULT_ACTIVITY = {
   id: '',
-  title: 'Hoạt động chưa đặt tên',
+  title: 'Unnamed Activity',
   description: '',
-  hostName: 'Buddy chưa xác định',
+  hostName: 'Unknown Buddy',
   hostAvatar: PLACEHOLDER_AVATAR,
   imageUrl: PLACEHOLDER_IMAGE,
   category: 'ACTIVITY',
   status: 'PUBLISHED',
-  statusLabel: 'Đã đăng',
-  time: 'Sắp cập nhật',
-  location: 'Sắp cập nhật',
+  statusLabel: 'Published',
+  time: 'TBD',
+  location: 'TBD',
   address: '',
   rating: 5,
   action: '',
@@ -62,8 +62,8 @@ export const DEFAULT_ACTIVITY = {
 }
 
 export const ACTIVITY_TABS = [
-  { label: 'Tất cả', value: 'ALL' },
-  { label: 'Sắp diễn ra', value: 'UPCOMING' },
-  { label: 'Đang diễn ra', value: 'ONGOING' },
-  { label: 'Đã hoàn thành', value: 'COMPLETED' },
+  { label: 'All', value: 'ALL' },
+  { label: 'Upcoming', value: 'UPCOMING' },
+  { label: 'In Progress', value: 'ONGOING' },
+  { label: 'Completed', value: 'COMPLETED' },
 ]

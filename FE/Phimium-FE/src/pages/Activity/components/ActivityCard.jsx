@@ -13,8 +13,8 @@ import {
 
 function ImageFallback() {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-100">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-2xl font-black text-white">
+    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-2xl font-black text-white">
         P
       </div>
     </div>
@@ -30,7 +30,7 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
       <Link
         to={buildActivityDetailPath(activity.id)}
         state={{ activity }}
-        className="group grid overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl md:grid-cols-[260px_1fr]"
+        className="group grid overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl md:grid-cols-[260px_1fr]"
       >
         <div className="relative h-56 overflow-hidden md:h-full">
           {imageUrl ? (
@@ -43,7 +43,7 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
             <ImageFallback />
           )}
 
-          <span className="absolute left-4 top-4 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white">
+          <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
             {formatStatus(activity.status)}
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
                 {formatActivityType(activity.activityType)}
               </span>
 
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                 {formatPrice(activity.participationFee)}
               </span>
             </div>
@@ -71,9 +71,9 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
 
           <div className="mt-5 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
             <p> {formatDateTime(activity.startTime)}</p>
-            <p> {activity.locationName || activity.address || 'Sắp cập nhật'}</p>
-            <p> Dẫn bởi {activity.hostBuddyName}</p>
-            <p>Còn {remainingSlots} chỗ</p>
+            <p> {activity.locationName || activity.address || 'TBD'}</p>
+            <p> Hosted by {activity.hostBuddyName}</p>
+            <p>{remainingSlots} spots left</p>
           </div>
         </div>
       </Link>
@@ -84,9 +84,9 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
     <Link
       to={buildActivityDetailPath(activity.id)}
       state={{ activity }}
-      className="group overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="group overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="relative h-64 overflow-hidden bg-emerald-50">
+      <div className="relative h-64 overflow-hidden bg-blue-50">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -106,12 +106,12 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
 
       <div className="p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
             {formatPrice(activity.participationFee)}
           </span>
 
           <span className="text-xs font-bold text-orange-600">
-            {remainingSlots} chỗ
+            {remainingSlots} spots left
           </span>
         </div>
 
@@ -126,12 +126,12 @@ export default function ActivityCard({ activity, viewMode = 'GRID' }) {
         <div className="mt-4 space-y-2 text-xs text-slate-600">
           <p className="line-clamp-1"> {formatDateTime(activity.startTime)}</p>
           <p className="line-clamp-1">
-             {activity.locationName || activity.address || 'Sắp cập nhật'}
+             {activity.locationName || activity.address || 'TBD'}
           </p>
         </div>
 
-        <div className="mt-5 rounded-xl bg-emerald-600 px-4 py-3 text-center text-sm font-black text-white transition group-hover:bg-emerald-700">
-          Tham gia hoạt động
+        <div className="mt-5 rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-black text-white transition group-hover:bg-blue-700">
+          Join Activity
         </div>
       </div>
     </Link>

@@ -50,7 +50,7 @@ export function ActivityHostBookingCard({
           </p>
 
           <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold">
-            <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">
+            <span className="rounded-full bg-blue-100 px-2 py-1 text-blue-700">
               Verified
             </span>
 
@@ -82,7 +82,7 @@ export function ActivityHostBookingCard({
           <p className="text-xs text-slate-500">/ person</p>
         </div>
 
-        <div className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
+        <div className="rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
           Booking
         </div>
       </div>

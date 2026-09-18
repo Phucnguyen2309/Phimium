@@ -35,15 +35,15 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
       <div className="max-w-[1400px] mx-auto space-y-8">
         
         {/* --- HEADER DASHBOARD --- */}
-        <div className="relative overflow-hidden bg-white rounded-3xl p-8 md:p-10 shadow-sm border border-emerald-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="relative overflow-hidden bg-white rounded-3xl p-8 md:p-10 shadow-sm border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           {/* Background pattern */}
-          <div className="absolute top-0 right-0 -mt-16 -mr-16 text-emerald-50 opacity-50">
+          <div className="absolute top-0 right-0 -mt-16 -mr-16 text-blue-50 opacity-50">
             <svg width="300" height="300" fill="currentColor" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/></svg>
           </div>
           
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-200">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
               Khu vực của Buddy
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-2">
@@ -56,7 +56,7 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
 
           <button 
             onClick={handleCreateActivity}
-            className="relative z-10 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-[0_8px_30px_rgb(16,185,129,0.3)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.5)] flex items-center gap-3 hover:-translate-y-1 group"
+            className="relative z-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-[0_8px_30px_rgb(16,185,129,0.3)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.5)] flex items-center gap-3 hover:-translate-y-1 group"
           >
             <span className="p-1.5 bg-white/20 rounded-lg group-hover:rotate-90 transition-transform duration-300">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
@@ -95,19 +95,19 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
               ) : hostedActivities?.length > 0 ? (
                 // MAP DATA THẬT
                 hostedActivities.map((activity) => (
-                  <div key={activity.id} className="group relative flex flex-col sm:flex-row gap-5 p-5 bg-white rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300">
+                  <div key={activity.id} className="group relative flex flex-col sm:flex-row gap-5 p-5 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
                     
                     {/* Hình thu nhỏ */}
                     <div className="w-full sm:w-40 h-32 rounded-xl overflow-hidden bg-slate-100 shrink-0 relative">
                       {activity.thumbnailUrl ? (
                         <img src={activity.thumbnailUrl} alt={activity.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300 bg-emerald-50/50">
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 bg-blue-50/50">
                           <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         </div>
                       )}
                       {/* Badge trạng thái */}
-                      <span className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur text-xs font-bold rounded-md text-emerald-600 shadow-sm">
+                      <span className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur text-xs font-bold rounded-md text-blue-600 shadow-sm">
                         {activity.status === 'PUBLISHED' ? 'Đang mở' : activity.status}
                       </span>
                     </div>
@@ -116,7 +116,7 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start gap-2 mb-1">
-                          <h3 className="text-lg font-bold text-slate-800 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                          <h3 className="text-lg font-bold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
                             {activity.title}
                           </h3>
                           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">
@@ -130,14 +130,14 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
                       
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 font-medium">
                         <div className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                           {formatDate(activity.startTime)}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                           <span className="truncate max-w-[150px]">{activity.locationName}</span>
                         </div>
-                        <div className="ml-auto font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                        <div className="ml-auto font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
                           {formatCurrency(activity.participationFee)}
                         </div>
                       </div>
@@ -181,7 +181,7 @@ export const BuddyView = ({ hostedActivities, feedbacks, loading, handleCreateAc
                       {/* Đánh giá Buddy */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Về Buddy (Bạn)</span>
+                          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Về Buddy (Bạn)</span>
                           <StarRating rating={fb.buddyRating} />
                         </div>
                         <p className="text-sm text-slate-700 font-medium">"{fb.buddyComment}"</p>

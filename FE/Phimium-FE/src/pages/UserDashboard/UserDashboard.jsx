@@ -5,9 +5,9 @@ import MyActivitiesView from '@/pages/MyActivities/MyActivitiesView.jsx'
 import MyGroupsView from '../MyGroup/MyGroupView'
 
 const DASHBOARD_TABS = [
-  { label: 'Hoạt động', value: 'ACTIVITIES' },
-  { label: 'Nhóm', value: 'GROUPS' },
-  { label: 'Phản hồi', value: 'FEEDBACK' },
+  { label: 'Activities', value: 'ACTIVITIES' },
+  { label: 'Groups', value: 'GROUPS' },
+  { label: 'Feedback', value: 'FEEDBACK' },
 ]
 
 export default function UserDashboard() {
@@ -28,7 +28,7 @@ export default function UserDashboard() {
                   onClick={() => setActiveTab(tab.value)}
                   className={`flex w-full items-center rounded-lg px-4 py-3 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-teal-600 text-white'
+                      ? 'bg-indigo-600 text-white'
                       : 'text-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -47,10 +47,10 @@ export default function UserDashboard() {
           {activeTab === 'FEEDBACK' && (
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Phản hồi
+                Feedback
               </h2>
               <p className="mt-2 text-sm text-slate-500">
-                Nội dung phản hồi sẽ hiển thị tại đây.
+                Feedback content will be displayed here.
               </p>
             </div>
           )}

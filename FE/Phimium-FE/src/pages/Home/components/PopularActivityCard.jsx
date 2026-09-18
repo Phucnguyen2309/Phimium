@@ -1,145 +1,69 @@
 import { Link } from 'react-router-dom'
-
 import { buildActivityDetailPath } from '@/routes/paths.js'
 
-const getValidImage = (url) => {
-  if (!url || url === 'string') return null
-  return url
-}
-
-const getFeeLabel = (fee) => {
-  const value = Number(fee ?? 0)
-
-  if (value <= 0) return 'Miễn phí'
-
-  return `${value.toLocaleString('vi-VN')} VND`
-}
-
-const getActivityTypeLabel = (type) => {
-  if (!type) return 'Hoạt động'
-
-  return String(type)
-    .replaceAll('_', ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-const CARD_HEIGHT = {
-  feature: 'h-[420px]',
-  wide: 'h-[185px]',
-  small: 'h-[210px]',
-}
-
-const TITLE_SIZE = {
-  feature: 'text-2xl',
-  wide: 'text-lg',
-  small: 'text-base',
-}
-
-function ActivityImageFallback({ title }) {
-  return (
-    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-100 p-6 text-center">
-      <div>
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-xl font-black text-white">
-          P
-        </div>
-
-        <p className="mt-3 text-sm font-bold text-emerald-800">
-          {title || 'Hoạt động PHIMIUM'}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-export default function PopularActivityCard({
-  activity,
-  variant = 'small',
-  className = '',
-}) {
+export default function PopularActivityCard({ activity }) {
   if (!activity) return null
 
-  const imageUrl = getValidImage(activity.thumbnailUrl)
-  const isFeature = variant === 'feature'
-  const isWide = variant === 'wide'
+  // Fallback image for demo
+  const imageUrl = activity.thumbnailUrl || "https://images.unsplash.com/photo-1555126634-323283e090fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+  
+  const price = activity.participationFee || 45
 
   return (
-    <Link
-      to={buildActivityDetailPath(activity.id)}
-      state={{ activity }}
-      className={`group relative block overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(15,23,42,0.12)] ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.18)] ${
-        CARD_HEIGHT[variant]
-      } ${className}`}
-    >
-      {imageUrl ? (
+    <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-100 mb-6 border border-slate-100">
+      <div className="relative h-[220px]">
         <img
           src={imageUrl}
           alt={activity.title}
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover"
         />
-      ) : (
-        <div className="absolute inset-0">
-          <ActivityImageFallback title={activity.title} />
-        </div>
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
-
-      {isFeature && (
-        <div className="absolute left-5 top-5">
-          <span className="rounded-md bg-orange-500 px-3 py-1.5 text-[11px] font-black text-white shadow-sm">
-            Xu hướng mới
+        
+        <div className="absolute left-4 top-4">
+          <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-yellow-950 shadow-sm">
+            ${price} / person
           </span>
         </div>
-      )}
 
-      {!isFeature && (
-        <div className="absolute right-4 top-4">
-          <span className="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-black text-white shadow-sm">
-            Đã xác minh
+        <div className="absolute bottom-4 left-4">
+          <span className="rounded bg-blue-900/80 backdrop-blur px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white">
+            VERIFIED PARTNER
           </span>
         </div>
-      )}
+      </div>
 
-      <div
-        className={`absolute bottom-0 left-0 right-0 ${
-          isFeature ? 'p-6' : 'p-4'
-        }`}
-      >
-        <h3
-          className={`font-black leading-tight tracking-tight text-white ${
-            TITLE_SIZE[variant]
-          }`}
-        >
-          {isFeature
-            ? activity.title
-            : isWide
-              ? activity.title
-              : getActivityTypeLabel(activity.activityType)}
+      <div className="p-5">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <span className="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-800">
+            3 Hours
+          </span>
+          <span className="rounded bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-800">
+            English Speaking
+          </span>
+        </div>
+
+        <h3 className="text-lg font-light leading-snug text-slate-900">
+          {activity.title || "Saigon Food Stories - Walking Tour"}
         </h3>
 
-        <p
-          className={`mt-2 line-clamp-1 text-white/90 ${
-            isFeature ? 'text-sm' : 'text-xs'
-          }`}
-        >
-          {isFeature
-            ? activity.description || 'Tham gia hoạt động này cùng Buddy mới.'
-            : isWide
-              ? activity.locationName || activity.address || 'Tham gia hoạt động'
-              : activity.title}
+        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500">
+          {activity.description || "Journey through the secret culinary alleys of District 3 with our expert local"}
         </p>
 
-        {isFeature && (
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-bold text-white"> 
-            <span>
-              {activity.participationFee > 0
-                ? getFeeLabel(activity.participationFee)
-                : 'Miễn phí'}
-            </span>
+        <div className="mt-5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-yellow-400 text-sm">★</span>
+            <span className="text-xs font-bold text-slate-800">4.9 <span className="font-normal text-slate-500">(124)</span></span>
           </div>
-        )}
+
+          <Link
+            to={buildActivityDetailPath(activity.id || 1)}
+            state={{ activity }}
+            className="rounded-xl bg-blue-950 px-5 py-2 text-xs font-bold text-white transition-transform active:scale-95"
+          >
+            Book Now
+          </Link>
+        </div>
       </div>
-    </Link>
+    </div>
   )
-}
+}

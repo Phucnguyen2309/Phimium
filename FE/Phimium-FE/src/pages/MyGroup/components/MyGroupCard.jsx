@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { buildGroupDetailPath } from '@/routes/paths.js'
 
 const STATUS_STYLES = {
-  READY: 'bg-emerald-50 text-emerald-700',
+  READY: 'bg-blue-50 text-blue-700',
   ONGOING: 'bg-blue-50 text-blue-700',
   COMPLETED: 'bg-slate-100 text-slate-600',
   CANCELLED: 'bg-rose-50 text-rose-600',
@@ -18,7 +18,7 @@ const STATUS_LABELS = {
 
 const FALLBACK_GRADIENTS = [
   'from-amber-100 via-orange-100 to-stone-200',
-  'from-emerald-100 via-teal-100 to-cyan-100',
+  'from-blue-100 via-indigo-100 to-cyan-100',
   'from-slate-100 via-slate-200 to-zinc-300',
 ]
 
@@ -100,7 +100,7 @@ function Avatar({ name, avatarUrl, size = 'md' }) {
 
   return (
     <div
-      className={`flex ${sizeClass} items-center justify-center rounded-full border-2 border-white bg-emerald-100 font-black text-emerald-700`}
+      className={`flex ${sizeClass} items-center justify-center rounded-full border-2 border-white bg-blue-100 font-black text-blue-700`}
     >
       {getAvatarText(name)}
     </div>
@@ -117,7 +117,7 @@ function GroupImageFallback({ index = 0, disabled = false }) {
       }`}
     >
       <div className="text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-lg font-black text-emerald-700 shadow-sm">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-lg font-black text-blue-700 shadow-sm">
           P
         </div>
         <p className="mt-2 text-xs font-bold text-slate-600">
@@ -204,7 +204,7 @@ export function MyGroupCard({ group, index = 0 }) {
           <GroupImageFallback index={index} disabled={isCancelled} />
         )}
 
-        <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-emerald-700 shadow-sm">
+        <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-700 shadow-sm">
           Group
         </div>
       </div>
@@ -213,7 +213,7 @@ export function MyGroupCard({ group, index = 0 }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-slate-950">
-              {group?.groupName || 'Nhóm chưa có tên'}
+              {group?.groupName || 'Unnamed Group'}
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
@@ -251,7 +251,7 @@ export function MyGroupCard({ group, index = 0 }) {
 
           <div className="flex items-center gap-2">
             <UsersIcon />
-            <span className="font-bold text-emerald-700">
+            <span className="font-bold text-blue-700">
               {currentParticipants}/{maximumParticipants} participants
             </span>
           </div>
@@ -260,7 +260,7 @@ export function MyGroupCard({ group, index = 0 }) {
           {group?.groupId ? (
             <Link
   to={buildGroupDetailPath(group.groupId)}
-  className="flex w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-800"
+  className="flex w-full items-center justify-center rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-800"
 >
   View Group Detail
 </Link>

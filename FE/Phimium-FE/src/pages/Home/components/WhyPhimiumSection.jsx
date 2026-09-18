@@ -5,7 +5,7 @@ const FEATURES = [
   {
     title: 'Hoạt động thân thiện',
     text: 'PHIMIUM tập trung vào workshop, cafe, board game và các trải nghiệm offline nhẹ nhàng.',
-    color: 'bg-emerald-100 text-emerald-700',
+    color: 'bg-blue-100 text-blue-700',
   },
   {
     title: 'Tham gia theo nhóm',
@@ -52,7 +52,7 @@ export function WhyPhimiumSection() {
             </div>
           </div>
 
-           <div className="relative overflow-hidden rounded-[32px] bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-emerald-100">
+           <div className="relative overflow-hidden rounded-[32px] bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-blue-100">
             <img
               src={whyPhimiumImage}
               alt="Minh họa cộng đồng PHIMIUM"
@@ -64,7 +64,7 @@ export function WhyPhimiumSection() {
                 Phong cách PHIMIUM
               </p>
 
-              <p className="text-lg font-black text-emerald-700">
+              <p className="text-lg font-black text-blue-700">
                 Vui ngoài đời thật
               </p>
             </div>

@@ -41,7 +41,7 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section className="bg-emerald-50/70 py-16">
+    <section className="bg-blue-50/70 py-16">
       <Container>
         <h2 className="text-center text-2xl font-black text-slate-950">
           Cách hoạt động
@@ -50,7 +50,7 @@ export function HowItWorksSection() {
         <div className="mt-10 grid gap-8 md:grid-cols-3">
           {STEPS.map((item) => (
             <div key={item.title} className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-200">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200">
                 <svg
                   className="h-7 w-7"
                   viewBox="0 0 24 24"

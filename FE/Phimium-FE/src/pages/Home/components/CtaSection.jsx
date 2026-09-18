@@ -7,12 +7,12 @@ export function CtaSection() {
   return (
     <section className="bg-slate-50 py-16">
       <Container>
-        <div className="rounded-[32px] bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-14 text-center shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-10">
+        <div className="rounded-[32px] bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-14 text-center shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-10">
           <h2 className="text-3xl font-black text-white">
             Sẵn sàng trải nghiệm thêm?
           </h2>
 
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-emerald-50">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-blue-50">
             Tham gia cộng đồng PHIMIUM với tư cách thành viên hoặc trở thành
             Buddy để chia sẻ hoạt động với mọi người.
           </p>
@@ -27,7 +27,7 @@ export function CtaSection() {
 
             <Link
               to={ROUTES.register}
-              className="rounded-lg bg-white px-6 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-50"
+              className="rounded-lg bg-white px-6 py-3 text-sm font-black text-blue-700 transition hover:bg-blue-50"
             >
               Bắt đầu miễn phí
             </Link>
