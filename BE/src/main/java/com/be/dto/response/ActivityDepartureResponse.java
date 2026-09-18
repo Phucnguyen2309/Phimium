@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -16,8 +18,9 @@ import java.util.UUID;
 public class ActivityDepartureResponse {
     private UUID departureId;
     private UUID activityId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDate departureDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private Integer capacity;
     private DepartureStatus status;
 }

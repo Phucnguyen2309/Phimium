@@ -2,6 +2,7 @@ package com.be.dto.request;
 
 import com.be.enums.ActivityStatus;
 import com.be.enums.TourType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,12 +25,6 @@ public class ActivityRequest {
 
     @NotNull(message = "Activity type is required")
     private TourType activityType;
-
-    @NotNull(message = "Start time is required")
-    private LocalDateTime startTime;
-
-    @NotNull(message = "End time is required")
-    private LocalDateTime endTime;
 
     @NotNull(message = "Registration deadline is required")
     private LocalDateTime registrationDeadline;
@@ -65,15 +61,22 @@ public class ActivityRequest {
     private Integer maximumParticipants;
 
     @Min(1)
-    private Integer groupMinSize = 4;
+    private Integer groupMinSize = 2;
 
     @Min(1)
-    private Integer groupMaxSize = 6;
+    private Integer groupMaxSize = 4;
 
     private ActivityStatus status = ActivityStatus.PUBLISHED;
 
-    @AssertTrue(message = "End time must be after start time")
-    public boolean isEndTimeAfterStartTime() {
-        return startTime == null || endTime == null || endTime.isAfter(startTime);
+
+    @Valid
+    @NotEmpty(message = "At least one departure is required")
+    private List<DepartureRequest> departures;
+
+    @AssertTrue(message = "Maximum participants must be greater than or equal to minimum participants")
+    public boolean isParticipantRangeValid() {
+        return minimumParticipants == null
+                || maximumParticipants == null
+                || maximumParticipants >= minimumParticipants;
     }
 }

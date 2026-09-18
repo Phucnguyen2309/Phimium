@@ -9,7 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -39,8 +41,9 @@ public class RegistrationResponse {
     @Builder
     public static class DepartureInfo {
         private UUID departureId;
-        private LocalDateTime startTime;
-        private LocalDateTime endTime;
+        private LocalDate departureDate;
+        private LocalTime startTime;
+        private LocalTime endTime;
         private ActivityInfo activity;
     }
 

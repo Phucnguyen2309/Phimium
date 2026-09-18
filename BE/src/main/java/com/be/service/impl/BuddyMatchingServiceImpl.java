@@ -32,12 +32,18 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
     public Buddy findAndAssignBuddy(Registration registration) {
         ActivityDeparture departure = registration.getDeparture();
 
+        LocalDateTime departureStart =
+                departure.getStartDateTime();
+
+        LocalDateTime departureEnd =
+                departure.getEndDateTime();
+
         // 1. Lọc điều kiện cứng: Buddy ACTIVE
         List<Buddy> activeBuddies = buddyRepository.findByStatus(BuddyStatus.ACTIVE);
 
         // 2. Lọc điều kiện cứng: Không trùng lịch tour
         List<Buddy> eligibleBuddies = activeBuddies.stream()
-                .filter(buddy -> !hasScheduleConflict(buddy.getBuddyId(), departure.getStartTime(), departure.getEndTime()))
+                .filter(buddy -> !hasScheduleConflict(buddy.getBuddyId(),departureStart, departureEnd))
                 .collect(Collectors.toList());
 
         if (eligibleBuddies.isEmpty()) {
@@ -65,24 +71,42 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
     }
 
     @Override
-    public boolean hasScheduleConflict(UUID buddyId, LocalDateTime newStart, LocalDateTime newEnd) {
-        // Lấy danh sách các đơn tour đang hoạt động của Buddy
-        List<Registration> activeRegistrations = registrationRepository.findByBuddy_BuddyIdAndStatusIn(
-                buddyId,
-                List.of(
-                        RegistrationStatus.BUDDY_ASSIGNED,
-                        RegistrationStatus.CONFIRMED,
-                        RegistrationStatus.IN_PROGRESS
-                )
-        );
+    public boolean hasScheduleConflict(
+            UUID buddyId,
+            LocalDateTime newStart,
+            LocalDateTime newEnd
+    ) {
 
-        // Kiểm tra overlap: existingStart < newEnd AND existingEnd > newStart
-        for (Registration reg : activeRegistrations) {
-            ActivityDeparture d = reg.getDeparture();
-            if (d.getStartTime().isBefore(newEnd) && d.getEndTime().isAfter(newStart)) {
-                return true;
-            }
-        }
-        return false;
+        List<Registration> activeRegistrations =
+                registrationRepository
+                        .findByBuddy_BuddyIdAndStatusIn(
+                                buddyId,
+                                List.of(
+                                        RegistrationStatus.BUDDY_ASSIGNED,
+                                        RegistrationStatus.CONFIRMED,
+                                        RegistrationStatus.IN_PROGRESS
+                                )
+                        );
+
+        return activeRegistrations.stream()
+                .map(Registration::getDeparture)
+                .anyMatch(departure ->
+                        isTimeOverlap(
+                                departure.getStartDateTime(),
+                                departure.getEndDateTime(),
+                                newStart,
+                                newEnd
+                        )
+                );
+    }
+
+    private boolean isTimeOverlap(
+            LocalDateTime existingStart,
+            LocalDateTime existingEnd,
+            LocalDateTime newStart,
+            LocalDateTime newEnd
+    ) {
+        return existingStart.isBefore(newEnd)
+                && existingEnd.isAfter(newStart);
     }
 }

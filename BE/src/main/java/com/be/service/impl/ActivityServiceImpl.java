@@ -11,6 +11,7 @@ import com.be.entity.User;
 import com.be.enums.DepartureStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
+import com.be.mapper.ActivityDepartureMapper;
 import com.be.mapper.ActivityDetailMapper;
 import com.be.mapper.ActivityMapper;
 import com.be.mapper.MyActivityMapper;
@@ -37,6 +38,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
     private final CloudinaryService cloudinaryService;
+    private final ActivityDepartureMapper  activityDepartureMapper;
     private final RegistrationRepository registrationRepository;
     private final ActivityDetailMapper activityDetailMapper;
     private final MyActivityMapper myActivityMapper;
@@ -54,23 +56,24 @@ public class ActivityServiceImpl implements ActivityService {
             activity.setThumbnailUrl(imageUrl);
         }
 
-        Activity savedActivity = activityRepository.save(activity);
+        if (request.getDepartures() != null) {
 
-        ActivityDeparture departure = ActivityDeparture.builder()
-                .activity(savedActivity)
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .capacity(request.getMaximumParticipants())
-                .status(DepartureStatus.AVAILABLE)
-                .build();
+            request.getDepartures().forEach(departureRequest -> {
 
-        departure = departureRepository.save(departure);
+                ActivityDeparture departure =
+                        activityDepartureMapper.toEntity(
+                                departureRequest
+                        );
 
-        // 3. Nạp departure vào activity để Mapper lấy ra trả về API
-        if (savedActivity.getDepartures() == null) {
-            savedActivity.setDepartures(new ArrayList<>());
+                // Quan trọng:
+                // set cả Activity.departures
+                // và ActivityDeparture.activity
+                activity.addDeparture(departure);
+            });
         }
-        savedActivity.getDepartures().add(departure);
+
+        Activity savedActivity =
+                activityRepository.save(activity);
 
         return activityMapper.toResponse(savedActivity);
     }

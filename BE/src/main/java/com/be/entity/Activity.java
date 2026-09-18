@@ -109,6 +109,15 @@ public class Activity {
         if (groupMaxSize == null) groupMaxSize = 6;
     }
 
+    public void addDeparture(ActivityDeparture departure) {
+        if (departures == null) {
+            departures = new ArrayList<>();
+        }
+
+        departures.add(departure);
+        departure.setActivity(this);
+    }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = DateTimeUtils.nowVietnam();

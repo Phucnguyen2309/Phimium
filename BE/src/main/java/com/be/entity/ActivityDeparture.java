@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -41,17 +43,20 @@ public class ActivityDeparture {
     )
     private Activity activity;
 
+    @Column(name = "departure_date", nullable = false)
+    private LocalDate departureDate;
+
     @Column(
             name = "start_time",
             nullable = false
     )
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column(
             name = "end_time",
             nullable = false
     )
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 
     @Min(0)
     @Column(
@@ -105,5 +110,15 @@ public class ActivityDeparture {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = DateTimeUtils.nowVietnam();
+    }
+
+    @Transient
+    public LocalDateTime getStartDateTime() {
+        return LocalDateTime.of(departureDate, startTime);
+    }
+
+    @Transient
+    public LocalDateTime getEndDateTime() {
+        return LocalDateTime.of(departureDate, endTime);
     }
 }

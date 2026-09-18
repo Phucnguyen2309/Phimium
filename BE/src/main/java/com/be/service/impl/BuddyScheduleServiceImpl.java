@@ -37,49 +37,47 @@ public class BuddyScheduleServiceImpl implements BuddyScheduleService {
     @Override
     @Transactional(readOnly = true)
     public List<BuddyScheduleResponse> getMySchedules(User currentUser) {
+
         if (currentUser == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Buddy buddy = buddyRepository.findByUser_UserId(currentUser.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_AUTHORIZED));
+        Buddy buddy = buddyRepository
+                .findByUser_UserId(currentUser.getUserId())
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.USER_NOT_AUTHORIZED)
+                );
 
-        List<Registration> registrations = registrationRepository.findByBuddyId(buddy.getBuddyId());
+        List<Registration> registrations =
+                registrationRepository.findByBuddyId(
+                        buddy.getBuddyId()
+                );
+
         LocalDateTime now = DateTimeUtils.nowVietnam();
 
-        Map<ActivityDeparture, List<Registration>> groupedByDeparture = registrations.stream()
-                .collect(Collectors.groupingBy(Registration::getDeparture));
+        Map<ActivityDeparture, List<Registration>> groupedByDeparture =
+                registrations.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        Registration::getDeparture
+                                )
+                        );
 
-        return groupedByDeparture.entrySet().stream()
-                .map(entry -> {
-                    ActivityDeparture departure = entry.getKey();
-                    List<Registration> regs = entry.getValue();
-
-                    int totalGuests = regs.stream()
-                            .mapToInt(r -> {
-                                int adults = r.getAdultCount() != null ? r.getAdultCount() : 0;
-                                int children = r.getChildCount() != null ? r.getChildCount() : 0;
-                                return adults + children;
-                            })
-                            .sum();
-
-                    int checkedIn = (int) regs.stream()
-                            .filter(r -> r.getCheckInStatus() == CheckInStatus.PRESENT)
-                            .count();
-
-                    ScheduleStatus status;
-                    if (now.isBefore(departure.getStartTime())) {
-                        status = ScheduleStatus.UPCOMING;
-                    } else if (now.isAfter(departure.getEndTime())) {
-                        status = ScheduleStatus.COMPLETED;
-                    } else {
-                        status = ScheduleStatus.IN_PROGRESS;
-                    }
-
-                    return buddyScheduleMapper.toBuddyScheduleResponse(departure, totalGuests, checkedIn, status);
-                })
-                .sorted(Comparator.comparing(BuddyScheduleResponse::getStartTime))
-                .collect(Collectors.toList());
+        return groupedByDeparture.entrySet()
+                .stream()
+                .map(entry ->
+                        buildScheduleResponse(entry, now)
+                )
+                .sorted(
+                        Comparator
+                                .comparing(
+                                        BuddyScheduleResponse::getDepartureDate
+                                )
+                                .thenComparing(
+                                        BuddyScheduleResponse::getStartTime
+                                )
+                )
+                .toList();
     }
 
     @Override
@@ -97,5 +95,84 @@ public class BuddyScheduleServiceImpl implements BuddyScheduleService {
         return regs.stream()
                 .map(buddyScheduleMapper::toTourMemberResponse)
                 .collect(Collectors.toList());
+    }
+
+    private BuddyScheduleResponse buildScheduleResponse(
+            Map.Entry<ActivityDeparture, List<Registration>> entry,
+            LocalDateTime now
+    ) {
+
+        ActivityDeparture departure = entry.getKey();
+        List<Registration> registrations = entry.getValue();
+
+        int totalGuests =
+                calculateTotalGuests(registrations);
+
+        int checkedIn =
+                countCheckedInGuests(registrations);
+
+        ScheduleStatus status =
+                determineScheduleStatus(departure, now);
+
+        return buddyScheduleMapper.toBuddyScheduleResponse(
+                departure,
+                totalGuests,
+                checkedIn,
+                status
+        );
+    }
+
+    private int calculateTotalGuests(
+            List<Registration> registrations
+    ) {
+        return registrations.stream()
+                .mapToInt(registration -> {
+
+                    int adults =
+                            registration.getAdultCount() == null
+                                    ? 0
+                                    : registration.getAdultCount();
+
+                    int children =
+                            registration.getChildCount() == null
+                                    ? 0
+                                    : registration.getChildCount();
+
+                    return adults + children;
+                })
+                .sum();
+    }
+
+    private int countCheckedInGuests(
+            List<Registration> registrations
+    ) {
+        return (int) registrations.stream()
+                .filter(registration ->
+                        registration.getCheckInStatus()
+                                == CheckInStatus.PRESENT
+                )
+                .count();
+    }
+
+    private ScheduleStatus determineScheduleStatus(
+            ActivityDeparture departure,
+            LocalDateTime now
+    ) {
+
+        LocalDateTime startDateTime =
+                departure.getStartDateTime();
+
+        LocalDateTime endDateTime =
+                departure.getEndDateTime();
+
+        if (now.isBefore(startDateTime)) {
+            return ScheduleStatus.UPCOMING;
+        }
+
+        if (now.isAfter(endDateTime)) {
+            return ScheduleStatus.COMPLETED;
+        }
+
+        return ScheduleStatus.IN_PROGRESS;
     }
 }
