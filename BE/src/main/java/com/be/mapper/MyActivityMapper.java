@@ -78,6 +78,9 @@ public class MyActivityMapper {
                 )
 
                 // Departure
+                .departureDate(departure == null
+                        ? null
+                        : departure.getDepartureDate())
                 .startTime(
                         departure == null
                                 ? null
