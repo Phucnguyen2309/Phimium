@@ -36,6 +36,11 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "Email already exists"
     ),
+    EMAIL_NOT_VERIFIED(
+            1005,
+            HttpStatus.BAD_REQUEST,
+            "Email chưa được xác thực. Vui lòng nhập OTP để xác thực email."
+    ),
 
     INVALID_TOKEN(
             1006,
@@ -314,6 +319,38 @@ public enum ErrorCode {
             HttpStatus.BAD_GATEWAY,
             "Payment provider error"
     ),
+
+    OTP_NOT_FOUND(
+            10001,
+            HttpStatus.NOT_FOUND,
+            "OTP not found"
+    ),
+    OTP_EXPIRE(
+            10002,
+            HttpStatus.BAD_REQUEST,
+            "OTP expired"
+    ),
+    OTP_MANY_ATTEMPTS(
+            10003,
+            HttpStatus.CONFLICT,
+            "Too many incorrect attempts. Please request a new OTP."
+    ),
+    OTP_INVALID(
+            10004,
+            HttpStatus.BAD_REQUEST,
+            "OTP invalid"
+    ),
+    OTP_ALREADY_EXIST(
+            10005,
+            HttpStatus.BAD_REQUEST,
+            "Email is already verified"
+    ),
+    OTP_RESEND(
+            10006,
+            HttpStatus.BAD_REQUEST,
+            "Please wait before requesting another OTP"
+    ),
+
 
     ;
 

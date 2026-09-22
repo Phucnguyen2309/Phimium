@@ -30,7 +30,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/auth/**",
-                                "/api/activity/getAll"
+                                "/api/activity/getAll",
+                                "/api/auth/verify-otp",
+                                "/api/auth/resend-otp"
                                )
 
                         .permitAll()
