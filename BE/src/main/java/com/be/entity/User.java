@@ -56,6 +56,9 @@ public class User implements UserDetails {
     @Column
     private LocalDate birthday;
 
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
+
     @Column
     private LocalDateTime updated_at;
     @Override

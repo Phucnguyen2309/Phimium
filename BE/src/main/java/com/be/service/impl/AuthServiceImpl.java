@@ -11,6 +11,7 @@ import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.repository.UserRepository;
 import com.be.service.AuthService;
+import com.be.service.EmailOtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     JwtService jwtService;
 
+    @Autowired
+    EmailOtpService emailOtpService;
+
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
         User user = userRepo.findByEmail(loginRequest.getEmail())
@@ -36,6 +40,9 @@ public class AuthServiceImpl implements AuthService {
         boolean ok = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
         if(!ok){
             throw  new AppException(ErrorCode.INVALID_CREDENTIALS,"Tên đăng nhập hoặc mật khẩu sai");
+        }
+        if(Boolean.TRUE.equals(user.getEmailVerified())){
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         String token = jwtService.generateToken(user);
@@ -63,8 +70,10 @@ public class AuthServiceImpl implements AuthService {
                 .phone(registerRequest.getPhone())
                 .birthday(LocalDate.parse(registerRequest.getBirthdate()))
                 .role(UserRole.USER)
+                .emailVerified(false)
                 .build();
         User saveUser = userRepo.save(users);
+        emailOtpService.sendOtp(saveUser);
         return new RegisterResponse(
                 saveUser.getEmail(),
                 saveUser.getFullName(),
