@@ -45,6 +45,7 @@ public class Payment {
 
     private String providerOrderId;
 
+    @Column(unique = true)
     private String providerTransactionId;
 
     private String provider;

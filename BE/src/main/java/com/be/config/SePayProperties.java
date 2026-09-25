@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class SePayProperties {
     private String merchantId;
     private String secretKey;
+    private String ipnSecret;
 
     private String checkoutUrl;
     private String apiUrl;

@@ -13,6 +13,10 @@ public interface BuddyRepository extends JpaRepository<Buddy, UUID> {
 
     List<Buddy> findByStatus(BuddyStatus status);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select b from Buddy b where b.status = :status order by b.buddyId")
+    List<Buddy> findActiveWithLock(@org.springframework.data.repository.query.Param("status") BuddyStatus status);
+
 
     Optional<Buddy> findByUser_UserId(UUID userId);
 

@@ -9,4 +9,5 @@ public class ResendOtpRequest {
  @Email
  @NotBlank
  private String email;
+    public void setEmail(String value) { email = value == null ? null : value.trim().toLowerCase(java.util.Locale.ROOT); }
 }

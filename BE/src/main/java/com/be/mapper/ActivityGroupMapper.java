@@ -58,7 +58,8 @@ public class ActivityGroupMapper {
         }
 
         List<Registration> safeRegistrations =
-                registrations == null ? List.of() : registrations;
+                registrations == null ? List.of() : registrations.stream()
+                        .filter(r -> r.getStatus() != com.be.enums.RegistrationStatus.CANCELLED).toList();
 
         List<ParticipantResponse> participants =
                 safeRegistrations.stream()
@@ -70,7 +71,7 @@ public class ActivityGroupMapper {
                 .groupName(group.getGroupName())
                 .status(group.getStatus())
                 .maximumParticipants(group.getMaximumParticipants())
-                .currentParticipants(participants.size())
+                .currentParticipants(safeRegistrations.stream().mapToInt(r -> r.getAdultCount() + r.getChildCount()).sum())
                 .activityId(activityId)
                 .thumbnailUrl(thumbnailUrl)
                 .createdAt(group.getCreated_at())

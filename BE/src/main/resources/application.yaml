@@ -1,6 +1,9 @@
 server:
   port: ${PORT:8080}
 
+google:
+  client-id: ${GOOGLE_CLIENT_ID}
+
 spring:
   application:
     name: phimium-be
@@ -27,15 +30,6 @@ spring:
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
-  sepay:
-    merchant-id: ${SEPAY_MERCHANT_ID}
-    secret-key: ${SEPAY_SECRET_KEY}
-    checkout-url: ${SEPAY_CHECKOUT_URL:https://pay-sandbox.sepay.vn/v1/checkout/init}
-    api-url: ${SEPAY_API_URL:https://pgapi-sandbox.sepay.vn}
-    success-url: ${SEPAY_SUCCESS_URL}
-    error-url: ${SEPAY_ERROR_URL}
-    cancel-url: ${SEPAY_CANCEL_URL}
-
   mail:
     host: smtp-relay.brevo.com
     port: 587
@@ -51,3 +45,16 @@ spring:
 app:
   mail:
     from: ${MAIL_FROM}
+
+sepay:
+  merchant-id: ${SEPAY_MERCHANT_ID}
+  secret-key: ${SEPAY_SECRET_KEY}
+  checkout-url: ${SEPAY_CHECKOUT_URL:https://pay-sandbox.sepay.vn/v1/checkout/init}
+  api-url: ${SEPAY_API_URL:https://pgapi-sandbox.sepay.vn}
+  success-url: ${SEPAY_SUCCESS_URL}
+  error-url: ${SEPAY_ERROR_URL}
+  cancel-url: ${SEPAY_CANCEL_URL}
+  ipn-secret: ${SEPAY_IPN_SECRET:}
+
+booking:
+  hold-minutes: ${BOOKING_HOLD_MINUTES:15}

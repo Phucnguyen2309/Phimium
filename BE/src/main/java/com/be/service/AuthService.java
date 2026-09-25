@@ -11,5 +11,7 @@ public interface AuthService {
 
     RegisterResponse register(RegisterRequest registerRequest);
 
+    LoginResponse refresh(String token);
+
     void logout(String authorizationHeader);
 }

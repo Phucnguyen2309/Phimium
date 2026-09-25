@@ -34,12 +34,46 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(User user) {
+    public String generateToken(User user) { return generateAccessToken(user); }
+
+    public String generateAccessToken(User user) {
+        if (!user.isEnabled() || !user.isEmailVerified() || !user.isProfileCompleted()) {
+            throw new com.be.exception.AppException(com.be.exception.ErrorCode.USER_NOT_AUTHORIZED);
+        }
+        return generate(user, "ACCESS", expireMs);
+    }
+
+    @Value("${spring.jwt.refresh-expiration:604800000}")
+    private long refreshExpireMs;
+
+    public String generateRefreshToken(User user) {
+        if (!user.isEnabled() || !user.isEmailVerified() || !user.isProfileCompleted()) {
+            throw new com.be.exception.AppException(com.be.exception.ErrorCode.USER_NOT_AUTHORIZED);
+        }
+        return generate(user, "REFRESH", refreshExpireMs);
+    }
+
+    public String generateOnboardingToken(User user) {
+        if (!user.isEnabled() || !user.isEmailVerified() || user.isProfileCompleted() || user.getGoogleSub() == null) {
+            throw new com.be.exception.AppException(com.be.exception.ErrorCode.INVALID_ONBOARDING_TOKEN);
+        }
+        return generate(user, "ONBOARDING", 600000);
+    }
+
+    public String extractTokenType(String token) {
+        return extractClaimsJws(token).get("tokenType", String.class);
+    }
+
+    public boolean isOnboardingToken(String token) {
+        return isTokenValid(token) && "ONBOARDING".equals(extractTokenType(token));
+    }
+
+    private String generate(User user, String tokenType, long lifetime) {
         Date now = new Date();
-        Date exp = new Date(now.getTime() + expireMs);
+        Date exp = new Date(now.getTime() + lifetime);
 
         var builder = Jwts.builder()
-                .setSubject(user.getUserId().toString())
+                .setSubject(user.getUserId().toString()).id(java.util.UUID.randomUUID().toString()).claim("tokenType", tokenType)
                 .claim("username", user.getEmail())
                 .claim("role", user.getRole().name())
                 .setIssuedAt(now)

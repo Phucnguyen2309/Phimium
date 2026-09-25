@@ -15,6 +15,19 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmail(String email);
 
+    Optional<User> findByGoogleSub(String googleSub);
+    boolean existsByGoogleSub(String googleSub);
+    boolean existsByPhone(String phone);
+    boolean existsByPhoneAndUserIdNot(String phone, UUID userId);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select u from User u where u.userId = :id")
+    Optional<User> findLockedById(@org.springframework.data.repository.query.Param("id") UUID id);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select u from User u where u.email = :email")
+    Optional<User> findLockedByEmail(@org.springframework.data.repository.query.Param("email") String email);
+
     Optional<User> findById(UUID id);
 
     List<User> findByRole(UserRole role);

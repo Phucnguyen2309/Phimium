@@ -16,6 +16,12 @@ import java.util.UUID;
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, UUID> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Registration r where r.registrationId = :id")
+    java.util.Optional<Registration> findByIdWithLock(@Param("id") UUID id);
+
+    List<Registration> findByStatusAndPaymentExpiresAtLessThanEqual(RegistrationStatus status, java.time.LocalDateTime now);
+    List<Registration> findByDepartureDepartureId(UUID departureId);
     List<Registration> findByUser(User user);
     List<Registration> findByDepartureActivity(Activity activity);
 
