@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (!jwtService.isTokenValid(token)) {
+        if (!jwtService.isTokenValid(token) || !"ACCESS".equals(jwtService.extractTokenType(token))) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .orElse(null);
 
                 if (currentUser != null
-                        && currentUser.isEnabled()) {
+                        && currentUser.isEnabled() && currentUser.isEmailVerified() && currentUser.isProfileCompleted()) {
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(

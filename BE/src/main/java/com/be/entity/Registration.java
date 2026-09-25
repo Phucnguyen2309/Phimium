@@ -59,6 +59,9 @@ public class Registration {
     @Column(name = "child_count", nullable = false)
     private Integer childCount;
 
+    @Column(name = "pickup_location", length = 500)
+    private String pickupLocation;
+
     @Column(
             name = "subtotal",
             nullable = false,
@@ -92,6 +95,12 @@ public class Registration {
 
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
+
+    @Column(name = "payment_expires_at")
+    private LocalDateTime paymentExpiresAt;
+
+    @Column(name = "payment_confirmed_at")
+    private LocalDateTime paymentConfirmedAt;
 
     @Column(name = "buddy_assigned_at")
     private LocalDateTime buddyAssignedAt;

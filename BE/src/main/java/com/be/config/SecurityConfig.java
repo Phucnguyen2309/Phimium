@@ -25,7 +25,12 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login",
+                                "/api/auth/verify-otp", "/api/auth/resend-otp", "/api/auth/google",
+                                "/api/auth/refresh",
+                                // JWT is verified explicitly by the onboarding service, never used as ACCESS.
+                                "/api/auth/complete-profile").permitAll()
+                        .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
@@ -42,6 +47,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/webhooks/sepay").permitAll()
                         .anyRequest().authenticated())
 
+                .exceptionHandling(errors -> errors
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"success\":false,\"code\":1006,\"message\":\"Invalid token\"}");
+                        }))
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

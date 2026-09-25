@@ -14,4 +14,5 @@ public class VerifyOtpRequest {
     @NotBlank
     @Pattern(regexp = "\\d{6}")
     private String otp;
+    public void setEmail(String value) { email = value == null ? null : value.trim().toLowerCase(java.util.Locale.ROOT); }
 }

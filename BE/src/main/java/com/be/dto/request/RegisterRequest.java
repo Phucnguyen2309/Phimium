@@ -1,47 +1,28 @@
 package com.be.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.util.Locale;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RegisterRequest {
-    @NotBlank(message = "Email không được để trống")
-    @Pattern(
-            regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-            message = "Email không đúng định dạng"
-    )
+    @NotBlank @Email
     private String email;
-
-    @NotBlank(message = "Password không được để trống")
-    @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
-            message = "Password phải có ít nhất 8 ký tự, gồm chữ, số và ký tự đặc biệt"
-    )
+    @NotBlank @Size(max = 72)
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
     private String password;
-
-    @NotBlank(message = "Họ và tên không được để trống")
-    @Size(min = 2, max = 100, message = "Họ và tên phải từ 2 đến 100 ký tự")
-    @Pattern(
-            regexp = "^[\\p{L} .'-]+$",
-            message = "Họ và tên chỉ được chứa chữ cái và khoảng trắng"
-    )
-    private String fullname;
-
-
-    @NotBlank(message = "Ngày sinh không được để trống (yyyy-MM-dd)")
-    private String birthdate;
-
-    @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(
-            regexp = "^0[35789]\\d{8}$",
-            message = "Số điện thoại không hợp lệ (VD: 0901234567)"
-    )
+    @NotBlank @Size(min = 2, max = 100)
+    @JsonAlias("fullname")
+    private String fullName;
+    @NotNull @Past
+    @JsonAlias("birthdate")
+    private LocalDate birthday;
+    @NotBlank @Pattern(regexp = "^0[35789]\\d{8}$")
     private String phone;
 
+    public void setEmail(String value) { email = value == null ? null : value.trim().toLowerCase(Locale.ROOT); }
+    public void setFullName(String value) { fullName = value == null ? null : value.trim(); }
+    public void setPhone(String value) { phone = value == null ? null : value.trim(); }
 }

@@ -32,35 +32,45 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private UUID userId;
 
-    @Column(name = "fullName")
+    @Column(name = "full_name")
     private String fullName;
 
-    @Column
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column
     private String password;
 
-    @Column
+    @Column(name = "google_sub", unique = true)
+    private String googleSub;
+
+    @Column(unique = true)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
     @Column
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
     @Column
     private UserStatus status;
 
-    @Column
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @Column
     private LocalDate birthday;
 
-    @Column(nullable = false)
-    private Boolean emailVerified = false;
+    @Builder.Default
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
 
-    @Column
-    private LocalDateTime updated_at;
+    @Builder.Default
+    @Column(name = "profile_completed", nullable = false)
+    private boolean profileCompleted = false;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) {
@@ -99,7 +109,8 @@ public class User implements UserDetails {
 
     @PrePersist
     public void prePersist() {
-        created_at = DateTimeUtils.nowVietnam();
+        email = email.trim().toLowerCase(java.util.Locale.ROOT);
+        createdAt = DateTimeUtils.nowVietnam();
 
         if(status == null){
             status = UserStatus.ACTIVE;
@@ -108,7 +119,8 @@ public class User implements UserDetails {
 
     @PreUpdate
     public void preUpdate() {
-        updated_at = DateTimeUtils.nowVietnam();
+        email = email.trim().toLowerCase(java.util.Locale.ROOT);
+        updatedAt = DateTimeUtils.nowVietnam();
     }
 
 

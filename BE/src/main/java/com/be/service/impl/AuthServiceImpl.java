@@ -1,85 +1,67 @@
 package com.be.service.impl;
 
 import com.be.config.JwtService;
-import com.be.dto.request.LoginRequest;
-import com.be.dto.request.RegisterRequest;
-import com.be.dto.response.LoginResponse;
-import com.be.dto.response.RegisterResponse;
+import com.be.dto.request.*;
+import com.be.dto.response.*;
 import com.be.entity.User;
 import com.be.enums.UserRole;
-import com.be.exception.AppException;
-import com.be.exception.ErrorCode;
+import com.be.exception.*;
 import com.be.repository.UserRepository;
-import com.be.service.AuthService;
-import com.be.service.EmailOtpService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.be.service.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    @Autowired
-    UserRepository userRepo;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    JwtService jwtService;
-
-    @Autowired
-    EmailOtpService emailOtpService;
+    private final UserRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final EmailOtpService emailOtpService;
+    private final AuthTokenService authTokenService;
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepo.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Tên đăng nhập không tồn tại"));
-
-        boolean ok = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
-        if(!ok){
-            throw  new AppException(ErrorCode.INVALID_CREDENTIALS,"Tên đăng nhập hoặc mật khẩu sai");
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepo.findByEmail(request.getEmail().trim().toLowerCase(Locale.ROOT))
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+        if (user.getPassword() == null) throw new AppException(ErrorCode.PASSWORD_LOGIN_UNAVAILABLE);
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
-        if(Boolean.TRUE.equals(user.getEmailVerified())){
-            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
-        }
-
-        String token = jwtService.generateToken(user);
-        return LoginResponse.builder()
-                .token(token)
-                .username(user.getEmail())
-                .role(user.getRole())
-                .buddyId(jwtService.extractBuddyId(token))
-                .build();
+        return authTokenService.issue(user);
     }
 
-
+    @Override
+    @Transactional
+    public RegisterResponse register(RegisterRequest request) {
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        String phone = request.getPhone().trim();
+        if (userRepo.existsByEmail(email)) throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        if (userRepo.existsByPhone(phone)) throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
+        User user = User.builder().email(email).password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName().trim()).birthday(request.getBirthday()).phone(phone)
+                .role(UserRole.USER).emailVerified(false).profileCompleted(true).build();
+        userRepo.saveAndFlush(user);
+        emailOtpService.sendOtp(user);
+        return new RegisterResponse(user.getEmail(), user.getFullName(), user.getPhone());
+    }
 
     @Override
-    public RegisterResponse register(RegisterRequest registerRequest) {
-        if (userRepo.existsByEmail(registerRequest.getEmail())) {
-            throw new AppException(
-                   ErrorCode.EMAIL_ALREADY_EXISTS, "Tên đăng nhập đã tồn tại"
-            );
+    public LoginResponse refresh(String token) {
+        if (!jwtService.isTokenValid(token) || !"REFRESH".equals(jwtService.extractTokenType(token))) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-        User users = User.builder()
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .fullName(registerRequest.getFullname())
-                .phone(registerRequest.getPhone())
-                .birthday(LocalDate.parse(registerRequest.getBirthdate()))
-                .role(UserRole.USER)
-                .emailVerified(false)
-                .build();
-        User saveUser = userRepo.save(users);
-        emailOtpService.sendOtp(saveUser);
-        return new RegisterResponse(
-                saveUser.getEmail(),
-                saveUser.getFullName(),
-                saveUser.getPhone()
-
-        );
+        try {
+            User user = userRepo.findById(UUID.fromString(jwtService.extractSubject(token)))
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+            return authTokenService.issue(user);
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
     }
 
     @Override
@@ -87,13 +69,10 @@ public class AuthServiceImpl implements AuthService {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-
         String token = authorizationHeader.substring(7);
-
-        if (!jwtService.isTokenValid(token)) {
+        if (!jwtService.isTokenValid(token) || !"ACCESS".equals(jwtService.extractTokenType(token))) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-
         jwtService.blacklistToken(token);
     }
 }

@@ -39,7 +39,7 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
                 departure.getEndDateTime();
 
         // 1. Lọc điều kiện cứng: Buddy ACTIVE
-        List<Buddy> activeBuddies = buddyRepository.findByStatus(BuddyStatus.ACTIVE);
+        List<Buddy> activeBuddies = buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE);
 
         // 2. Lọc điều kiện cứng: Không trùng lịch tour
         List<Buddy> eligibleBuddies = activeBuddies.stream()
@@ -84,7 +84,8 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
                                 List.of(
                                         RegistrationStatus.BUDDY_ASSIGNED,
                                         RegistrationStatus.CONFIRMED,
-                                        RegistrationStatus.IN_PROGRESS
+                                        RegistrationStatus.IN_PROGRESS,
+                                        RegistrationStatus.PAYMENT_REVIEW
                                 )
                         );
 

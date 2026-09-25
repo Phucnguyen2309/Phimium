@@ -26,12 +26,15 @@ public class RegistrationResponse {
     private DepartureInfo departure;
     private Integer adultCount;
     private Integer childCount;
+    private String pickupLocation;
     private BigDecimal subtotal;
     private BigDecimal discountAmount;
     private BigDecimal totalAmount;
     private BuddyInfo buddy;
     private CheckInStatus checkInStatus;
     private LocalDateTime registeredAt;
+    private LocalDateTime paymentExpiresAt;
+    private LocalDateTime paymentConfirmedAt;
     private LocalDateTime checkedInAt;
     private LocalDateTime cancelledAt;
 

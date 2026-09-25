@@ -14,11 +14,11 @@ public interface PaymentService {
 
     CreatePaymentResponse createPayment(UUID registrationId, UUID currentUser, CreatePaymentRequest request);
 
-    void processPayment(SePayWebhookRequest request);
+    void processPayment(SePayWebhookRequest request, String secret);
 
     Page<PaymentResponse> getMyPayments(Pageable pageable, UUID userId);
 
-    PaymentResponse getPaymentHistory(UUID userId,UUID paymentId);
+    PaymentResponse getPaymentHistory(UUID paymentId,UUID userId);
 
 
 }

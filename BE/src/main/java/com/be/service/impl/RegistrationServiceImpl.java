@@ -46,6 +46,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final PricingService pricingService;
     private final BuddyMatchingService buddyMatchingService;
+    private final com.be.service.BookingLifecycleService lifecycle;
+    private final PaymentRepository paymentRepository;
+
+    @org.springframework.beans.factory.annotation.Value("${booking.hold-minutes:15}")
+    private long holdMinutes;
 
     @Override
     @Transactional
@@ -60,6 +65,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         int adult = request.getAdultCount() != null ? request.getAdultCount() : 0;
         int child = request.getChildCount() != null ? request.getChildCount() : 0;
+        if (child < 0 || adult > 1000 || child > 1000) throw new AppException(ErrorCode.INVALID_GUEST_COUNT);
+        if (request.getPickupLocation() == null || request.getPickupLocation().isBlank()
+                || request.getPickupLocation().length() > 500 || !Boolean.TRUE.equals(request.getIsSafetyTermsAccepted())) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR);
+        }
         int totalGuests = adult + child;
 
         // 1. Kiểm tra bắt buộc có ít nhất 1 người lớn
@@ -71,6 +81,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTURE_NOT_FOUND));
 
         Activity activity = departure.getActivity();
+        if (!DateTimeUtils.nowVietnam().isBefore(departure.getStartDateTime())) {
+            throw new AppException(ErrorCode.DEPARTURE_IN_PAST);
+        }
+        int maxGroup = activity.getGroupMaxSize() == null ? 6 : activity.getGroupMaxSize();
+        if (totalGuests > maxGroup) throw new AppException(ErrorCode.GROUP_IS_FULL);
 
         if (departure.getStatus() != DepartureStatus.AVAILABLE) {
             throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
@@ -97,6 +112,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .couponCode(request.getCouponCode())
                 .build();
 
+        // Lock before quoting so concurrent bookings cannot overuse a coupon.
+        if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
+            couponRepository.findByCodeWithLock(request.getCouponCode().trim())
+                    .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_APPLICABLE));
+        }
         PriceQuoteResponse quote = pricingService.calculatePriceQuote(quoteRequest, user);
 
         // 3. Kiểm tra tính hợp lệ của Coupon và trừ lượt dùng
@@ -120,28 +140,36 @@ public class RegistrationServiceImpl implements RegistrationService {
         departureRepository.save(departure);
 
         // 5. Gán hoặc tạo nhóm
-        ActivityGroup assignedGroup = assignOrCreateGroup(activity);
+        // Group and Buddy are allocated only after payment confirmation.
 
         // 6. Tạo đơn đăng ký lưu snapshot giá tiền
         Registration registration = Registration.builder()
                 .departure(departure)
                 .user(user)
-                .group(assignedGroup)
+
                 .coupon(appliedCouponEntity)
                 .adultCount(adult)
                 .childCount(child)
+                .pickupLocation(request.getPickupLocation())
                 .subtotal(quote.getSubtotal())
                 .discountAmount(quote.getDiscountAmount())
                 .totalAmount(quote.getTotalAmount())
-                .status(RegistrationStatus.WAITING_FOR_BUDDY)
+                .status(RegistrationStatus.PENDING_PAYMENT)
                 .checkInStatus(CheckInStatus.NOT_YET)
                 .registeredAt(DateTimeUtils.nowVietnam())
+                .paymentExpiresAt(DateTimeUtils.nowVietnam().plusMinutes(Math.max(1, holdMinutes))
+                        .isBefore(departure.getStartDateTime())
+                        ? DateTimeUtils.nowVietnam().plusMinutes(Math.max(1, holdMinutes))
+                        : departure.getStartDateTime())
                 .build();
 
         registration = registrationRepository.save(registration);
 
         // 7. Tự động ghép Buddy
-        buddyMatchingService.findAndAssignBuddy(registration);
+        if (registration.getTotalAmount().signum() == 0) {
+            // Free bookings do not create a zero-value SePay transaction.
+            lifecycle.confirm(registration);
+        }
 
         // 8. Lưu cam kết an toàn
         InstructionAcknowledgement acknowledgement = acknowledgementMapper.toEntity(
@@ -160,24 +188,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         List<Registration> registrations = registrationRepository.findByUser(user);
         return registrationMapper.toResponseList(registrations);
-    }
-
-    private ActivityGroup assignOrCreateGroup(Activity activity) {
-        List<ActivityGroup> existingGroups = activityGroupRepository.findByActivity(activity);
-        for (ActivityGroup group : existingGroups) {
-            int currentMemberCount = registrationRepository.findByGroup(group).size();
-            if (currentMemberCount < group.getMaximumParticipants()) {
-                return group;
-            }
-        }
-        int maxParticipants = activity.getGroupMaxSize() != null ? activity.getGroupMaxSize() : 6;
-        ActivityGroup newGroup = ActivityGroup.builder()
-                .activity(activity)
-                .groupName("Nhóm " + (existingGroups.size() + 1) + " - " + activity.getTitle())
-                .maximumParticipants(maxParticipants)
-                .status(GroupStatus.READY)
-                .build();
-        return activityGroupRepository.save(newGroup);
     }
 
     @Override
@@ -210,7 +220,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         Registration registration = registrationRepository
-                .findById(registrationId)
+                .findByIdWithLock(registrationId)
                 .orElseThrow(() ->
                         new AppException(ErrorCode.REGISTRATION_NOT_FOUND)
                 );
@@ -223,6 +233,9 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
 
+        if (registration.getPaymentConfirmedAt() == null) {
+            throw new AppException(ErrorCode.REGISTRATION_CANNOT_CHECK_IN);
+        }
         // Chỉ check-in khi đã được assign buddy
         if (registration.getStatus()
                 != RegistrationStatus.BUDDY_ASSIGNED) {
@@ -282,7 +295,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                         CheckInStatus.NOT_YET, now.toLocalDate(), now.toLocalTime());
 
         List<Registration> validAbsents = registrations.stream()
-                .filter(reg -> reg.getStatus() != RegistrationStatus.CANCELLED)
+                .filter(reg -> reg.getPaymentConfirmedAt() != null && reg.getStatus() != RegistrationStatus.CANCELLED)
                 .peek(reg -> reg.setCheckInStatus(CheckInStatus.ABSENT))
                 .toList();
 
@@ -319,7 +332,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Registration registration = registrationRepository.findById(registrationId)
+        Registration registration = registrationRepository.findByIdWithLock(registrationId)
                 .orElseThrow(() ->
                         new AppException(ErrorCode.REGISTRATION_NOT_FOUND)
                 );
@@ -361,34 +374,13 @@ public class RegistrationServiceImpl implements RegistrationService {
             );
         }
 
-        registration.setStatus(RegistrationStatus.CANCELLED);
-        registration.setCancelledAt(now);
-
-        ActivityDeparture lockedDeparture =
-                departureRepository
-                        .findByIdWithLock(departure.getDepartureId())
-                        .orElse(departure);
-
-        int totalGuests =
-                safeInt(registration.getAdultCount())
-                        + safeInt(registration.getChildCount());
-
-        lockedDeparture.setCapacity(
-                lockedDeparture.getCapacity() + totalGuests
-        );
-
-        if (lockedDeparture.getStatus() == DepartureStatus.FULL
-                && lockedDeparture.getCapacity() > 0) {
-
-            lockedDeparture.setStatus(
-                    DepartureStatus.AVAILABLE
-            );
+        if ((registration.getPaymentConfirmedAt() != null && registration.getTotalAmount().signum() > 0)
+                || paymentRepository.findByRegistrationRegistrationId(registrationId).stream().anyMatch(p ->
+                p.getStatus() == PaymentStatus.PAID || p.getStatus() == PaymentStatus.REVIEW_REQUIRED)) {
+            throw new AppException(ErrorCode.PAYMENT_REVIEW_REQUIRED,
+                    "Paid bookings require a refund review before cancellation");
         }
-
-        departureRepository.save(lockedDeparture);
-
-        restoreCouponIfNeeded(registration);
-
+        lifecycle.release(registration);
         Registration savedRegistration =
                 registrationRepository.save(registration);
 
@@ -448,14 +440,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         Registration registration =
-                registrationRepository.findById(registrationId)
+                registrationRepository.findByIdWithLock(registrationId)
                         .orElseThrow(() ->
                                 new AppException(
                                         ErrorCode.REGISTRATION_NOT_FOUND
                                 )
                         );
 
-        if (registration.getStatus()
+        if (registration.getPaymentConfirmedAt() == null || registration.getStatus()
                 != RegistrationStatus.WAITING_FOR_BUDDY) {
 
             throw new AppException(
@@ -463,6 +455,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             );
         }
 
+        buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE);
         Buddy buddy =
                 buddyRepository.findById(buddyId)
                         .orElseThrow(() ->
@@ -471,8 +464,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                                 )
                         );
 
-        ActivityDeparture departure =
-                registration.getDeparture();
+        if (buddy.getStatus() != BuddyStatus.ACTIVE) throw new AppException(ErrorCode.BUDDY_NOT_FOUND);
+        ActivityDeparture departure = registration.getDeparture();
 
         boolean isBusy =
                 registrationRepository
@@ -505,24 +498,4 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
 
-    private void restoreCouponIfNeeded(
-            Registration registration
-    ) {
-        Coupon coupon = registration.getCoupon();
-
-        if (coupon == null) {
-            return;
-        }
-
-        Integer usedCount = coupon.getUsedCount();
-
-        if (usedCount != null && usedCount > 0) {
-            coupon.setUsedCount(usedCount - 1);
-            couponRepository.save(coupon);
-        }
-    }
-
-    private int safeInt(Integer value) {
-        return value != null ? value : 0;
-    }
 }

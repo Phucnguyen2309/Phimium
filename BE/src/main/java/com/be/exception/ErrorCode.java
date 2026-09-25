@@ -5,6 +5,21 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
+    BOOKING_EXPIRED(3010, HttpStatus.CONFLICT, "Booking hold expired; please book again"),
+    PAYMENT_REVIEW_REQUIRED(9010, HttpStatus.CONFLICT, "Payment requires manual review"),
+    SEPAY_NOT_CONFIGURED(9011, HttpStatus.SERVICE_UNAVAILABLE, "SePay configuration is incomplete"),
+    INVALID_PAYMENT_NOTIFICATION(9012, HttpStatus.BAD_REQUEST, "Invalid payment notification"),
+    INVALID_GOOGLE_TOKEN(1010, HttpStatus.UNAUTHORIZED, "Invalid Google token"),
+    PROFILE_INCOMPLETE(1011, HttpStatus.FORBIDDEN, "Profile incomplete"),
+    ACCOUNT_BLOCKED(1012, HttpStatus.FORBIDDEN, "Account is inactive"),
+    GOOGLE_ACCOUNT_ALREADY_LINKED(1013, HttpStatus.CONFLICT, "Google account already linked"),
+    GOOGLE_ACCOUNT_LINKED_TO_ANOTHER_USER(1014, HttpStatus.CONFLICT, "Google account linked to another user"),
+    GOOGLE_EMAIL_DOES_NOT_MATCH(1015, HttpStatus.BAD_REQUEST, "Google email does not match"),
+    PHONE_ALREADY_EXISTS(1016, HttpStatus.CONFLICT, "Phone already exists"),
+    INVALID_ONBOARDING_TOKEN(1017, HttpStatus.UNAUTHORIZED, "Invalid onboarding token"),
+    ONBOARDING_TOKEN_EXPIRED(1018, HttpStatus.UNAUTHORIZED, "Onboarding token expired"),
+    PASSWORD_LOGIN_UNAVAILABLE(1019, HttpStatus.BAD_REQUEST, "This account does not have password login enabled."),
+    AUTH_CONFLICT(1020, HttpStatus.CONFLICT, "Account information conflicts with an existing account"),
 
 // ================= USER & AUTH (1000 - 1999) =================
 

@@ -1,0 +1,310 @@
+{
+  "info": {
+    "name": "PHIMIUM Registration → SePay",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set accessToken and departureId. Checkout fields must be submitted in a browser to SePay. Simulated IPN is only for your sandbox; do not run against live payments."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "departureId",
+      "value": ""
+    },
+    {
+      "key": "registrationId",
+      "value": ""
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    },
+    {
+      "key": "invoiceNumber",
+      "value": ""
+    },
+    {
+      "key": "amount",
+      "value": ""
+    },
+    {
+      "key": "ipnSecret",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Preview price",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/v1/pricing/quote",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"departureId\": \"{{departureId}}\",\n  \"adultCount\": 2,\n  \"childCount\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Hold booking",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/v1/registrations",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"departureId\": \"{{departureId}}\",\n  \"adultCount\": 2,\n  \"childCount\": 1,\n  \"pickupLocation\": \"Khách sạn ABC, 123 Nguyễn Huệ, Quận 1\",\n  \"isSafetyTermsAccepted\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create / resume SePay checkout",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/payment/registration/{{registrationId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"paymentMethod\": \"BANK_TRANSFER\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Read payment status",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/payment/{{paymentId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. My registrations",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/registrations/me",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cancel unpaid booking",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/v1/registrations/{{registrationId}}/cancel",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sandbox only - simulate SePay IPN",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/webhooks/sepay",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Secret-Key",
+            "value": "{{ipnSecret}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"notification_type\": \"ORDER_PAID\",\n  \"order\": {\n    \"order_invoice_number\": \"{{invoiceNumber}}\",\n    \"order_id\": \"test-{{invoiceNumber}}\",\n    \"order_status\": \"CAPTURED\",\n    \"order_currency\": \"VND\",\n    \"order_amount\": \"{{amount}}\"\n  },\n  \"transaction\": {\n    \"transaction_id\": \"test-{{invoiceNumber}}\",\n    \"transaction_type\": \"PAYMENT\",\n    \"transaction_status\": \"APPROVED\",\n    \"transaction_currency\": \"VND\",\n    \"transaction_amount\": \"{{amount}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) {",
+              "  const data = pm.response.json().data || {};",
+              "  ['registrationId','paymentId','invoiceNumber','amount'].forEach(key => {",
+              "    if (data[key] !== undefined) pm.collectionVariables.set(key, data[key]);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

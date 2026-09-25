@@ -62,9 +62,23 @@ public class PricingServiceImpl implements PricingService {
         ActivityDeparture departure = activityDepartureRepository.findById(request.getDepartureId())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTURE_NOT_FOUND));
 
+        if (departure.getActivity().getStatus() == com.be.enums.ActivityStatus.CANCELLED
+                || departure.getActivity().getStatus() == com.be.enums.ActivityStatus.COMPLETED) {
+            throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
+        }
         int adults = request.getAdultCount() != null ? request.getAdultCount() : 0;
         int children = request.getChildCount() != null ? request.getChildCount() : 0;
+        if (children < 0 || children > 1000 || adults > 1000) throw new AppException(ErrorCode.INVALID_GUEST_COUNT);
         int totalGuests = adults + children;
+        if (!DateTimeUtils.nowVietnam().isBefore(departure.getStartDateTime())) {
+            throw new AppException(ErrorCode.DEPARTURE_IN_PAST);
+        }
+        if (departure.getStatus() != com.be.enums.DepartureStatus.AVAILABLE) {
+            throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
+        }
+        if (totalGuests > departure.getCapacity()) throw new AppException(ErrorCode.INSUFFICIENT_CAPACITY);
+        int maxGroup = departure.getActivity().getGroupMaxSize() == null ? 6 : departure.getActivity().getGroupMaxSize();
+        if (totalGuests > maxGroup) throw new AppException(ErrorCode.GROUP_IS_FULL);
 
         if (adults < 1) {
             throw new AppException(ErrorCode.AT_LEAST_ONE_ADULT_REQUIRED);
@@ -126,6 +140,12 @@ public class PricingServiceImpl implements PricingService {
             }
         }
 
+        if (adultUnitPrice.signum() < 0 || childUnitPrice.signum() < 0) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR);
+        }
+        // Quote and charge integer VND using the same rounding policy.
+        subtotal = subtotal.setScale(0, RoundingMode.HALF_UP);
+        discountAmount = discountAmount.setScale(0, RoundingMode.HALF_UP);
         BigDecimal totalAmount = calculateTotal(subtotal, discountAmount);
 
         return pricingMapper.toPriceQuoteResponse(

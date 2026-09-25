@@ -1,9 +1,6 @@
 package com.be.controller;
 
-import com.be.dto.request.LoginRequest;
-import com.be.dto.request.RegisterRequest;
-import com.be.dto.request.ResendOtpRequest;
-import com.be.dto.request.VerifyOtpRequest;
+import com.be.dto.request.*;
 import com.be.dto.response.ApiResponse;
 import com.be.dto.response.LoginResponse;
 import com.be.dto.response.RegisterResponse;
@@ -22,6 +19,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
+    @Autowired
+    private com.be.service.GoogleAuthService googleAuthService;
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<com.be.dto.response.GoogleAuthResponse>> google(
+            @Valid @RequestBody GoogleAuthRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Google authentication", googleAuthService.authenticate(request.getCredential())));
+    }
+
+    @PostMapping("/complete-profile")
+    public ResponseEntity<ApiResponse<LoginResponse>> completeProfile(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @Valid @RequestBody CompleteProfileRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Profile completed", googleAuthService.completeProfile(authorization, request)));
+    }
+
+    @PostMapping("/link/google")
+    public ResponseEntity<ApiResponse<Void>> linkGoogle(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.be.entity.User user,
+            @Valid @RequestBody GoogleAuthRequest request) {
+        googleAuthService.link(user.getUserId(), request.getCredential());
+        return ResponseEntity.ok(ApiResponse.success("Google account linked", null));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Token refreshed", authService.refresh(request.getRefreshToken())));
+    }
     @Autowired
     private AuthService authService;
     @Autowired

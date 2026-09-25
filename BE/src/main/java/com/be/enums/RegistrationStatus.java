@@ -6,5 +6,5 @@ public enum RegistrationStatus {
     CONFIRMED,
     IN_PROGRESS,
     COMPLETED,
-    CANCELLED
+    CANCELLED, PENDING_PAYMENT, PAYMENT_REVIEW
 }

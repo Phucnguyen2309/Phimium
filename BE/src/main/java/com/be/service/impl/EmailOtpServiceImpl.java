@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -27,25 +27,6 @@ public class EmailOtpServiceImpl implements EmailOtpService {
     private final EmailService emailService;
 
     private final PasswordEncoder passwordEncoder;
-//    @Override
-//    @Transactional
-//    public void sendOtp(User user) {
-//       emailOtpRepository.findByUser(user).ifPresent(emailOtpRepository::delete);
-//
-//       String otp = OtpUtils.generateOtp();
-//
-//       EmailOtp emailOtp = EmailOtp.builder()
-//               .user(user)
-//               .otpHash(passwordEncoder.encode(otp))
-//               .expireAt(LocalDateTime.now().plusMinutes(5))
-//               .attempts(0)
-//               .lastSentAt(LocalDateTime.now())
-//               .build();
-//       emailOtpRepository.save(emailOtp);
-//
-//       emailService.sendOtpEmail(user.getEmail(),otp);
-//    }
-
     @Override
     @Transactional
     public void sendOtp(User user) {
@@ -66,11 +47,11 @@ public class EmailOtpServiceImpl implements EmailOtpService {
     }
 
     @Override
-    @Transactional
+    @Transactional(dontRollbackOn = AppException.class)
     public void verifyOtp(String email, String otp) {
-       User user = userRepository.findByEmail(email)
+       User user = userRepository.findLockedByEmail(email.trim().toLowerCase(java.util.Locale.ROOT))
                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-       if(Boolean.TRUE.equals(user.getEmailVerified())){
+       if(user.isEmailVerified()){
            return;
        }
        EmailOtp emailOtp = emailOtpRepository.findByUser(user)
@@ -82,7 +63,6 @@ public class EmailOtpServiceImpl implements EmailOtpService {
            throw new AppException(ErrorCode.OTP_EXPIRE);
        }
        if(emailOtp.getAttempts() >= 5){
-           emailOtpRepository.delete(emailOtp);
            throw new AppException(ErrorCode.OTP_MANY_ATTEMPTS);
        }
 
@@ -101,10 +81,10 @@ public class EmailOtpServiceImpl implements EmailOtpService {
     @Override
     @Transactional
     public void resendOtp(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findLockedByEmail(email.trim().toLowerCase(java.util.Locale.ROOT))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if(Boolean.TRUE.equals(user.getEmailVerified())){
+        if(user.isEmailVerified()){
             throw new AppException(ErrorCode.OTP_ALREADY_EXIST);
         }
         emailOtpRepository.findByUser(user).ifPresent(existingOtp ->{
