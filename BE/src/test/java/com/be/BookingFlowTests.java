@@ -36,9 +36,10 @@ import static org.junit.jupiter.api.Assertions.*;
         BookingLifecycleService.class, BuddyMatchingServiceImpl.class, PaymentServiceImpl.class,
         RegistrationMapper.class, ActivityGroupMapper.class, BuddyMapper.class,
         InstructionAcknowledgementMapper.class, PricingMapper.class, PaymentMapperImpl.class,
-        SePayProperties.class, SePaySignatureUtil.class})
+        SePayProperties.class, SePaySignatureUtil.class, AdminBookingService.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class BookingFlowTests {
+    @Autowired AdminBookingService adminBookings;
     @Autowired RegistrationService registrations;
     @Autowired PaymentService payments;
     @Autowired BookingLifecycleService lifecycle;
@@ -105,6 +106,87 @@ class BookingFlowTests {
 
     void error(ErrorCode code, org.junit.jupiter.api.function.Executable action) {
         assertEquals(code, assertThrows(AppException.class, action).getErrorCode());
+    }
+
+    @Test void adminCountsGuestsSeparatelyFromBookingsAndExcludesCancelledSeats() {
+        UUID pending = book().getRegistrationId();
+        user = anotherBooker();
+        UUID paid = book().getRegistrationId();
+        payments.processPayment(receipt(checkout(paid)), "test-ipn-key");
+        user = anotherBooker();
+        UUID cancelled = book().getRegistrationId();
+        registrations.cancelRegistration(cancelled, user);
+        var summary = adminBookings.departure(departureId);
+        assertEquals(3, summary.totalBookings());
+        assertEquals(2, summary.activeBookings());
+        assertEquals(6, summary.reservedGuests());
+        assertEquals(4, summary.adultGuests());
+        assertEquals(2, summary.childGuests());
+        assertEquals(3, summary.pendingPaymentGuests());
+        assertEquals(3, summary.confirmedGuests());
+        assertEquals(3, summary.cancelledGuests());
+        assertEquals(14, summary.remainingSeats());
+        assertEquals(20, summary.totalCapacity());
+        expire(pending);
+        lifecycle.expire(pending);
+        assertEquals(17, adminBookings.departure(departureId).remainingSeats());
+        assertEquals(20, adminBookings.departure(departureId).totalCapacity());
+    }
+
+    User anotherBooker() {
+        return tx.execute(s -> users.saveAndFlush(User.builder().email(UUID.randomUUID() + "@example.com")
+                .role(UserRole.USER).status(UserStatus.ACTIVE).emailVerified(true).profileCompleted(true).build()));
+    }
+
+    @Test void adminFiltersBookingsAndReturnsBookerContactAndPickup() {
+        tx.executeWithoutResult(s -> {
+            var u = users.findById(user.getUserId()).orElseThrow();
+            u.setFullName("Test Booker"); u.setPhone("+84901234567");
+        });
+        UUID id = book().getRegistrationId();
+        var page = adminBookings.registrations(null, departureId, RegistrationStatus.PENDING_PAYMENT, 0, 1);
+        assertEquals(1, page.getTotalElements());
+        assertEquals(id, page.getContent().get(0).booking().getRegistrationId());
+        assertEquals("Test Booker", page.getContent().get(0).customer().fullName());
+        assertEquals(user.getEmail(), page.getContent().get(0).customer().email());
+        assertEquals("+84901234567", adminBookings.registration(id).customer().phone());
+        assertEquals("Hotel ABC, District 1", adminBookings.registration(id).booking().getPickupLocation());
+        assertTrue(adminBookings.registrations(null, UUID.randomUUID(), null, 0, 20).isEmpty());
+        assertTrue(adminBookings.registrations(null, departureId, RegistrationStatus.CANCELLED, 0, 20).isEmpty());
+        error(ErrorCode.VALIDATION_ERROR, () -> adminBookings.registrations(null, null, null, 0, 101));
+    }
+
+    @Test void adminCapacityCannotDropBelowReservedAndCancellationRestoresSeats() {
+        UUID id = book().getRegistrationId();
+        error(ErrorCode.INSUFFICIENT_CAPACITY, () -> adminBookings.capacity(departureId, 2));
+        var full = adminBookings.capacity(departureId, 3);
+        assertEquals(0, full.remainingSeats());
+        assertEquals(DepartureStatus.FULL, full.status());
+        error(ErrorCode.DEPARTURE_NOT_AVAILABLE, this::book);
+        var enlarged = adminBookings.capacity(departureId, 10);
+        assertEquals(7, enlarged.remainingSeats());
+        assertEquals(DepartureStatus.AVAILABLE, enlarged.status());
+        registrations.cancelRegistration(id, user);
+        assertEquals(10, adminBookings.departure(departureId).remainingSeats());
+        assertEquals(10, adminBookings.departure(departureId).totalCapacity());
+    }
+
+    @Test void adminDepartureFiltersAndCreation() {
+        UUID activityId = tx.execute(s -> departures.findById(departureId).orElseThrow().getActivity().getId());
+        var request = new DepartureRequest(LocalDate.now().plusDays(3), LocalTime.NOON, LocalTime.of(15, 0), 12);
+        var secondRequest = new DepartureRequest(LocalDate.now().plusDays(3), LocalTime.of(18, 0), LocalTime.of(21, 0), 8);
+        var created = adminBookings.createDepartures(activityId, List.of(request, secondRequest));
+        assertEquals(2, created.size());
+        assertEquals(12, created.get(0).totalCapacity());
+        assertEquals(0, created.get(0).reservedGuests());
+        var page = adminBookings.departures(activityId, request.getDepartureDate(), request.getDepartureDate(), null, 0, 20);
+        assertEquals(2, page.getTotalElements());
+        assertEquals(created.get(0).departureId(), page.getContent().get(0).departureId());
+        error(ErrorCode.VALIDATION_ERROR, () -> adminBookings.departures(null, LocalDate.now().plusDays(1), LocalDate.now(), null, 0, 20));
+        request.setDepartureDate(LocalDate.now().minusDays(1));
+        error(ErrorCode.DEPARTURE_IN_PAST, () -> adminBookings.createDepartures(activityId, List.of(request)));
+        request.setDepartureDate(LocalDate.now().plusDays(4));
+        error(ErrorCode.VALIDATION_ERROR, () -> adminBookings.createDepartures(activityId, List.of(request, request)));
     }
 
     @Test void bookingHoldsSeatsWithoutAssigningBuddy() {

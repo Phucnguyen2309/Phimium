@@ -14,7 +14,23 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface RegistrationRepository extends JpaRepository<Registration, UUID> {
+public interface RegistrationRepository extends JpaRepository<Registration, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Registration> {
+
+    interface DepartureCount {
+        UUID getDepartureId();
+        RegistrationStatus getStatus();
+        Long getBookings();
+        Long getAdults();
+        Long getChildren();
+    }
+
+    @Query("""
+        select r.departure.departureId as departureId, r.status as status,
+               count(r) as bookings, sum(r.adultCount) as adults, sum(r.childCount) as children
+        from Registration r where r.departure.departureId in :ids
+        group by r.departure.departureId, r.status
+        """)
+    List<DepartureCount> countByDepartures(@Param("ids") List<UUID> ids);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Registration r where r.registrationId = :id")

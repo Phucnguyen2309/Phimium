@@ -5,17 +5,13 @@ import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.MyActivityResponse;
 import com.be.entity.Activity;
-import com.be.entity.ActivityDeparture;
 import com.be.entity.Registration;
 import com.be.entity.User;
-import com.be.enums.DepartureStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
-import com.be.mapper.ActivityDepartureMapper;
 import com.be.mapper.ActivityDetailMapper;
 import com.be.mapper.ActivityMapper;
 import com.be.mapper.MyActivityMapper;
-import com.be.repository.ActivityDepartureRepository;
 import com.be.repository.ActivityRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.ActivityService;
@@ -27,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,12 +33,10 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
     private final CloudinaryService cloudinaryService;
-    private final ActivityDepartureMapper  activityDepartureMapper;
     private final RegistrationRepository registrationRepository;
     private final ActivityDetailMapper activityDetailMapper;
     private final MyActivityMapper myActivityMapper;
 
-    private final ActivityDepartureRepository departureRepository;
 
     @Override
     @Transactional
@@ -54,22 +47,6 @@ public class ActivityServiceImpl implements ActivityService {
         if (image != null && !image.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(image);
             activity.setThumbnailUrl(imageUrl);
-        }
-
-        if (request.getDepartures() != null) {
-
-            request.getDepartures().forEach(departureRequest -> {
-
-                ActivityDeparture departure =
-                        activityDepartureMapper.toEntity(
-                                departureRequest
-                        );
-
-                // Quan trọng:
-                // set cả Activity.departures
-                // và ActivityDeparture.activity
-                activity.addDeparture(departure);
-            });
         }
 
         Activity savedActivity =

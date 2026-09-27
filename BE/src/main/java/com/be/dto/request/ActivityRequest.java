@@ -2,7 +2,6 @@ package com.be.dto.request;
 
 import com.be.enums.ActivityStatus;
 import com.be.enums.TourType;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -68,10 +66,6 @@ public class ActivityRequest {
 
     private ActivityStatus status = ActivityStatus.PUBLISHED;
 
-
-    @Valid
-    @NotEmpty(message = "At least one departure is required")
-    private List<DepartureRequest> departures;
 
     @AssertTrue(message = "Maximum participants must be greater than or equal to minimum participants")
     public boolean isParticipantRangeValid() {
