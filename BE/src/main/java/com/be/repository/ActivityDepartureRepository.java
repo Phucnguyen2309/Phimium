@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ActivityDepartureRepository extends JpaRepository<ActivityDeparture, UUID> {
+public interface ActivityDepartureRepository extends JpaRepository<ActivityDeparture, UUID>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<ActivityDeparture> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT d FROM ActivityDeparture d WHERE d.departureId = :id")
     Optional<ActivityDeparture> findByIdWithLock(@Param("id") UUID id);
