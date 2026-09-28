@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from '@/context/authContext.js'
+import { useLanguage } from '@/context/languageContext.js'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.js'
 import { ROUTES } from '@/routes/paths.js'
 import activityService from '@/services/activityService.js'
@@ -11,15 +12,17 @@ export function useActivityDetail() {
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { t } = useLanguage()
 
   const [activity, setActivity] = useState(location.state?.activity ?? null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [joining, setJoining] = useState(false)
   const [showSafetyTerms, setShowSafetyTerms] = useState(false)
   const [safetyTermsAccepted, setSafetyTermsAccepted] = useState(false)
   const [joinMessage, setJoinMessage] = useState('')
 
-  useDocumentTitle(activity?.title ? activity.title : 'Chi tiết hoạt động')
+  useDocumentTitle(activity?.title || t('activityDetail.pageTitle'))
 
   useEffect(() => {
     if (!id) return
@@ -29,6 +32,7 @@ export function useActivityDetail() {
     const fetchDetail = async () => {
       try {
         setLoading(true)
+        setError(null)
 
         const response = await activityService.getActivityById(id)
         const detail = response?.data?.data ?? response?.data
@@ -42,6 +46,7 @@ export function useActivityDetail() {
         }
 
         if (isMounted) {
+          setError(error)
           setActivity(null)
         }
       } finally {
@@ -75,7 +80,7 @@ export function useActivityDetail() {
     }
 
     if (!safetyTermsAccepted) {
-      setJoinMessage('Bạn cần đồng ý điều khoản an toàn trước khi tham gia.')
+      setJoinMessage(t('activityDetail.mustAcceptTerms'))
       return
     }
 
@@ -95,7 +100,7 @@ export function useActivityDetail() {
         replace: true,
         state: {
           activeTab: 'ACTIVITIES',
-          message: 'Đăng ký tham gia thành công.',
+          messageKey: 'dashboard.joinSuccess',
         },
       })
     } catch (error) {
@@ -104,7 +109,7 @@ export function useActivityDetail() {
       }
 
       setJoinMessage(
-        error?.response?.data?.message ?? 'Không thể tham gia hoạt động.',
+        error?.response?.data?.message ?? t('activityDetail.joinFailed'),
       )
     } finally {
       setJoining(false)
@@ -113,6 +118,7 @@ export function useActivityDetail() {
 
   return {
     activity,
+    error,
     handleJoinActivity,
     handleJoinClick,
     id,
@@ -124,4 +130,4 @@ export function useActivityDetail() {
     setShowSafetyTerms,
     showSafetyTerms,
   }
-}
+}

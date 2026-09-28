@@ -8,14 +8,12 @@ import com.be.repository.EmailOtpRepository;
 import com.be.repository.UserRepository;
 import com.be.service.EmailOtpService;
 import com.be.service.EmailService;
+import com.be.util.DateTimeUtils;
 import com.be.util.OtpUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +36,10 @@ public class EmailOtpServiceImpl implements EmailOtpService {
         String otp = OtpUtils.generateOtp();
 
         emailOtp.setOtpHash(passwordEncoder.encode(otp));
-        emailOtp.setExpireAt(LocalDateTime.now().plusMinutes(5));
+        var now = DateTimeUtils.nowVietnam();
+        emailOtp.setExpireAt(now.plusMinutes(5));
         emailOtp.setAttempts(0);
-        emailOtp.setLastSentAt(LocalDateTime.now());
+        emailOtp.setLastSentAt(now);
 
         emailOtpRepository.save(emailOtp);
         emailService.sendOtpEmail(user.getEmail(), otp);
@@ -57,7 +56,7 @@ public class EmailOtpServiceImpl implements EmailOtpService {
        EmailOtp emailOtp = emailOtpRepository.findByUser(user)
                .orElseThrow(() -> new AppException(ErrorCode.OTP_NOT_FOUND));
 
-       if(emailOtp.getExpireAt().isBefore(LocalDateTime.now())){
+       if(emailOtp.getExpireAt().isBefore(DateTimeUtils.nowVietnam())){
            emailOtpRepository.delete(emailOtp);
 
            throw new AppException(ErrorCode.OTP_EXPIRE);
@@ -88,7 +87,7 @@ public class EmailOtpServiceImpl implements EmailOtpService {
             throw new AppException(ErrorCode.OTP_ALREADY_EXIST);
         }
         emailOtpRepository.findByUser(user).ifPresent(existingOtp ->{
-            if(existingOtp.getLastSentAt().plusSeconds(60).isAfter(LocalDateTime.now())){
+            if(existingOtp.getLastSentAt().plusSeconds(60).isAfter(DateTimeUtils.nowVietnam())){
                 throw new AppException(ErrorCode.OTP_RESEND);
             }
         });

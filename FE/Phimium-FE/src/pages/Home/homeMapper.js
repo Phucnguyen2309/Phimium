@@ -1,43 +1,58 @@
-export const fallbackActivities = []
+import { t } from '@/utils/i18n.js'
+import { getValidText } from '@/utils/text.js'
 
-export const safeList = (value) => (Array.isArray(value) ? value : [])
+export const ALL_TYPES = 'ALL'
 
-export const getResponseList = (response) =>
-  safeList(
-    response?.data?.data ??
-      response?.data?.content ??
-      response?.data ??
-      response,
-  )
+/** Danh sách loại hoạt động có trong dữ liệu, luôn bắt đầu bằng 'ALL'. */
+export const getActivityTypes = (activities) => [
+  ALL_TYPES,
+  ...new Set(activities.map((activity) => activity.activityType).filter(Boolean)),
+]
 
-export const formatTime = (value) => {
-  if (!value) return 'Sắp cập nhật'
+/** Gom các Buddy đang tổ chức hoạt động (lấy từ dữ liệu activity thật). */
+export const getBuddiesFromActivities = (activities, limit = 3) => {
+  const buddies = new Map()
 
-  const date = new Date(value)
+  activities.forEach((activity) => {
+    const name = getValidText(activity.hostBuddyName)
+    if (!name || name === t('activity.unknownBuddy')) return
 
-  if (Number.isNaN(date.getTime())) return 'Sắp cập nhật'
+    const key = activity.hostBuddyId ?? name
+    const current = buddies.get(key) ?? {
+      id: key,
+      name,
+      activityTitles: [],
+      activityTypes: new Set(),
+    }
 
-  return date.toLocaleString('vi-VN', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+    current.activityTitles.push(activity.title)
+    if (activity.activityType) current.activityTypes.add(activity.activityType)
+
+    buddies.set(key, current)
   })
+
+  return [...buddies.values()]
+    .sort((a, b) => b.activityTitles.length - a.activityTitles.length)
+    .slice(0, limit)
+    .map((buddy) => ({
+      ...buddy,
+      activityTypes: [...buddy.activityTypes],
+    }))
 }
 
-export const getRemainingSlots = (activity) => {
-  const maximumParticipants = Number(activity?.maximumParticipants ?? 0)
+/** Các điểm hẹn (địa điểm) khác nhau của hoạt động. */
+export const getMeetingPoints = (activities, limit = 5) => {
+  const points = new Map()
 
-  const currentParticipants = Number(
-    activity?.currentParticipants ??
-      activity?.joinedParticipants ??
-      activity?.participantCount ??
-      activity?.registeredCount ??
-      0,
-  )
+  activities.forEach((activity) => {
+    const name = getValidText(activity.locationName)
+    const address = getValidText(activity.address)
+    const key = name || address
 
-  const remaining = maximumParticipants - currentParticipants
+    if (!key || points.has(key)) return
 
-  return Math.max(remaining, 0)
+    points.set(key, { id: key, name: name || address, address })
+  })
+
+  return [...points.values()].slice(0, limit)
 }

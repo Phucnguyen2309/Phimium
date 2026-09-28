@@ -15,23 +15,26 @@ npm run lint
 
 ```text
 src/
-  app/             App root and app-level providers
-  assets/          Images, fonts, and static imports
-  components/      Shared reusable UI components
-  constants/       App-wide constants
-  features/        Feature modules such as movies or auth
-  hooks/           Shared React hooks
-  layouts/         Page shells and layout components
-  pages/           Route-level screens
-  routes/          Route path constants and router setup
-  services/        API clients and external services
-  utils/           Small shared helper functions
+  app/          App root + router
+  assets/       Images imported in code
+  components/   Shared UI (common, layout, activity)
+  constants/    App-wide constants
+  context/      Auth context
+  features/     Modules reused across pages (activity, myActivities, myGroups)
+  hooks/        Shared React hooks
+  layouts/      Page shells
+  pages/        One folder per route (XxxPage + XxxView + useXxx)
+  routes/       Route paths + ProtectedRoute
+  services/     API clients
+  utils/        Pure helper functions
 ```
+
+Xem chi tiết quy ước trong `HUONG_DAN_CAU_TRUC.md`.
 
 ## Environment
 
-Create `.env` when the API is ready:
+Copy `.env.example` thành `.env` rồi chỉnh URL API:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080/api
 ```

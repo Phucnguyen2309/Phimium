@@ -5,15 +5,9 @@ const activityService = {
 
   getActivityById: (activityId) => http.get(`/activity/${activityId}`),
 
+  getMyActivities: () => http.get('/activity/joined'),
+
   joinActivity: (payload) => http.post('/v1/registrations/join', payload),
-
-  getMyRegistrations: () => http.get('/activity/joined'),
-
-  getMyActivities : () => http.get(`/activity/joined`) ,
-
-  getMyGroups: () => http.get('/v1/registrations/my-groups'),
-
-  getGroupdetails : (groupId) => http.get(`/v1/registrations/groups/${groupId}`),
 
   getGuidelineByActivityId: (activityId) =>
     http.get(`/v1/activities/${activityId}/guidelines`),

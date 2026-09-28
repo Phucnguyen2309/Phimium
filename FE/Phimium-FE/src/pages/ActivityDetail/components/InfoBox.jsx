@@ -11,4 +11,4 @@ export function InfoBox({ icon, title, text }) {
       </div>
     </div>
   )
-}
+}

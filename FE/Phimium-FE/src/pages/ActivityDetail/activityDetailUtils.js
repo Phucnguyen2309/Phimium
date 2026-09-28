@@ -1,30 +1,13 @@
-export function getValidImage(value) {
-  if (!value || value === 'string') return ''
-  return value
-}
-
-export function getInitials(name) {
-  const cleanName = String(name ?? '').trim()
-
-  if (!cleanName || cleanName === 'string') return 'P'
-
-  const words = cleanName.split(/\s+/)
-
-  if (words.length >= 2) {
-    return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase()
-  }
-
-  return cleanName.charAt(0).toUpperCase()
-}
+import { t } from '@/utils/i18n.js'
 
 export function formatRating(value) {
   const rating = Number(value)
 
   if (!Number.isFinite(rating) || rating <= 0) {
-    return 'Chưa có đánh giá'
+    return t('activityDetail.noRating')
   }
 
-  return `${rating.toFixed(1)} rating`
+  return t('activityDetail.rating', { rating: rating.toFixed(1) })
 }
 
 export function hasValidCoordinates(activity) {

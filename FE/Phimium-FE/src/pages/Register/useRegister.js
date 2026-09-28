@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useLanguage } from '@/context/languageContext.js'
 import { ROUTES } from '@/routes/paths.js'
-import { registerUser } from '@/services/authService.js'
+import authService from '@/services/authService.js'
 
 const initialFormData = {
   fullname: '',
@@ -18,6 +19,7 @@ export function useRegister() {
   const [isLoading, setIsLoading] = useState(false)
 
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
@@ -29,14 +31,15 @@ export function useRegister() {
     setIsLoading(true)
 
     try {
-      await registerUser(formData)
-      alert('Đăng ký tài khoản thành công! Vui lòng đăng nhập.')
-      navigate(ROUTES.login)
+      await authService.register(formData)
+      navigate(ROUTES.login, {
+        state: { messageKey: 'auth.register.success' },
+      })
     } catch (err) {
       setError(
         err.message ||
           err.data?.message ||
-          'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
+          t('auth.register.invalid'),
       )
     } finally {
       setIsLoading(false)

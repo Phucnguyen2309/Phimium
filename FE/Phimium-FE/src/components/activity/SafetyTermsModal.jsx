@@ -1,13 +1,17 @@
 import { useEffect } from 'react'
 
-const SafetyTermsModal = ({
+import { useLanguage } from '@/context/languageContext.js'
+
+export function SafetyTermsModal({
   open,
   checked,
   onCheckedChange,
   onClose,
   onConfirm,
   loading,
-}) => {
+}) {
+  const { t } = useLanguage()
+
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key === 'Escape' && open) {
@@ -29,10 +33,10 @@ const SafetyTermsModal = ({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
-              Điều khoản an toàn
+              {t('safetyTerms.eyebrow')}
             </p>
             <h2 className="mt-2 text-2xl font-bold text-slate-950">
-              Xác nhận điều khoản an toàn
+              {t('safetyTerms.title')}
             </h2>
           </div>
           <button
@@ -40,21 +44,14 @@ const SafetyTermsModal = ({
             onClick={onClose}
             className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
-            Đóng
+            {t('common.close')}
           </button>
         </div>
 
         <div className="mt-6 space-y-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-          <p>
-            Tôi đồng ý tham gia hoạt động với tinh thần tôn trọng, an toàn và
-            đúng giờ.
-          </p>
-          <p>
-            Tôi hiểu rằng thông tin nhóm sẽ được hệ thống sắp xếp tự động.
-          </p>
-          <p>
-            Tôi sẽ tuân thủ hướng dẫn và quy tắc an toàn của hoạt động.
-          </p>
+          <p>{t('safetyTerms.term1')}</p>
+          <p>{t('safetyTerms.term2')}</p>
+          <p>{t('safetyTerms.term3')}</p>
         </div>
 
         <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4">
@@ -65,8 +62,7 @@ const SafetyTermsModal = ({
             className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
           />
           <span className="text-sm leading-6 text-slate-700">
-            Tôi đã đọc, hiểu và đồng ý với các điều khoản an toàn trước khi
-            tham gia hoạt động này.
+            {t('safetyTerms.agree')}
           </span>
         </label>
 
@@ -76,7 +72,7 @@ const SafetyTermsModal = ({
             onClick={onClose}
             className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Hủy
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -84,12 +80,10 @@ const SafetyTermsModal = ({
             onClick={onConfirm}
             className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? 'Đang xử lý...' : 'Xác nhận & tham gia'}
+            {loading ? t('common.processing') : t('safetyTerms.confirm')}
           </button>
         </div>
       </div>
     </div>
   )
 }
-
-export default SafetyTermsModal

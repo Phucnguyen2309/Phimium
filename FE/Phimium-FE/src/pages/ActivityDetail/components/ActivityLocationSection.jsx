@@ -1,11 +1,15 @@
-import { hasValidCoordinates } from '../activityDetailUtils.js'
+import { useLanguage } from '@/context/languageContext.js'
+import { hasValidCoordinates } from '@/pages/ActivityDetail/activityDetailUtils.js'
+
 import { LocationIcon } from './ActivityDetailIcons.jsx'
 
 export function ActivityLocationSection({ activity }) {
+  const { t } = useLanguage()
+
   return (
     <section className="mt-8">
       <h2 className="text-xl font-black text-slate-950">
-        Where we&apos;ll be
+        {t('activityDetail.whereTitle')}
       </h2>
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -16,11 +20,11 @@ export function ActivityLocationSection({ activity }) {
 
           <div>
             <p className="font-black text-slate-950">
-              {activity?.locationName || 'Chưa cập nhật địa điểm'}
+              {activity?.locationName || t('activityDetail.noLocation')}
             </p>
 
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              {activity?.address || 'Chưa cập nhật địa chỉ'}
+              {activity?.address || t('activityDetail.noAddress')}
             </p>
 
             {hasValidCoordinates(activity) && (
@@ -33,4 +37,4 @@ export function ActivityLocationSection({ activity }) {
       </div>
     </section>
   )
-}
+}
