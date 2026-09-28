@@ -1,5 +1,6 @@
-import SafetyTermsModal from '@/components/activity/SafetyTermsModal.jsx'
-import { Container } from '@/components/common'
+import { SafetyTermsModal } from '@/components/activity/SafetyTermsModal.jsx'
+import { BackButton, Container } from '@/components/common'
+import { useLanguage } from '@/context/languageContext.js'
 
 import { ActivityHero } from './components/ActivityHero.jsx'
 import { ActivityHostBookingCard } from './components/ActivityHostBookingCard.jsx'
@@ -9,6 +10,7 @@ import { ActivityQuickLinks } from './components/ActivityQuickLinks.jsx'
 
 export function ActivityDetailView({
   activity,
+  error,
   handleJoinActivity,
   handleJoinClick,
   id,
@@ -20,6 +22,28 @@ export function ActivityDetailView({
   setShowSafetyTerms,
   showSafetyTerms,
 }) {
+  const { t } = useLanguage()
+
+  if (!activity) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Container className="py-8">
+          <BackButton />
+
+          {loading || !error ? (
+            <p className="text-sm font-semibold text-slate-500">
+              {t('activityDetail.loading')}
+            </p>
+          ) : (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-600">
+              {t('activityDetail.loadError')}
+            </div>
+          )}
+        </Container>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Container className="py-8">
@@ -30,12 +54,12 @@ export function ActivityDetailView({
             <main>
               <section>
                 <h2 className="text-2xl font-black text-slate-950">
-                  About this experience
+                  {t('activityDetail.about')}
                 </h2>
 
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
                   {activity?.description ||
-                    'Thông tin mô tả hoạt động chưa được cập nhật.'}
+                    t('activityDetail.noDescription')}
                 </p>
               </section>
 
@@ -47,7 +71,7 @@ export function ActivityDetailView({
 
               {loading && (
                 <p className="mt-5 text-sm text-slate-500">
-                  Đang tải chi tiết...
+                  {t('activityDetail.loadingShort')}
                 </p>
               )}
 
@@ -80,4 +104,4 @@ export function ActivityDetailView({
       />
     </div>
   )
-}
+}

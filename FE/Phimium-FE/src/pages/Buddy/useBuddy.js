@@ -1,47 +1,68 @@
 import { useEffect, useState } from 'react'
-import buddyService from '@/services/buddyService.js'
-import { mapActivitiesResponse } from '@/pages/Activity/ActivityMapper.js'
 
-export const useBuddy = (buddyId) => { 
-  const [data, setData] = useState({
-    activities: [],
-    feedbacks: [],
-    loading: true
-  })
+import { mapActivitiesResponse } from '@/features/activity/activityMapper.js'
+import buddyService from '@/services/buddyService.js'
+import { getResponseList } from '@/utils/response.js'
+
+export function useBuddy(buddyId) {
+  const [hostedActivities, setHostedActivities] = useState([])
+  const [feedbacks, setFeedbacks] = useState([])
+  const [loading, setLoading] = useState(Boolean(buddyId))
+  const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!buddyId) return
+
+    let isMounted = true
+
     const fetchData = async () => {
-      if (!buddyId) return;
-
       try {
-        setData(prev => ({ ...prev, loading: true }))
+        setLoading(true)
+        setError(null)
 
-        // Thêm .catch() trực tiếp vào getFeedbackByBuddy để nó không nổ lây sang getHostedActivities
+        // Lỗi feedback không được làm hỏng danh sách hoạt động
         const [activityRes, feedbackRes] = await Promise.all([
           buddyService.getHostedActivities(buddyId),
-          buddyService.getFeedbackByBuddy(buddyId).catch(error => {
-            console.warn('Bỏ qua lỗi tải Feedback:', error.message);
-            // Trả về data rỗng giả để app chạy tiếp
-            return { data: { data: [] } }; 
-          })
+          buddyService.getFeedbackByBuddy(buddyId).catch((err) => {
+            console.warn('Không tải được feedback:', err?.message)
+            return null
+          }),
         ])
 
-        setData({
-          activities: mapActivitiesResponse(activityRes),
-          feedbacks: feedbackRes?.data?.data || [], 
-          loading: false
-        })
-      } catch (error) {
-        console.error('Lỗi tải dữ liệu Dashboard:', error)
-        setData(prev => ({ ...prev, loading: false }))
+        if (isMounted) {
+          setHostedActivities(mapActivitiesResponse(activityRes))
+          setFeedbacks(getResponseList(feedbackRes))
+        }
+      } catch (err) {
+        console.error('Lỗi tải dữ liệu Buddy dashboard:', err)
+
+        if (isMounted) {
+          setError(err)
+          setHostedActivities([])
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchData()
+
+    return () => {
+      isMounted = false
+    }
   }, [buddyId])
 
+  // TODO: mở form tạo hoạt động khi BE có API
+  const handleCreateActivity = () => {}
+
   return {
-    ...data,
-    handleCreateActivity: () => console.log('Mở form tạo...')
+    hostedActivities,
+    feedbacks,
+    loading,
+    error,
+    hasBuddyId: Boolean(buddyId),
+    handleCreateActivity,
   }
 }

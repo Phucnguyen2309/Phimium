@@ -1,7 +1,12 @@
+import { useLanguage } from '@/context/languageContext.js'
+import { formatRating } from '@/pages/ActivityDetail/activityDetailUtils.js'
+import { getValidImage } from '@/utils/image.js'
+
 import { LocationIcon } from './ActivityDetailIcons.jsx'
-import { formatRating, getValidImage } from '../activityDetailUtils.js'
 
 export function ActivityHero({ activity }) {
+  const { t } = useLanguage()
+
   const activityImage = getValidImage(activity?.thumbnailUrl)
 
   return (
@@ -21,12 +26,9 @@ export function ActivityHero({ activity }) {
       <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
         <div className="mb-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-            Phimium activity
+            {t('activityDetail.heroBadge')}
           </span>
 
-          <span className="rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold">
-            Verified host
-          </span>
         </div>
 
         <h1 className="max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">
@@ -49,4 +51,4 @@ export function ActivityHero({ activity }) {
       </div>
     </section>
   )
-}
+}

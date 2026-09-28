@@ -2,6 +2,7 @@ package com.be.entity;
 
 import com.be.enums.PaymentMethod;
 import com.be.enums.PaymentStatus;
+import com.be.util.DateTimeUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,8 +63,9 @@ public class Payment {
     @PrePersist
     public void prePersist()
     {
-        createdAt = LocalDateTime.now();
-        updateAt = LocalDateTime.now();
+        LocalDateTime now = DateTimeUtils.nowVietnam();
+        createdAt = now;
+        updateAt = now;
 
         if(status == null){
           status = PaymentStatus.PENDING;
@@ -75,6 +77,6 @@ public class Payment {
     @PreUpdate
     public void preUpdate()
     {
-        updateAt = LocalDateTime.now();
+        updateAt = DateTimeUtils.nowVietnam();
     }
 }

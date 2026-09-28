@@ -2,77 +2,80 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { USER_ROLES } from '@/constants/app.js'
 import { MainLayout } from '@/layouts/MainLayout.jsx'
-import ActivityDetailPage from '@/pages/ActivityDetailPage.jsx'
-import ActivityGuidelinePage from '@/pages/ActivityGuidelinePage.jsx'
-import AdminPage from '@/pages/AdminPage.jsx'
-import BuddyPage from '@/pages/BuddyPage.jsx'
-import ForbiddenPage from '@/pages/ForbiddenPage.jsx'
-import HomePage from '@/pages/HomePage.jsx'
-import Login from '@/pages/Login.jsx'
-import UserDashboard from '../pages/UserDashboard/UserDashboard'
-import Register from '@/pages/Register.jsx'
+import ActivitiesPage from '@/pages/Activities/ActivitiesPage.jsx'
+import ActivityDetailPage from '@/pages/ActivityDetail/ActivityDetailPage.jsx'
+import ActivityGuidelinePage from '@/pages/ActivityGuideline/ActivityGuidelinePage.jsx'
+import AdminPage from '@/pages/Admin/AdminPage.jsx'
+import BuddyPage from '@/pages/Buddy/BuddyPage.jsx'
+import ForbiddenPage from '@/pages/Forbidden/ForbiddenPage.jsx'
+import GroupDetailPage from '@/pages/GroupDetail/GroupDetailPage.jsx'
+import HomePage from '@/pages/Home/HomePage.jsx'
+import LoginPage from '@/pages/Login/LoginPage.jsx'
+import NotFoundPage from '@/pages/NotFound/NotFoundPage.jsx'
+import RegisterPage from '@/pages/Register/RegisterPage.jsx'
+import UserDashboardPage from '@/pages/UserDashboard/UserDashboardPage.jsx'
 import { ProtectedRoute } from '@/routes/ProtectedRoute.jsx'
 import { ROUTES } from '@/routes/paths.js'
-import ActivityView from '../pages/Activity/ActivityView'
-import GroupDetailPage from '../pages/MyGroup/GroupDetailPage'
-
 
 const withMainLayout = (page) => <MainLayout>{page}</MainLayout>
+
+const withRoles = (roles, page) => (
+  <ProtectedRoute allowedRoles={roles}>{withMainLayout(page)}</ProtectedRoute>
+)
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path={ROUTES.login} element={<Login />} />
-        <Route path={ROUTES.register} element={<Register />} />
+        {/* Auth */}
+        <Route path={ROUTES.login} element={<LoginPage />} />
+        <Route path={ROUTES.register} element={<RegisterPage />} />
+
+        {/* Public */}
         <Route path={ROUTES.home} element={withMainLayout(<HomePage />)} />
+        <Route
+          path={ROUTES.activities}
+          element={withMainLayout(<ActivitiesPage />)}
+        />
         <Route
           path={ROUTES.activityDetail}
           element={withMainLayout(<ActivityDetailPage />)}
         />
         <Route
-            path={ROUTES.activities}
-            element={withMainLayout(<ActivityView />)}
-          />
-        <Route
           path={ROUTES.activityGuidelines}
           element={withMainLayout(<ActivityGuidelinePage />)}
         />
+
+        {/* User */}
         <Route
           path={ROUTES.userDashboard}
-          element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.user]}>
-              {withMainLayout(<UserDashboard />)}
-            </ProtectedRoute>
-          }
+          element={withRoles([USER_ROLES.user], <UserDashboardPage />)}
         />
         <Route
           path={ROUTES.groupDetail}
-          element={
-    <ProtectedRoute allowedRoles={[USER_ROLES.user]}>
-      {withMainLayout(<GroupDetailPage />)}
-    </ProtectedRoute>
-  }
-/>
+          element={withRoles([USER_ROLES.user], <GroupDetailPage />)}
+        />
+
+        {/* Buddy */}
         <Route
           path={ROUTES.buddy}
-          element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.buddy]}>
-              {withMainLayout(<BuddyPage />)}
-            </ProtectedRoute>
-          }
+          element={withRoles([USER_ROLES.buddy], <BuddyPage />)}
         />
+
+        {/* Admin */}
         <Route
           path={ROUTES.admin}
-          element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.admin]}>
-              {withMainLayout(<AdminPage />)}
-            </ProtectedRoute>
-          }
+          element={withRoles([USER_ROLES.admin], <AdminPage />)}
         />
+
+        {/* Errors */}
         <Route
           path={ROUTES.forbidden}
           element={withMainLayout(<ForbiddenPage />)}
+        />
+        <Route
+          path={ROUTES.notFound}
+          element={withMainLayout(<NotFoundPage />)}
         />
       </Routes>
     </BrowserRouter>

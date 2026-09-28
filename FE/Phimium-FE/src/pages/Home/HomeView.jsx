@@ -1,33 +1,48 @@
-import { CtaSection } from "./components/CtaSection"
-import { HeroSection } from "./components/HeroSection"
-import { HomeFooter } from "./components/HomeFooter"
-import { HowItWorksSection } from "./components/HowItWorksSection"
-import { PopularActivitiesSection } from "./components/PopularActivitiesSection"
-import { TestimonialsSection } from "./components/TestimonialsSection"
-import { WhyPhimiumSection } from "./components/WhyPhimiumSection"
+import { SiteFooter } from '@/components/layout/SiteFooter.jsx'
 
+import { BuddiesSection } from './components/BuddiesSection.jsx'
+import { FeaturedActivitiesSection } from './components/FeaturedActivitiesSection.jsx'
+import { HeroSection } from './components/HeroSection.jsx'
+import { JoinStepsSection } from './components/JoinStepsSection.jsx'
+import { MeetingPointsSection } from './components/MeetingPointsSection.jsx'
+import { PillarsSection } from './components/PillarsSection.jsx'
+import { SafetyBannerSection } from './components/SafetyBannerSection.jsx'
 
-export function HomeView({ activities = [], loading = false }) {
-  const activityList = Array.isArray(activities) ? activities : []
-
+export function HomeView({
+  activityTypes,
+  buddies,
+  error,
+  featuredActivities,
+  isAuthenticated,
+  loading,
+  meetingPoints,
+  selectedType,
+  setSelectedType,
+}) {
   return (
     <div className="bg-slate-50">
-      < HeroSection />
+      <HeroSection activityTypes={activityTypes} />
 
-      <PopularActivitiesSection
-        activities={activityList}
+      <PillarsSection />
+
+      <FeaturedActivitiesSection
+        activities={featuredActivities}
+        activityTypes={activityTypes}
+        selectedType={selectedType}
+        onSelectType={setSelectedType}
         loading={loading}
+        error={error}
       />
 
-      <HowItWorksSection />
+      <MeetingPointsSection meetingPoints={meetingPoints} />
 
-      <WhyPhimiumSection />
+      <JoinStepsSection isAuthenticated={isAuthenticated} />
 
-      <TestimonialsSection />
+      <BuddiesSection buddies={buddies} />
 
-      <CtaSection />
+      <SafetyBannerSection isAuthenticated={isAuthenticated} />
 
-      <HomeFooter />
+      <SiteFooter />
     </div>
   )
 }

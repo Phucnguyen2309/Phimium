@@ -18,6 +18,7 @@ build/
 .env
 .env.*
 *.env
+!.env.example
 
 # Spring Boot / Java
 target/
@@ -39,4 +40,4 @@ build/
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw?

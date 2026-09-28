@@ -2,19 +2,16 @@ import { Navigate, useLocation } from 'react-router-dom'
 
 import { useAuth } from '@/context/authContext.js'
 import { ROUTES } from '@/routes/paths.js'
+import { normalizeRole } from '@/utils/role.js'
 
 export function ProtectedRoute({ allowedRoles, children }) {
   const { isAuthenticated, user } = useAuth()
   const location = useLocation()
-  const userRole = String(user?.role ?? '').replace('ROLE_', '').toUpperCase()
+  const userRole = normalizeRole(user?.role)
 
   if (!isAuthenticated) {
     return (
-      <Navigate
-        replace
-        to={ROUTES.login}
-        state={{ from: location.pathname }}
-      />
+      <Navigate replace to={ROUTES.login} state={{ from: location.pathname }} />
     )
   }
 
