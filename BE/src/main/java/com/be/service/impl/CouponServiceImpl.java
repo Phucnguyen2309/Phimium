@@ -1,24 +1,30 @@
 package com.be.service.impl;
 
+import com.be.dto.request.CreateCouponRequest;
 import com.be.entity.Coupon;
 import com.be.enums.CouponDiscountType;
 import com.be.enums.CouponStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
+import com.be.mapper.CouponMapper;
 import com.be.repository.CouponRepository;
 import com.be.service.CouponService;
 import com.be.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
 
     private final CouponRepository couponRepository;
+    private final CouponMapper couponMapper;
 
     @Override
     public Coupon validateAndGetCoupon(String code, BigDecimal subtotal) {
@@ -72,5 +78,39 @@ public class CouponServiceImpl implements CouponService {
         }
 
         return discount;
+    }
+    @Override
+    @Transactional
+    public Coupon createCoupon(CreateCouponRequest request) {
+        if (couponRepository.findByCode(request.getCode().trim().toUpperCase()).isPresent()) {
+            throw new AppException(ErrorCode.COUPON_ALREADY_EXISTS);
+        }
+
+        if (request.getValidUntil().isBefore(request.getValidFrom())) {
+            throw new AppException(ErrorCode.INVALID_COUPON_DATE_RANGE);
+        }
+
+        Coupon coupon = couponMapper.toEntity(request);
+        return couponRepository.save(coupon);
+    }
+
+    @Override
+    public List<Coupon> getAllCoupons() {
+        return couponRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public Coupon toggleCouponStatus(UUID couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_FOUND));
+
+        if (coupon.getStatus() == CouponStatus.ACTIVE) {
+            coupon.setStatus(CouponStatus.INACTIVE);
+        } else {
+            coupon.setStatus(CouponStatus.ACTIVE);
+        }
+
+        return couponRepository.save(coupon);
     }
 }

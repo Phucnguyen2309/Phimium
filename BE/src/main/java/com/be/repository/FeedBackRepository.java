@@ -2,6 +2,7 @@ package com.be.repository;
 
 import com.be.entity.FeedBack;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface FeedBackRepository extends JpaRepository<FeedBack, UUID> {
+public interface FeedBackRepository extends JpaRepository<FeedBack, UUID>, JpaSpecificationExecutor<FeedBack> {
 
     boolean existsByRegistration_RegistrationId(UUID registrationId);
 

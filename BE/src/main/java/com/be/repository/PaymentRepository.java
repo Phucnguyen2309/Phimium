@@ -6,12 +6,13 @@ import com.be.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+public interface PaymentRepository extends JpaRepository<Payment, UUID>, JpaSpecificationExecutor<Payment> {
     Optional<Payment> findByInvoiceNumber(String invoiceNumber);
 
     @org.springframework.data.jpa.repository.Query("select p.registration.registrationId from Payment p where p.invoiceNumber = :invoice")

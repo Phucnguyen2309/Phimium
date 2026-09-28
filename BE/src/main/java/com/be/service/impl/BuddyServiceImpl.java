@@ -4,6 +4,7 @@ import com.be.dto.request.UpgradeBuddyRequest;
 import com.be.dto.response.BuddyResponse;
 import com.be.entity.Buddy;
 import com.be.entity.User;
+import com.be.enums.BuddyStatus;
 import com.be.enums.UserRole;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -67,6 +69,30 @@ public class BuddyServiceImpl implements BuddyService {
         Buddy savedBuddy = buddyRepository.save(buddy);
 
         return buddyMapper.toResponse(savedBuddy);
+    }
+
+    @Override
+    public List<BuddyResponse> getAllBuddies(BuddyStatus status) {
+        List<Buddy> buddies;
+        if (status != null) {
+            buddies = buddyRepository.findByStatus(status);
+        } else {
+            buddies = buddyRepository.findAll();
+        }
+        return buddies.stream()
+                .map(buddyMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public BuddyResponse updateBuddyStatus(UUID buddyId, BuddyStatus status) {
+        Buddy buddy = buddyRepository.findById(buddyId)
+                .orElseThrow(() -> new AppException(ErrorCode.BUDDY_NOT_FOUND));
+
+        buddy.setStatus(status);
+        Buddy saved = buddyRepository.save(buddy);
+        return buddyMapper.toResponse(saved);
     }
 }
 

@@ -20,6 +20,8 @@ import com.be.service.PricingService;
 import com.be.service.RegistrationService;
 import com.be.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -497,5 +499,49 @@ public class RegistrationServiceImpl implements RegistrationService {
         return registrationMapper.toResponse(savedRegistration);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RegistrationResponse> getAllRegistrationsForAdmin(RegistrationStatus status, Pageable pageable) {
+        Page<Registration> registrationPage;
+        if (status != null) {
+            registrationPage = registrationRepository.findByStatus(status, pageable);
+        } else {
+            registrationPage = registrationRepository.findAll(pageable);
+        }
+        return registrationPage.map(registrationMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RegistrationResponse getRegistrationDetailForAdmin(UUID registrationId) {
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+        return registrationMapper.toResponse(registration);
+    }
+
+    @Override
+    @Transactional
+    public RegistrationResponse manualConfirmPayment(UUID registrationId, User adminUser) {
+        if (adminUser.getRole() != UserRole.ADMIN) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+
+        if (registration.getStatus() == RegistrationStatus.CANCELLED
+                || registration.getStatus() == RegistrationStatus.COMPLETED) {
+            throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
+        }
+
+        // Chuyển sang chờ ghép Buddy và kích hoạt thuật toán
+        registration.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
+        registrationRepository.save(registration);
+
+        // Kích hoạt ghép Buddy tự động
+        buddyMatchingService.findAndAssignBuddy(registration);
+
+        return registrationMapper.toResponse(registration);
+    }
 
 }
