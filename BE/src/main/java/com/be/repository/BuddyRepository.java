@@ -22,4 +22,6 @@ public interface BuddyRepository extends JpaRepository<Buddy, UUID> {
 
 
     boolean existsByUser_UserId(UUID userId);
+
+    long countByStatus(BuddyStatus status);
 }

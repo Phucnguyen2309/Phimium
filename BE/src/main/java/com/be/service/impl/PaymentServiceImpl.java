@@ -183,4 +183,42 @@ public class PaymentServiceImpl implements PaymentService {
         fields.put("signature", sePaySignatureUtil.sign(fields));
         return fields;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PaymentResponse> getAdminPayments(String keyword, PaymentStatus status, Pageable pageable) {
+        String search = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim().toLowerCase() : null;
+
+        Page<Payment> payments = paymentRepository.findAll((root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            // 1. Lọc theo trạng thái thanh toán
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            // 2. Tìm kiếm theo mã hóa đơn, mã đơn provider, mã giao dịch SePay hoặc mô tả
+            if (search != null) {
+                String pattern = "%" + search + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("invoiceNumber")), pattern),
+                        cb.like(cb.lower(root.get("providerOrderId")), pattern),
+                        cb.like(cb.lower(root.get("providerTransactionId")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        }, pageable);
+
+        return payments.map(paymentMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentResponse getPaymentDetail(UUID paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+        return paymentMapper.toResponse(payment);
+    }
 }

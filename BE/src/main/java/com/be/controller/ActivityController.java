@@ -41,60 +41,6 @@ public class ActivityController {
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    @PostMapping(
-            value = "/activities",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(
-            summary = "Tạo tour/hoạt động mới (Chỉ Admin)",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(
-                                    implementation = CreateActivityMultipartRequest.class
-                            ),
-                            encoding = {
-                                    @Encoding(
-                                            name = "request",
-                                            contentType = MediaType.APPLICATION_JSON_VALUE
-                                    ),
-                                    @Encoding(
-                                            name = "image",
-                                            contentType = "image/*"
-                                    )
-                            }
-                    )
-            )
-    )
-    public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
-
-            @Valid
-            @RequestPart("request")
-            ActivityRequest request,
-
-            @RequestPart(
-                    value = "image",
-                    required = false
-            )
-            MultipartFile image,
-
-            @AuthenticationPrincipal User currentUser
-
-    ) throws IOException {
-
-        ActivityResponse response =
-                activityService.createActivity(
-                        request,
-                        image,
-                        currentUser
-                );
-
-        return ResponseEntity.ok(
-                ApiResponse.success("Success", response)
-        );
-    }
-
     @GetMapping("/getAll")
     public ResponseEntity<ApiResponse<List<ActivityResponse>>> getAllActivity(){
         List<ActivityResponse> activity = activityService.getAllActivities();

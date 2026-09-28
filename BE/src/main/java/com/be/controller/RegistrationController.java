@@ -89,30 +89,4 @@ public class RegistrationController {
         return ResponseEntity.ok(ApiResponse.success("Registration cancelled successfully", response));
     }
 
-    // -------------------------------- ADMIN APIs ---------------------------------
-    @GetMapping("/{registrationId}/buddy-candidates")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(
-            summary = "[ADMIN] Lấy danh sách Buddy khả dụng cho đơn chờ",
-            description = "Chỉ Admin mới có quyền gọi API này để lọc các Buddy không bị trùng lịch"
-    )
-    public ResponseEntity<ApiResponse<List<BuddyResponse>>> getBuddyCandidates(@PathVariable UUID registrationId) {
-        List<BuddyResponse> candidates = registrationService.getAvailableBuddyCandidates(registrationId);
-        return ResponseEntity.ok(ApiResponse.success("Get available buddy candidates successfully", candidates));
-    }
-
-    @PostMapping("/{registrationId}/assign-buddy")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(
-            summary = "[ADMIN] Gán Buddy thủ công cho đơn WAITING_FOR_BUDDY",
-            description = "Chỉ Admin mới có quyền gán Buddy vào đơn đang chờ"
-    )
-    public ResponseEntity<ApiResponse<RegistrationResponse>> assignBuddy(
-            @PathVariable UUID registrationId,
-            @RequestBody @Valid AssignBuddyRequest request,
-            @AuthenticationPrincipal User adminUser) {
-
-        RegistrationResponse response = registrationService.adminAssignBuddy(registrationId, request.getBuddyId(), adminUser);
-        return ResponseEntity.ok(ApiResponse.success("Buddy assigned successfully", response));
-    }
 }

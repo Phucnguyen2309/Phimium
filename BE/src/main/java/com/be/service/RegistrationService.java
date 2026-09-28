@@ -5,6 +5,9 @@ import com.be.dto.response.ActivityGroupResponse;
 import com.be.dto.response.BuddyResponse;
 import com.be.dto.response.RegistrationResponse;
 import com.be.entity.User;
+import com.be.enums.RegistrationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,4 +33,10 @@ public interface RegistrationService {
     RegistrationResponse cancelRegistration(UUID registrationId, User currentUser);
     List<BuddyResponse> getAvailableBuddyCandidates(UUID registrationId);
     RegistrationResponse adminAssignBuddy(UUID registrationId, UUID buddyId, User adminUser);
+
+    Page<RegistrationResponse> getAllRegistrationsForAdmin(RegistrationStatus status, Pageable pageable);
+
+    RegistrationResponse getRegistrationDetailForAdmin(UUID registrationId);
+
+    RegistrationResponse manualConfirmPayment(UUID registrationId, User adminUser);
 }

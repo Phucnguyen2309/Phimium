@@ -15,12 +15,16 @@ import com.be.repository.BuddyRepository;
 import com.be.repository.FeedBackRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.FeedBackService;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -128,5 +132,58 @@ public class FeedBackServiceImpl implements FeedBackService {
 
         buddy.setAverageRating(newAverage);
         buddy.setTotalReviews(newReviewCount);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FeedBackResponse> getAdminFeedbacks(
+            String keyword,
+            Integer tourRating,
+            Integer buddyRating,
+            Pageable pageable
+    ) {
+        String search = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim().toLowerCase() : null;
+
+        Page<FeedBack> feedbacks = feedBackRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 1. Lọc theo điểm tour (1-5 sao)
+            if (tourRating != null) {
+                predicates.add(cb.equal(root.get("tourRating"), tourRating));
+            }
+
+            // 2. Lọc theo điểm Buddy (1-5 sao)
+            if (buddyRating != null) {
+                predicates.add(cb.equal(root.get("buddyRating"), buddyRating));
+            }
+
+            // 3. Tìm kiếm từ khóa xuất hiện ở bình luận Tour hoặc Buddy
+            if (search != null) {
+                String pattern = "%" + search + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("tourComment")), pattern),
+                        cb.like(cb.lower(root.get("buddyComment")), pattern)
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
+
+        return feedbacks.map(feedBackMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FeedBackResponse getFeedbackDetail(UUID feedbackId) {
+        FeedBack feedback = feedBackRepository.findById(feedbackId)
+                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
+        return feedBackMapper.toResponse(feedback);
+    }
+
+    @Override
+    @Transactional
+    public void deleteFeedback(UUID feedbackId) {
+        FeedBack feedback = feedBackRepository.findById(feedbackId)
+                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
+        feedBackRepository.delete(feedback);
     }
 }

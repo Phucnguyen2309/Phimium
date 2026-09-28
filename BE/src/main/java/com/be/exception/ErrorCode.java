@@ -171,6 +171,17 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST,
             "The provided coupon cannot be applied to this booking"
     ),
+
+    COUPON_ALREADY_EXISTS(
+            4507,
+            HttpStatus.CONFLICT,
+            "Coupon code already exists"
+    ),
+    INVALID_COUPON_DATE_RANGE(
+            4508,
+            HttpStatus.BAD_REQUEST,
+            "Valid until date must be after valid from date"
+    ),
     // ================= ACTIVITY & DEPARTURE (5000 - 5999) =================
 
     ACTIVITY_NOT_FOUND(
@@ -260,6 +271,11 @@ public enum ErrorCode {
             7001,
             HttpStatus.CONFLICT,
             "Feedback has already been submitted for this registration"
+    ),
+    FEEDBACK_NOT_FOUND(
+            7002,
+            HttpStatus.NOT_FOUND,
+            "Feedback not found"
     ),
     CHECKIN_CLOSED(
             8001,

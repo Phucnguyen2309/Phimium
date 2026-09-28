@@ -3,11 +3,14 @@ package com.be.repository;
 import com.be.entity.*;
 import com.be.enums.CheckInStatus;
 import com.be.enums.RegistrationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -110,4 +113,14 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             @Param("buddyId") UUID buddyId,
             @Param("departureId") UUID departureId
     );
+
+    Page<Registration> findByStatus(RegistrationStatus status, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(r.totalAmount), 0) FROM Registration r " +
+            "WHERE r.status IN ('CONFIRMED', 'BUDDY_ASSIGNED', 'IN_PROGRESS', 'COMPLETED')")
+    BigDecimal calculateTotalRevenue();
+
+    long countByStatus(RegistrationStatus status);
+
+    List<Registration> findTop5ByOrderByRegisteredAtDesc();
 }
