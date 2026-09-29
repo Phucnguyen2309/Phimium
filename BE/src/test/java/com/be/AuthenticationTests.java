@@ -32,7 +32,7 @@ class AuthenticationTests {
         ReflectionTestUtils.setField(jwt, "secretkey", Base64.getEncoder().encodeToString(new byte[32]));
         ReflectionTestUtils.setField(jwt, "expireMs", 86400000L);
         ReflectionTestUtils.setField(jwt, "refreshExpireMs", 604800000L);
-        var tokens = new AuthTokenService(jwt);
+        var tokens = new AuthTokenServiceImpl(jwt);
         auth = new AuthServiceImpl(users, encoder, jwt, otp, tokens);
         verifier = mock(GoogleTokenVerifier.class);
         google = new GoogleAuthServiceImpl(verifier, users, jwt, tokens);
