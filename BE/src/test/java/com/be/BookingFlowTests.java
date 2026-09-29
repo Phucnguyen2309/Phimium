@@ -33,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.*;
         "sepay.success-url=https://example.com/success", "sepay.error-url=https://example.com/error",
         "sepay.cancel-url=https://example.com/cancel"})
 @Import({RegistrationServiceImpl.class, PricingServiceImpl.class, CouponServiceImpl.class,
-        BookingLifecycleService.class, BuddyMatchingServiceImpl.class, PaymentServiceImpl.class,
+        BookingLifecycleServiceImpl.class, BuddyMatchingServiceImpl.class, PaymentServiceImpl.class,
         RegistrationMapper.class, ActivityGroupMapper.class, BuddyMapper.class,
         InstructionAcknowledgementMapper.class, PricingMapper.class, PaymentMapperImpl.class,
-        SePayProperties.class, SePaySignatureUtil.class, AdminBookingService.class})
+        SePayProperties.class, SePaySignatureUtil.class, AdminBookingServiceImpl.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class BookingFlowTests {
     @Autowired AdminBookingService adminBookings;

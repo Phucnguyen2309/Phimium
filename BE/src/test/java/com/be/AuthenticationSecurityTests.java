@@ -6,6 +6,7 @@ import com.be.entity.User;
 import com.be.enums.*;
 import com.be.repository.*;
 import com.be.service.*;
+import com.be.service.impl.AuthTokenServiceImpl;
 import com.be.service.impl.GoogleAuthServiceImpl;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(properties = "TOKEN_SECRET_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", controllers = {AuthController.class, AuthenticationSecurityTests.ProbeController.class})
 @Import({SecurityConfig.class, JwtAuthenticationFilter.class, JwtService.class,
-        GoogleAuthServiceImpl.class, AuthTokenService.class, AuthenticationSecurityTests.ProbeController.class})
+        GoogleAuthServiceImpl.class, AuthTokenServiceImpl.class, AuthenticationSecurityTests.ProbeController.class})
 class AuthenticationSecurityTests {
     @Autowired MockMvc mvc;
     @Autowired JwtService jwt;

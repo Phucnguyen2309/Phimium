@@ -3,6 +3,7 @@ package com.be;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.service.GoogleTokenVerifier;
+import com.be.service.impl.GoogleTokenVerifierImpl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -19,10 +20,10 @@ class AuthenticationGoogleConfigurationTests {
         String clientId = configured == null ? "test-client.apps.googleusercontent.com" : configured;
         new ApplicationContextRunner()
                 .withPropertyValues("google.client-id=" + clientId)
-                .withUserConfiguration(GoogleTokenVerifier.class)
+                .withUserConfiguration(GoogleTokenVerifierImpl.class)
                 .run(context -> {
                     assertNull(context.getStartupFailure());
-                    GoogleTokenVerifier service = context.getBean(GoogleTokenVerifier.class);
+                    GoogleTokenVerifierImpl service = context.getBean(GoogleTokenVerifierImpl.class);
                     GoogleIdTokenVerifier verifier = (GoogleIdTokenVerifier)
                             ReflectionTestUtils.getField(service, "verifier");
                     assertNotNull(verifier);
@@ -35,6 +36,6 @@ class AuthenticationGoogleConfigurationTests {
 
     @Test
     void emptyClientIdIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new GoogleTokenVerifier(" "));
+        assertThrows(IllegalArgumentException.class, () -> new GoogleTokenVerifierImpl(" "));
     }
 }
