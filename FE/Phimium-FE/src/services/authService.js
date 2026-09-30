@@ -11,6 +11,7 @@ const toApiError = (error, defaultMessage) => {
 
   const apiError = new Error(message)
   apiError.status = error?.response?.status
+  apiError.code = data?.code
   apiError.data = data
 
   return apiError
@@ -23,6 +24,48 @@ const authService = {
       return response.data
     } catch (error) {
       throw toApiError(error, t('auth.login.failed'))
+    }
+  },
+
+  /** Đăng nhập / đăng ký bằng Google. credential: Google ID token từ Google Identity Services */
+  googleAuth: async (credential) => {
+    try {
+      const response = await http.post('/auth/google', { credential })
+      return response.data
+    } catch (error) {
+      throw toApiError(error, t('auth.google.failed'))
+    }
+  },
+
+  /** Hoàn tất hồ sơ cho tài khoản Google mới (Bearer onboardingToken) */
+  completeProfile: async (onboardingToken, profile) => {
+    try {
+      const response = await http.post('/auth/complete-profile', profile, {
+        headers: { Authorization: `Bearer ${onboardingToken}` },
+      })
+      return response.data
+    } catch (error) {
+      throw toApiError(error, t('auth.completeProfile.failed'))
+    }
+  },
+
+  /** Xác thực email bằng mã OTP 6 số gửi qua email sau khi đăng ký */
+  verifyOtp: async (email, otp) => {
+    try {
+      const response = await http.post('/auth/verify-otp', { email, otp })
+      return response.data
+    } catch (error) {
+      throw toApiError(error, t('auth.verifyEmail.failed'))
+    }
+  },
+
+  /** Gửi lại mã OTP (Backend chặn nếu gửi lại trong vòng 60 giây) */
+  resendOtp: async (email) => {
+    try {
+      const response = await http.post('/auth/resend-otp', { email })
+      return response.data
+    } catch (error) {
+      throw toApiError(error, t('auth.verifyEmail.resendFailed'))
     }
   },
 

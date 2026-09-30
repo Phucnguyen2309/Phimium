@@ -39,6 +39,7 @@ public class AdminBookingController {
     }
 
     @GetMapping("/departures")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<Page<AdminDepartureResponse>> departures(
             @RequestParam(required = false) UUID activityId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

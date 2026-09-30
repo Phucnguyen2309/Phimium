@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { Container } from '@/components/common'
+import { BrandLogo } from '@/components/layout/BrandLogo.jsx'
 import { APP_NAME } from '@/constants/app.js'
 import { useLanguage } from '@/context/languageContext.js'
 import { ROUTES } from '@/routes/paths.js'
@@ -9,16 +10,11 @@ export function SiteFooter() {
   const { t } = useLanguage()
 
   return (
-    <footer className="border-t border-emerald-100 bg-white py-10">
+    <footer className="border-t border-slate-200 bg-white py-12">
       <Container>
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
-            <Link
-              to={ROUTES.home}
-              className="text-xl font-black text-emerald-700"
-            >
-              {APP_NAME}
-            </Link>
+            <BrandLogo />
 
             <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
               {t('footer.tagline')}
@@ -35,14 +31,14 @@ export function SiteFooter() {
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <Link
                 to={ROUTES.home}
-                className="block transition hover:text-emerald-700"
+                className="block transition hover:text-blue-950"
               >
                 {t('footer.about')}
               </Link>
 
               <Link
                 to={ROUTES.activities}
-                className="block transition hover:text-emerald-700"
+                className="block transition hover:text-blue-950"
               >
                 {t('nav.activities')}
               </Link>
@@ -55,14 +51,14 @@ export function SiteFooter() {
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <a
                 href="#popular-activities"
-                className="block transition hover:text-emerald-700"
+                className="block transition hover:text-blue-950"
               >
                 {t('footer.helpCenter')}
               </a>
 
               <a
                 href="#popular-activities"
-                className="block transition hover:text-emerald-700"
+                className="block transition hover:text-blue-950"
               >
                 {t('footer.safetyGuide')}
               </a>
@@ -73,11 +69,11 @@ export function SiteFooter() {
             <h3 className="text-sm font-black text-slate-950">{t('footer.legal')}</h3>
 
             <div className="mt-4 space-y-3 text-sm text-slate-600">
-              <a href="#" className="block transition hover:text-emerald-700">
+              <a href="#" className="block transition hover:text-blue-950">
                 {t('footer.privacy')}
               </a>
 
-              <a href="#" className="block transition hover:text-emerald-700">
+              <a href="#" className="block transition hover:text-blue-950">
                 {t('footer.contact')}
               </a>
             </div>

@@ -9,15 +9,3 @@ export function formatRating(value) {
 
   return t('activityDetail.rating', { rating: rating.toFixed(1) })
 }
-
-export function hasValidCoordinates(activity) {
-  const latitude = Number(activity?.latitude)
-  const longitude = Number(activity?.longitude)
-
-  return (
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    latitude !== 0 &&
-    longitude !== 0
-  )
-}

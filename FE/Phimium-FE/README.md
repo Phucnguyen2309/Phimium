@@ -33,8 +33,11 @@ Xem chi tiết quy ước trong `HUONG_DAN_CAU_TRUC.md`.
 
 ## Environment
 
-Copy `.env.example` thành `.env` rồi chỉnh URL API:
+Copy `.env.example` thành `.env` rồi chỉnh:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api
+VITE_GOOGLE_CLIENT_ID=<giống GOOGLE_CLIENT_ID của Backend>
 ```
+
+Đăng nhập Google: trong Google Cloud Console → OAuth Client ID (Web), thêm `http://localhost:5173` và domain Vercel vào **Authorized JavaScript origins**. Sửa `.env` xong phải chạy lại `npm run dev`.

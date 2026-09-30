@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
 import { LanguageSwitcher } from '@/components/common'
@@ -180,7 +180,18 @@ function AccountMenu() {
 export function SiteHeader() {
   const { t } = useLanguage()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const closeMobile = useCallback(() => setMobileOpen(false), [])
+
+  // Đổ bóng nhẹ cho header khi đã cuộn xuống
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 8)
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const navLinks = (
     <>
@@ -206,8 +217,14 @@ export function SiteHeader() {
   )
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[999] border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+    <header
+      className={`fixed inset-x-0 top-0 z-[999] border-b backdrop-blur-xl transition duration-300 ${
+        scrolled
+          ? 'border-slate-200/80 bg-white/90 shadow-[0_8px_30px_-12px_rgba(22,36,86,0.18)]'
+          : 'border-transparent bg-white'
+      }`}
+    >
+      <div className="mx-auto flex h-16 w-full max-w-[1920px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10 2xl:px-16">
         <BrandLogo />
 
         <nav className="hidden items-center gap-8 md:flex">{navLinks}</nav>

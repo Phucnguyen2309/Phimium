@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { STORAGE_KEYS, USER_ROLES } from '@/constants/app.js'
 import { AuthContext } from '@/context/authContext.js'
+import { decodeJwtPayload } from '@/utils/jwt.js'
 import { normalizeRole } from '@/utils/role.js'
 
 const normalizeToken = (token) => {
@@ -39,14 +40,20 @@ const readStoredUser = () => {
 
 const extractAuthData = (loginResponse) => {
   const payload = loginResponse?.data ?? loginResponse
-  const rawRole = payload?.role ?? payload?.authorities?.[0] ?? USER_ROLES.user
+  const token = normalizeToken(payload?.accessToken ?? payload?.token ?? payload?.jwt)
+
+  // Response đăng nhập Google chỉ có token -> lấy thêm thông tin từ claims của JWT
+  const claims = decodeJwtPayload(token) ?? {}
+  const rawRole =
+    payload?.role ?? payload?.authorities?.[0] ?? claims.role ?? USER_ROLES.user
 
   return {
-    token: normalizeToken(payload?.token ?? payload?.accessToken ?? payload?.jwt),
-    username: payload?.username ?? payload?.name ?? payload?.email ?? '',
+    token,
+    username:
+      payload?.username ?? claims.username ?? payload?.name ?? payload?.email ?? '',
     role: normalizeRole(rawRole),
-    userId: payload?.userId,
-    buddyId: payload?.buddyId,
+    userId: payload?.userId ?? claims.sub,
+    buddyId: payload?.buddyId ?? claims.buddyId,
   }
 }
 

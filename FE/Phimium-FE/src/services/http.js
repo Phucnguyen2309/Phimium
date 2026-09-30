@@ -13,7 +13,8 @@ http.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(STORAGE_KEYS.token)
 
-    if (token && token !== 'undefined' && token !== 'null') {
+    // Không ghi đè nếu request đã tự đặt Authorization (VD: onboarding token Google)
+    if (!config.headers.Authorization && token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`
     }
 

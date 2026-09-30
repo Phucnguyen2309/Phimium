@@ -179,8 +179,10 @@ export function AdminSidebar({
         <nav className="flex flex-col gap-1.5">
           {NAV_ITEMS.map((item) => {
             const isActive = activeTab === item.id
-            const itemKey = String(item.id).toLowerCase()
-            const itemLabel = t('admin.tabs.' + itemKey) || t('admin.tabs.' + item.id) || item.defaultLabel
+            // t() trả lại chính key khi thiếu bản dịch -> khi đó dùng defaultLabel
+            const tabKey = `admin.tabs.${String(item.id).toLowerCase()}`
+            const translatedLabel = t(tabKey)
+            const itemLabel = translatedLabel === tabKey ? item.defaultLabel : translatedLabel
 
             return (
               <button
