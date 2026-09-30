@@ -2,6 +2,7 @@ package com.be.dto.request;
 
 import com.be.enums.ActivityStatus;
 import com.be.enums.TourType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,7 +52,8 @@ public class ActivityRequest {
     private BigDecimal childParticipationFee;
 
     @NotNull
-    @Min(1)
+    @Min(value = 2, message = "Số lượng khách tối thiểu cho mỗi tour phải từ 2 người trở lên")
+    @Schema(example = "2")
     private Integer minimumParticipants;
 
     @NotNull

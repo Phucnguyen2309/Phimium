@@ -1,6 +1,8 @@
 package com.be.service.impl;
 
 import com.be.dto.request.CreateCouponRequest;
+import com.be.dto.request.UpdateCouponRequest;
+import com.be.dto.response.CouponResponse;
 import com.be.entity.Coupon;
 import com.be.enums.CouponDiscountType;
 import com.be.enums.CouponStatus;
@@ -112,5 +114,29 @@ public class CouponServiceImpl implements CouponService {
         }
 
         return couponRepository.save(coupon);
+    }
+    @Override
+    @Transactional
+    public CouponResponse updateCoupon(UUID couponId, UpdateCouponRequest request) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_FOUND));
+
+        // 1. Kiểm tra tính hợp lệ của khoảng thời gian
+        if (request.getValidUntil().isBefore(request.getValidFrom())
+                || request.getValidUntil().isEqual(request.getValidFrom())) {
+            throw new AppException(ErrorCode.INVALID_COUPON_DATE_RANGE);
+        }
+
+        // 2. Nếu đổi sang mã code khác, kiểm tra code mới đã tồn tại chưa
+        String newCode = request.getCode().trim().toUpperCase();
+        if (!coupon.getCode().equalsIgnoreCase(newCode) && couponRepository.existsByCode(newCode)) {
+            throw new AppException(ErrorCode.COUPON_ALREADY_EXISTS);
+        }
+
+        couponMapper.updateEntity(request, coupon);
+
+        // 4. Lưu và trả response qua mapper
+        Coupon updated = couponRepository.save(coupon);
+        return couponMapper.toResponse(updated);
     }
 }

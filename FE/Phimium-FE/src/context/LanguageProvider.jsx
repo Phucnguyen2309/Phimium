@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { DEFAULT_LANGUAGE, STORAGE_KEYS } from '@/constants/app.js'
 import { LanguageContext } from '@/context/languageContext.js'
@@ -52,11 +52,9 @@ export function LanguageProvider({ children }) {
     [language, setLanguage],
   )
 
-  // key={language}: đổi ngôn ngữ thì mount lại app để dữ liệu đã map
-  // (mapper, format ngày / tiền) được tính lại theo ngôn ngữ mới.
   return (
     <LanguageContext.Provider value={value}>
-      <Fragment key={language}>{children}</Fragment>
+      {children}
     </LanguageContext.Provider>
   )
 }

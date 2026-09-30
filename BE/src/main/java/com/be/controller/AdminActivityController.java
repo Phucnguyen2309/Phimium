@@ -2,6 +2,7 @@ package com.be.controller;
 
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.request.CreateActivityMultipartRequest;
+import com.be.dto.request.UpdateActivityRequest;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
 import com.be.entity.User;
@@ -17,13 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/admin/activities")
@@ -72,5 +71,22 @@ public class AdminActivityController {
         return ResponseEntity.ok(
                 ApiResponse.success("Success", response)
         );
+    }
+
+    @PutMapping("/{activityId}")
+    @Operation(summary = "Chỉnh sửa thông tin Tour/Hoạt động")
+    public ResponseEntity<ApiResponse<ActivityResponse>> updateActivity(
+            @PathVariable UUID activityId,
+            @Valid @RequestBody UpdateActivityRequest request
+    ) {
+        ActivityResponse response = activityService.updateActivity(activityId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật tour thành công", response));
+    }
+
+    @DeleteMapping("/{activityId}")
+    @Operation(summary = "Xóa Tour (chỉ xóa được khi chưa có lịch khởi hành/booking)")
+    public ResponseEntity<ApiResponse<Void>> deleteActivity(@PathVariable UUID activityId) {
+        activityService.deleteActivity(activityId);
+        return ResponseEntity.ok(ApiResponse.success("Xóa tour thành công", null));
     }
 }

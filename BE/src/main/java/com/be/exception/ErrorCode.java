@@ -213,6 +213,16 @@ public enum ErrorCode {
             HttpStatus.CONFLICT,
             "Insufficient departure capacity"
     ),
+    ACTIVITY_CANNOT_BE_DELETED(
+            5006,
+            HttpStatus.BAD_REQUEST,
+            "Tours with scheduled departures or existing bookings cannot be deleted"
+    ),
+    CAPACITY_LESS_THAN_MINIMUM_PARTICIPANTS(
+            5007,
+            HttpStatus.BAD_REQUEST,
+            "The capacity must not be less than the tour's minimum number of participants"
+    ),
 // ================= COMMON (9000 - 9999) =================
 
     VALIDATION_ERROR(

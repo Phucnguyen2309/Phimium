@@ -51,7 +51,14 @@ export const translate = (language, key, params = {}) => {
     resolveKey(DICTIONARIES[language], key) ??
     resolveKey(DICTIONARIES[DEFAULT_LANGUAGE], key)
 
-  if (typeof value !== 'string') return key
+  if (typeof value !== 'string') {
+    if (typeof key === 'string' && key.startsWith('admin.')) {
+      const parts = key.split('.')
+      const lastPart = parts[parts.length - 1]
+      return lastPart.replace(/_/g, ' ')
+    }
+    return key
+  }
 
   return interpolate(value, params)
 }

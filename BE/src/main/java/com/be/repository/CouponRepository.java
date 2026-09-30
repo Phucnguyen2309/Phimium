@@ -18,4 +18,6 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select c from Coupon c where c.code = :code")
     Optional<Coupon> findByCodeWithLock(@org.springframework.data.repository.query.Param("code") String code);
+
+    boolean existsByCode(String code);
 }

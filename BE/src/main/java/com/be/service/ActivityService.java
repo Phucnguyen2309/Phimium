@@ -1,6 +1,7 @@
 package com.be.service;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.request.UpdateActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.MyActivityResponse;
@@ -24,4 +25,8 @@ public interface ActivityService {
     List<MyActivityResponse> getJoinedActivities(User currentUser);
 
     ActivityDetailResponse getActivityDetail(UUID activityId);
+
+    ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request);
+
+    void deleteActivity(UUID activityId);
 }

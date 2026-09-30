@@ -21,8 +21,10 @@ import { ROUTES } from '@/routes/paths.js'
 
 const withMainLayout = (page) => <MainLayout>{page}</MainLayout>
 
-const withRoles = (roles, page) => (
-  <ProtectedRoute allowedRoles={roles}>{withMainLayout(page)}</ProtectedRoute>
+const withRoles = (roles, page, useMainLayout = true) => (
+  <ProtectedRoute allowedRoles={roles}>
+    {useMainLayout ? withMainLayout(page) : page}
+  </ProtectedRoute>
 )
 
 function App() {
@@ -69,7 +71,7 @@ function App() {
         {/* Admin */}
         <Route
           path={ROUTES.admin}
-          element={withRoles([USER_ROLES.admin], <AdminPage />)}
+          element={withRoles([USER_ROLES.admin], <AdminPage />, false)}
         />
 
         {/* Errors */}
