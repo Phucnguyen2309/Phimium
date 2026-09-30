@@ -78,3 +78,22 @@ export const formatEnumLabel = (value, fallback = '') => {
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
+
+/** Chuẩn hóa bỏ dấu tiếng Việt để tìm kiếm không phân biệt dấu */
+export const removeVietnameseTones = (str) => {
+  if (!str) return ''
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd')
+}
+
+/** So sánh tìm kiếm thông minh: hỗ trợ cả có dấu và không dấu */
+export const matchSearchText = (target, search) => {
+  if (!target || !search) return false
+  const t = String(target).toLowerCase().trim()
+  const s = String(search).toLowerCase().trim()
+  if (t.includes(s)) return true
+  return removeVietnameseTones(t).includes(removeVietnameseTones(s))
+}
