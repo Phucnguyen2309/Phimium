@@ -1,6 +1,8 @@
 package com.be.service;
 
 import com.be.dto.request.CreateCouponRequest;
+import com.be.dto.request.UpdateCouponRequest;
+import com.be.dto.response.CouponResponse;
 import com.be.entity.Coupon;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,4 +16,5 @@ public interface CouponService {
     List<Coupon> getAllCoupons();
 
     Coupon toggleCouponStatus(UUID couponId);
+    CouponResponse updateCoupon(UUID couponId, UpdateCouponRequest request);
 }

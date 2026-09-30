@@ -48,6 +48,7 @@ public class BuddyMapper {
                 .averageRating(buddy.getAverageRating())
                 .totalReviews(buddy.getTotalReviews())
                 .avatarUrl(buddy.getAvatarUrl())
+                .status(buddy.getStatus())
                 .build();
     }
 

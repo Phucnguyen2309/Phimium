@@ -1,7 +1,9 @@
 package com.be.controller;
 
 import com.be.dto.request.CreateCouponRequest;
+import com.be.dto.request.UpdateCouponRequest;
 import com.be.dto.response.ApiResponse;
+import com.be.dto.response.CouponResponse;
 import com.be.entity.Coupon;
 import com.be.service.CouponService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,5 +47,14 @@ public class AdminCouponController {
     public ResponseEntity<ApiResponse<Coupon>> toggleCouponStatus(@PathVariable UUID couponId) {
         Coupon updated = couponService.toggleCouponStatus(couponId);
         return ResponseEntity.ok(ApiResponse.success("Coupon status toggled successfully", updated));
+    }
+    @PutMapping("/{couponId}")
+    @Operation(summary = "Chỉnh sửa thông tin mã giảm giá")
+    public ResponseEntity<ApiResponse<CouponResponse>> updateCoupon(
+            @PathVariable UUID couponId,
+            @Valid @RequestBody UpdateCouponRequest request
+    ) {
+        CouponResponse response = couponService.updateCoupon(couponId, request);
+        return ResponseEntity.ok(ApiResponse.success("Coupon updated successfully", response));
     }
 }

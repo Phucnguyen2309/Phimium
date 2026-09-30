@@ -1,6 +1,7 @@
 package com.be.service.impl;
 
 import com.be.dto.request.ActivityRequest;
+import com.be.dto.request.UpdateActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.MyActivityResponse;
@@ -91,5 +92,34 @@ public class ActivityServiceImpl implements ActivityService {
                 );
 
         return activityDetailMapper.toResponse(activity);
+    }
+
+    @Override
+    @Transactional
+    public ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
+
+        // Kiểm tra logic số lượng khách
+        if (request.getMinimumParticipants() > request.getMaximumParticipants()) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR);
+        }
+
+        activityMapper.updateEntity(request, activity);
+
+        Activity updated = activityRepository.save(activity);
+        return activityMapper.toResponse(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteActivity(UUID activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
+        if (activity.getDepartures() != null && !activity.getDepartures().isEmpty()) {
+            throw new AppException(ErrorCode.ACTIVITY_CANNOT_BE_DELETED);
+        }
+
+        activityRepository.delete(activity);
     }
 }

@@ -1,5 +1,6 @@
 package com.be.dto.response;
 
+import com.be.enums.BuddyStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,5 @@ public class BuddyResponse {
     private String avatarUrl;
     private BigDecimal averageRating;
     private Integer totalReviews;
+    private BuddyStatus status;
 }
