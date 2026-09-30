@@ -452,7 +452,7 @@ export function ActivityCard({ activity, viewMode = 'GRID' }) {
 | `OtpInput` | `@/components/common` | Ô nhập mã OTP nhiều số: tự nhảy ô, Backspace lùi, dán cả mã. Ô trống là dấu cách trong `value`, đủ mã khi khớp `/^\d{6}$/`. Đổi `shakeKey` để ô rung khi sai |
 | `AuthLayout` | `@/layouts/AuthLayout.jsx` | Khung trang Đăng nhập / Đăng ký |
 | `SiteHeader` | `@/components/layout/SiteHeader.jsx` | Header chung (đã gắn sẵn trong `MainLayout`): logo, 3 mục menu, VI/EN, tài khoản |
-| `BrandLogo` | `@/components/layout/BrandLogo.jsx` | Logo Phimium (ảnh `src/assets/images/logo.png` + tên + tagline). Luôn dùng component này, không tự chèn ảnh logo. Favicon ở `public/favicon.png` |
+| `BrandLogo` | `@/components/layout/BrandLogo.jsx` | Logo Phimium (ảnh `public/logo.png` + tên + tagline). Luôn dùng component này, không tự chèn ảnh logo. Favicon ở `public/favicon.png` |
 | `SiteFooter` | `@/components/layout/SiteFooter.jsx` | Footer cuối trang |
 | `PointsMap` | `@/features/map/PointsMap.jsx` | Bản đồ thật (Leaflet + OpenStreetMap): `points` có `latitude/longitude`, `activeId`, `onSelect(id)`. Tự có loading / lỗi + thử lại. **Không** vẽ bản đồ giả bằng CSS, **không** tự nạp Leaflet chỗ khác |
 | `SafetyTermsModal` | `@/components/activity/SafetyTermsModal.jsx` | Xác nhận điều khoản trước khi join |

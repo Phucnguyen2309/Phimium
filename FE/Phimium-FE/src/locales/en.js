@@ -705,6 +705,7 @@ const en = {
       searchPlaceholder: 'Quick search...',
       refresh: 'Refresh',
       untitled: 'Untitled',
+      unnamed: 'Unnamed',
       uncategorized: 'Uncategorized',
       unassigned: 'Unassigned',
       guest: 'Guest',

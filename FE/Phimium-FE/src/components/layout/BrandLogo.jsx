@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
 
-import logo from '@/assets/images/logo.png'
 import { APP_NAME } from '@/constants/app.js'
 import { useLanguage } from '@/context/languageContext.js'
 import { ROUTES } from '@/routes/paths.js'
 
 /**
- * Logo Phimium: ảnh logo (src/assets/images/logo.png) + tên + tagline.
+ * Logo Phimium: biểu tượng chữ P + tên + tagline.
  * tone="dark": chữ navy trên nền sáng (mặc định) | tone="light": chữ trắng trên nền tối.
  */
 export function BrandLogo({ className = '', tone = 'dark' }) {
@@ -20,13 +19,17 @@ export function BrandLogo({ className = '', tone = 'dark' }) {
       className={`group inline-flex items-center gap-2.5 ${className}`}
     >
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition ${
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl p-1 transition ${
           isLight
-            ? 'bg-white shadow-sm ring-1 ring-white/30'
-            : 'group-hover:scale-105'
+            ? 'bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20'
+            : 'bg-white shadow-xs border border-slate-100 group-hover:shadow-md'
         }`}
       >
-        <img src={logo} alt="" aria-hidden="true" className="h-9 w-9 object-contain" />
+        <img
+          src="/logo.png"
+          alt={APP_NAME}
+          className="h-8 w-8 object-contain drop-shadow-xs"
+        />
       </span>
 
       <span className="flex flex-col leading-none">

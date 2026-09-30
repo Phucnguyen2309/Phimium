@@ -705,6 +705,7 @@ const vi = {
       searchPlaceholder: 'Tìm kiếm nhanh...',
       refresh: 'Làm mới',
       untitled: 'Chưa đặt tên',
+      unnamed: 'Chưa có tên',
       uncategorized: 'Chưa phân loại',
       unassigned: 'Chưa chỉ định',
       guest: 'Khách vãng lai',

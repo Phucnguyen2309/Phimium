@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, Fragment } from 'react'
 
 import adminService from '@/services/adminService.js'
 import { useLanguage } from '@/context/languageContext.js'
-import { formatMoney } from '@/utils/format.js'
+import { formatDDMMYYYY, formatMoney } from '@/utils/format.js'
 import { AdminAddDepartureModal, AdminEditCapacityModal } from './AdminDepartureModals.jsx'
 import { AdminEditActivityModal } from './AdminEditActivityModal.jsx'
 import { AdminDeleteActivityModal } from './AdminDeleteActivityModal.jsx'
@@ -237,7 +237,7 @@ function ActivityExpandPanel({ activity, onRefresh }) {
                           : dep.startTime || '—'}
                       </span>
                       <span className="block text-xs text-slate-500">
-                        {dep.departureDate || (isVi ? 'Chưa có ngày' : 'No date')}
+                        {formatDDMMYYYY(dep.departureDate) || (isVi ? 'Chưa có ngày' : 'No date')}
                       </span>
                       <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2">
                         {(() => {
@@ -329,7 +329,7 @@ function ActivityExpandPanel({ activity, onRefresh }) {
                     const name = customer?.fullName || (customer?.email?.split('@')[0]) || '—'
                     const email = customer?.email || ''
                     const phone = customer?.phone || ''
-                    const depDate = booking?.departure?.departureDate || ''
+                    const depDate = formatDDMMYYYY(booking?.departure?.departureDate) || ''
                     const startTime = booking?.departure?.startTime
                       ? String(booking.departure.startTime).slice(0, 5)
                       : ''
