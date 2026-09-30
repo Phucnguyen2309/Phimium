@@ -33,7 +33,7 @@ public class AdminBuddyController {
     }
 
     @PatchMapping("/{buddyId}/status")
-    @Operation(summary = "Cập nhật trạng thái Buddy (Duyệt hồ sơ ACTIVE hoặc đình chỉ SUSPENDED)")
+    @Operation(summary = "Cập nhật trạng thái Buddy (Duyệt hồ sơ ACTIVE, INACTIVE hoặc đình chỉ SUSPENDED)")
     public ResponseEntity<ApiResponse<BuddyResponse>> updateBuddyStatus(
             @PathVariable UUID buddyId,
             @RequestParam BuddyStatus status

@@ -123,4 +123,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     long countByStatus(RegistrationStatus status);
 
     List<Registration> findTop5ByOrderByRegisteredAtDesc();
+
+    List<Registration> findByBuddy_BuddyIdAndStatus(UUID buddyId, RegistrationStatus status);
 }

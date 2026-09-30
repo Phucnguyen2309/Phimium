@@ -85,6 +85,9 @@ public class AdminBookingServiceImpl implements AdminBookingService {
             throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
         Set<String> timeSlots = new HashSet<>();
         for (var request : requests) {
+            if (request.getCapacity() < activity.getMinimumParticipants()) {
+                throw new AppException(ErrorCode.CAPACITY_LESS_THAN_MINIMUM_PARTICIPANTS);
+            }
             if (!LocalDateTime.of(request.getDepartureDate(), request.getStartTime()).isAfter(DateTimeUtils.nowVietnam()))
                 throw new AppException(ErrorCode.DEPARTURE_IN_PAST);
             String slot = request.getDepartureDate() + "|" + request.getStartTime() + "|" + request.getEndTime();
@@ -110,6 +113,9 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         var counts = registrations.countByDepartures(List.of(id));
         long reserved = summary(departure, counts).reservedGuests();
         if (totalCapacity < 1 || totalCapacity > 1000000) throw new AppException(ErrorCode.VALIDATION_ERROR);
+        if (totalCapacity < departure.getActivity().getMinimumParticipants()) {
+            throw new AppException(ErrorCode.CAPACITY_LESS_THAN_MINIMUM_PARTICIPANTS);
+        }
         if (totalCapacity < reserved) throw new AppException(ErrorCode.INSUFFICIENT_CAPACITY);
         departure.setCapacity((int) (totalCapacity - reserved));
         departure.setStatus(departure.getCapacity() == 0 ? DepartureStatus.FULL : DepartureStatus.AVAILABLE);

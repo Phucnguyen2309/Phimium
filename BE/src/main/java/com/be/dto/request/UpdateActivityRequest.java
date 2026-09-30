@@ -63,7 +63,7 @@ public class UpdateActivityRequest {
     private BigDecimal childParticipationFee;
 
     @NotNull(message = "Số khách tối thiểu không được để trống")
-    @Min(1)
+    @Min(value = 2, message = "Số lượng khách tối thiểu cho mỗi tour phải từ 2 người trở lên")
     @Schema(example = "2")
     private Integer minimumParticipants;
 

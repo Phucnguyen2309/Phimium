@@ -3,10 +3,12 @@ package com.be.service.impl;
 import com.be.dto.response.AdminDashboardResponse;
 import com.be.entity.Registration;
 import com.be.enums.BuddyStatus;
+import com.be.enums.PaymentStatus;
 import com.be.enums.RegistrationStatus;
 import com.be.enums.UserRole;
 import com.be.mapper.DashboardMapper;
 import com.be.repository.BuddyRepository;
+import com.be.repository.PaymentRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.repository.UserRepository;
 import com.be.service.AdminDashboardService;
@@ -25,11 +27,12 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final UserRepository userRepository;
     private final BuddyRepository buddyRepository;
     private final DashboardMapper dashboardMapper;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional(readOnly = true)
     public AdminDashboardResponse getDashboardSummary() {
-        BigDecimal totalRevenue = registrationRepository.calculateTotalRevenue();
+        BigDecimal totalRevenue = paymentRepository.sumAmountByStatus(PaymentStatus.PAID);
         long totalBookings = registrationRepository.count();
         long totalUsers = userRepository.countByRole(UserRole.USER);
         long activeBuddies = buddyRepository.countByStatus(BuddyStatus.ACTIVE);
