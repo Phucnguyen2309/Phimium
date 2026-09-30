@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { AUTH_ERROR_CODES } from '@/constants/app.js'
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
 import { getDefaultRouteByRole, ROUTES } from '@/routes/paths.js'
 import authService from '@/services/authService.js'
 
 export function useLogin() {
-  const [email, setEmail] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const [email, setEmail] = useState(location.state?.email ?? '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const navigate = useNavigate()
-  const location = useLocation()
   const { login } = useAuth()
   const { t } = useLanguage()
   const fromPath = location.state?.from || ROUTES.home
@@ -35,6 +37,14 @@ export function useLogin() {
         replace: true,
       })
     } catch (err) {
+      // Tài khoản chưa xác thực email -> chuyển sang trang nhập OTP
+      if (err.code === AUTH_ERROR_CODES.emailNotVerified) {
+        navigate(ROUTES.verifyEmail, {
+          state: { email: email.trim().toLowerCase(), otpSent: false, from: location.state?.from },
+        })
+        return
+      }
+
       setError(
         err.message ||
           err.data?.message ||

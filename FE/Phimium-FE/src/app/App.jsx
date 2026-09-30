@@ -7,6 +7,7 @@ import ActivityDetailPage from '@/pages/ActivityDetail/ActivityDetailPage.jsx'
 import ActivityGuidelinePage from '@/pages/ActivityGuideline/ActivityGuidelinePage.jsx'
 import AdminPage from '@/pages/Admin/AdminPage.jsx'
 import BuddyPage from '@/pages/Buddy/BuddyPage.jsx'
+import CompleteProfilePage from '@/pages/CompleteProfile/CompleteProfilePage.jsx'
 import ForbiddenPage from '@/pages/Forbidden/ForbiddenPage.jsx'
 import GroupDetailPage from '@/pages/GroupDetail/GroupDetailPage.jsx'
 import HomePage from '@/pages/Home/HomePage.jsx'
@@ -14,6 +15,7 @@ import LoginPage from '@/pages/Login/LoginPage.jsx'
 import NotFoundPage from '@/pages/NotFound/NotFoundPage.jsx'
 import RegisterPage from '@/pages/Register/RegisterPage.jsx'
 import UserDashboardPage from '@/pages/UserDashboard/UserDashboardPage.jsx'
+import VerifyEmailPage from '@/pages/VerifyEmail/VerifyEmailPage.jsx'
 import { ProtectedRoute } from '@/routes/ProtectedRoute.jsx'
 import { ROUTES } from '@/routes/paths.js'
 
@@ -30,6 +32,8 @@ function App() {
         {/* Auth */}
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route path={ROUTES.register} element={<RegisterPage />} />
+        <Route path={ROUTES.completeProfile} element={<CompleteProfilePage />} />
+        <Route path={ROUTES.verifyEmail} element={<VerifyEmailPage />} />
 
         {/* Public */}
         <Route path={ROUTES.home} element={withMainLayout(<HomePage />)} />

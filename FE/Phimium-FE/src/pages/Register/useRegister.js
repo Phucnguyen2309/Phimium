@@ -32,8 +32,9 @@ export function useRegister() {
 
     try {
       await authService.register(formData)
-      navigate(ROUTES.login, {
-        state: { messageKey: 'auth.register.success' },
+      // Backend đã gửi OTP qua email -> sang trang nhập mã
+      navigate(ROUTES.verifyEmail, {
+        state: { email: formData.email.trim().toLowerCase(), otpSent: true },
       })
     } catch (err) {
       setError(

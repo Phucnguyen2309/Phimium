@@ -36,7 +36,7 @@ node scripts/check-i18n.mjs   # vi.js và en.js phải đủ key
 10. Không `console.log`. Không đọc `localStorage` ngoài `AuthProvider.jsx`, `LanguageProvider.jsx` và `http.js`. User hiện tại lấy từ `useAuth()`.
 11. Không thêm dependency, không sửa `package.json` / `vite.config.js` / `eslint.config.js` nếu task không yêu cầu.
 12. **Không gõ cứng chữ hiển thị** (kể cả `placeholder`, `alt`, `aria-label`). Dùng `const { t } = useLanguage()` trong component/hook, `t` từ `@/utils/i18n.js` trong mapper/utils. Thêm key vào **cả** `vi.js` và `en.js` (mục 16 của hướng dẫn).
-13. Style: 2 space, không `;`, nháy đơn, line ending **CRLF**, Tailwind class inline, màu chính `emerald` (riêng header, trang chủ, Login/Register dùng navy + vàng, xem mục 11 của hướng dẫn).
+13. Style: 2 space, không `;`, nháy đơn, line ending **CRLF**, Tailwind class inline, màu chính `emerald` (riêng header/footer, trang chủ, Login/Register dùng navy + vàng, xem mục 11 của hướng dẫn).
 
 ## Khi xong task
 

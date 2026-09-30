@@ -5,6 +5,8 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  completeProfile: '/complete-profile',
+  verifyEmail: '/verify-email',
   activities: '/activities',
   activityDetail: '/activities/:id',
   activityGuidelines: '/activities/:id/guidelines',

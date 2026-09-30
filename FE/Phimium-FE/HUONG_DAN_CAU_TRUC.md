@@ -35,7 +35,11 @@
 | State | `useState` / `useMemo` + React Context (`AuthProvider`). **Chưa** dùng Redux / Zustand / React Query. |
 | Deploy | Vercel (`vercel.json` rewrite mọi route về `index.html`) |
 
-Env: `VITE_API_BASE_URL` (xem `.env.example`). Mặc định là `http://localhost:8080/api`.
+Env (xem `.env.example`):
+
+- `VITE_API_BASE_URL`: mặc định là `http://localhost:8080/api`.
+- `VITE_GOOGLE_CLIENT_ID`: OAuth Client ID của Google, **giống** `GOOGLE_CLIENT_ID` của Backend. Đọc qua `GOOGLE_CLIENT_ID` trong `constants/app.js`, không đọc `import.meta.env` rải rác.
+- `VITE_MAP_TILE_URL`, `VITE_MAP_ATTRIBUTION` (tuỳ chọn): đổi nguồn tile bản đồ. Mặc định là OpenStreetMap (miễn phí, không key, chỉ hợp lượng truy cập nhỏ). CARTO giờ bắt buộc API key, đừng dùng lại URL CARTO không key.
 
 ---
 
@@ -50,12 +54,13 @@ src/
   assets/images/            ảnh import trong code
   components/               UI dùng chung, KHÔNG gọi API
     common/                 AuthAlert, BackButton, Container, FormField, PasswordField,
-                            LanguageSwitcher, UserAvatar  (import từ '@/components/common')
+                            Icon, LanguageSwitcher, OtpInput, UserAvatar  (import từ '@/components/common')
     layout/                 SiteHeader, BrandLogo, SiteFooter
     activity/               SafetyTermsModal
   constants/
-    app.js                  APP_NAME, STORAGE_KEYS, USER_ROLES
+    app.js                  APP_NAME, STORAGE_KEYS, USER_ROLES, GOOGLE_CLIENT_ID, AUTH_ERROR_CODES, OTP_CONFIG
     activity.js             ACTIVITY_STATUS, ACTIVITY_STATUS_LABELS, GROUP_STATUS_STYLES
+    map.js                  LEAFLET_CDN, MAP_TILE_URL, MAP_ATTRIBUTION, MAP_DEFAULT_CENTER, zoom
   context/
     authContext.js          AuthContext + hook useAuth()
     languageContext.js      LanguageContext + hook useLanguage()
@@ -65,15 +70,19 @@ src/
     activity/activityMapper.js
     myActivities/           MyActivitiesPanel, useMyActivities, myActivitiesMapper, constants, components/
     myGroups/               MyGroupsPanel, useMyGroups, myGroupsMapper, components/
+    googleAuth/             GoogleAuthSection, GoogleSignInButton, useGoogleAuth, loadGoogleScript
+    map/                    PointsMap (bản đồ Leaflet thật), loadLeaflet
   hooks/
     useDocumentTitle.js
     useClickOutside.js      đóng dropdown / menu khi click ra ngoài
+    useInView.js            biết phần tử đã xuất hiện trên màn hình (dùng cho Reveal)
+    useParallax.js          parallax theo cuộn trang
   layouts/
     MainLayout.jsx          header + khung trang
     AuthLayout.jsx          khung trang Đăng nhập / Đăng ký (panel thương hiệu + form)
   pages/                    1 folder = 1 route
-    Activities/  ActivityDetail/  ActivityGuideline/  Admin/  Buddy/
-    Forbidden/   GroupDetail/     Home/  Login/  NotFound/  Register/  UserDashboard/
+    Activities/  ActivityDetail/  ActivityGuideline/  Admin/  Buddy/  CompleteProfile/
+    Forbidden/   GroupDetail/     Home/  Login/  NotFound/  Register/  UserDashboard/  VerifyEmail/
   routes/
     paths.js                ROUTES, buildXxxPath(), getDefaultRouteByRole()
     ProtectedRoute.jsx      chặn theo đăng nhập + role
@@ -81,7 +90,7 @@ src/
     http.js                 axios instance (tự gắn Bearer token)
     authService.js  activityService.js  groupService.js  buddyService.js
   utils/                    hàm thuần JS, KHÔNG import React
-    format.js  response.js  image.js  text.js  role.js  i18n.js
+    format.js  response.js  image.js  text.js  role.js  i18n.js  jwt.js  geo.js
   locales/                  từ điển đa ngôn ngữ
     vi.js                   tiếng Việt (mặc định)
     en.js                   tiếng Anh – cùng bộ key với vi.js
@@ -291,8 +300,13 @@ navigate(ROUTES.userDashboard, { state: { activeTab: 'GROUPS' } })
 | `normalizeRole(role)` | `utils/role.js` | `"ROLE_admin"` → `"ADMIN"` |
 | `t(key, params?)` | `utils/i18n.js` | Dịch cho code **không phải React** (mapper, utils, service) |
 | `getLocale()` | `utils/i18n.js` | `'vi-VN'` / `'en-US'` cho `Intl` / `toLocaleString` |
+| `getCoordinates(item)` / `hasValidCoordinates(item)` | `utils/geo.js` | `{ lat, lng }` từ `latitude` / `longitude`, `null` nếu thiếu hoặc bằng 0 |
+| `buildGoogleMapsUrl(item)` / `buildDirectionsUrl(item)` | `utils/geo.js` | Link Google Maps xem vị trí / chỉ đường (ưu tiên toạ độ, không có thì theo tên + địa chỉ) |
+| `decodeJwtPayload(token)` | `utils/jwt.js` | đọc claim (`sub`, `username`, `role`, `buddyId`) từ JWT, lỗi thì trả `null`. Chỉ để **đọc**, không dùng để xác thực |
 
 Cho activity thì dùng thêm `@/features/activity/activityMapper.js`: `mapActivity`, `mapActivitiesResponse`, `formatActivityType`, `formatStatus`, `formatPrice`, `getRemainingSlots`.
+
+Lịch khởi hành (`activity.departures`, đã map sẵn `{ id, date, startTime, endTime, capacity, status }`): `getUpcomingDepartures(activity)` (bỏ lịch đã qua / CLOSED / CANCELLED, giữ FULL), `getDurationMinutes`, `formatDuration`, `formatDepartureDate`, `formatDepartureTime`, hằng `DEPARTURE_STATUS`. Tên loại tour (`FOODTOUR`, `HISTORYTOUR`) dịch qua key `activity.types.*` trong `formatActivityType`.
 
 Cần helper mới dùng chung thì **thêm vào file utils phù hợp**, không tạo bản sao trong component.
 
@@ -368,6 +382,40 @@ Nếu BE chưa có API cho một tính năng: vẫn làm UI, nhưng hiện trạ
 - Object `user` gồm: `username`, `role`, `userId`, `buddyId`.
 - **Không đọc / ghi `localStorage` trực tiếp** trong component, hook hay trang. Chỉ `AuthProvider.jsx`, `LanguageProvider.jsx` và `http.js` được đụng tới storage, và luôn qua `STORAGE_KEYS`.
 - Sau khi login, điều hướng bằng `getDefaultRouteByRole(role)`.
+- `login(response)` tự lấy token từ `accessToken` / `token` / `jwt`, thiếu field nào thì bổ sung từ claim trong JWT (`sub` → `userId`).
+
+### Đăng ký tài khoản thường + xác thực email (OTP)
+
+1. `Register` gọi `POST /auth/register`, Backend gửi mã OTP 6 số qua email (hết hạn sau 5 phút).
+2. Đăng ký xong chuyển sang `ROUTES.verifyEmail` với `state: { email, otpSent: true }`.
+3. Trang `VerifyEmail` gọi `authService.verifyOtp(email, otp)` (`POST /auth/verify-otp`), nhập đủ 6 số là tự gửi. Thành công thì về `ROUTES.login` kèm `state: { messageKey, email }` để điền sẵn email.
+4. Gửi lại mã: `authService.resendOtp(email)` (`POST /auth/resend-otp`), khoá nút 60 giây (`OTP_CONFIG.resendSeconds`).
+5. Đăng nhập mà Backend trả `code` 1005 (`AUTH_ERROR_CODES.emailNotVerified`) thì `useLogin` tự chuyển sang `VerifyEmail` với `otpSent: false`.
+6. F5 làm mất router state: trang hiện thêm ô nhập email.
+
+Lỗi Backend có dạng `{ success: false, code, message }`. `toApiError` gắn `error.code` để hook so với `AUTH_ERROR_CODES` và hiện câu dịch sẵn, **không** hiện thẳng `message` tiếng Anh của Backend khi đã có key dịch.
+
+### Đăng nhập / đăng ký bằng Google
+
+Dùng Google Identity Services (script `https://accounts.google.com/gsi/client`, **không** cài package npm). Mọi thứ nằm trong `features/googleAuth/`:
+
+| File | Vai trò |
+| --- | --- |
+| `loadGoogleScript.js` | nạp script GIS đúng 1 lần (singleton Promise) |
+| `GoogleSignInButton.jsx` | render nút chính chủ của Google, props `onCredential`, `mode` (`signin` / `signup`), `disabled` |
+| `useGoogleAuth.js` | gửi credential lên BE và xử lý kết quả |
+| `GoogleAuthSection.jsx` | khối "hoặc" + nút + loading + thông báo, đặt dưới form Login / Register |
+
+Luồng với Backend:
+
+1. Google trả `credential` (ID token) → `authService.googleAuth(credential)` gọi `POST /auth/google`.
+2. BE trả `status`:
+   - `AUTHENTICATED`: có `accessToken` → `login()` rồi điều hướng theo role (hoặc về trang `from`).
+   - `PROFILE_REQUIRED`: tài khoản mới, có `onboardingToken` → chuyển sang `ROUTES.completeProfile` kèm `state: { onboardingToken, email, fullName, from }`.
+   - `ACCOUNT_LINK_REQUIRED`: email đã có tài khoản thường → báo người dùng đăng nhập bằng mật khẩu (tone `info` của `AuthAlert`).
+3. Trang `CompleteProfile` gọi `authService.completeProfile(onboardingToken, { fullName, birthday, phone })` → `POST /auth/complete-profile` với header `Authorization: Bearer <onboardingToken>`, nhận token thật rồi `login()`.
+
+`onboardingToken` chỉ sống trong router state, **không** lưu storage. `http.js` không ghi đè header `Authorization` nếu request đã tự đặt.
 
 ---
 
@@ -393,24 +441,36 @@ export function ActivityCard({ activity, viewMode = 'GRID' }) {
 
 | Component | Import | Dùng khi |
 | --- | --- | --- |
-| `Container` | `@/components/common` | Bọc nội dung, giới hạn chiều rộng (`max-w-6xl`) |
+| `Container` | `@/components/common` | Bọc nội dung, giới hạn chiều rộng. `size="default"` (`max-w-6xl`) hoặc `size="wide"` (tới 1920px, cùng độ rộng với header) cho trang danh sách như Các tour. Không tự viết `max-w-*` đè lên |
 | `BackButton` | `@/components/common` | Nút "Quay lại" (`navigate(-1)`) |
+| `Reveal` | `@/components/common` | Hiện dần (fade + trượt lên) khi cuộn tới, `delay` tính bằng ms |
 | `LanguageSwitcher` | `@/components/common` | Nút đổi VI / EN (đã có trên header, Login, Register) |
 | `UserAvatar` | `@/components/common` | Avatar tròn: chữ cái đầu + ảnh (đổi màu qua prop `colorClassName`) |
 | `FormField` | `@/components/common` | Ô nhập có label + icon (`user`, `mail`, `lock`, `phone`, `calendar`), props còn lại truyền xuống `<input>` |
 | `PasswordField` | `@/components/common` | Ô mật khẩu có nút hiện / ẩn |
-| `AuthAlert` | `@/components/common` | Hộp thông báo lỗi / thành công trong form (`tone="error" \| "success"`) |
+| `AuthAlert` | `@/components/common` | Hộp thông báo trong form (`tone="error" \| "success" \| "info"`) |
+| `OtpInput` | `@/components/common` | Ô nhập mã OTP nhiều số: tự nhảy ô, Backspace lùi, dán cả mã. Ô trống là dấu cách trong `value`, đủ mã khi khớp `/^\d{6}$/`. Đổi `shakeKey` để ô rung khi sai |
 | `AuthLayout` | `@/layouts/AuthLayout.jsx` | Khung trang Đăng nhập / Đăng ký |
 | `SiteHeader` | `@/components/layout/SiteHeader.jsx` | Header chung (đã gắn sẵn trong `MainLayout`): logo, 3 mục menu, VI/EN, tài khoản |
-| `BrandLogo` | `@/components/layout/BrandLogo.jsx` | Logo Phimium (icon P + tên + tagline) |
+| `BrandLogo` | `@/components/layout/BrandLogo.jsx` | Logo Phimium (ảnh `src/assets/images/logo.png` + tên + tagline). Luôn dùng component này, không tự chèn ảnh logo. Favicon ở `public/favicon.png` |
 | `SiteFooter` | `@/components/layout/SiteFooter.jsx` | Footer cuối trang |
+| `PointsMap` | `@/features/map/PointsMap.jsx` | Bản đồ thật (Leaflet + OpenStreetMap): `points` có `latitude/longitude`, `activeId`, `onSelect(id)`. Tự có loading / lỗi + thử lại. **Không** vẽ bản đồ giả bằng CSS, **không** tự nạp Leaflet chỗ khác |
 | `SafetyTermsModal` | `@/components/activity/SafetyTermsModal.jsx` | Xác nhận điều khoản trước khi join |
 
 ### Style (Tailwind)
 
 - **Màu chính: `emerald`** (`emerald-600` cho nút chính, `emerald-700` cho text / hover, `emerald-50` / `emerald-100` cho nền nhạt).
 - Màu phụ: `slate` cho text và viền, `red` cho lỗi, `orange` cho điểm nhấn, `blue` dùng ở trang chi tiết hoạt động.
-- **Ngoại lệ: header chung (`SiteHeader`, `BrandLogo`), trang chủ (`pages/Home`) và trang Đăng nhập / Đăng ký (`AuthLayout`)** dùng tông **navy + vàng**: nền đậm `blue-950` / `blue-900`, nút chính `bg-yellow-400 text-blue-950`, tiêu đề `text-blue-950`, nhãn nhỏ `text-blue-700`. Chỉ dùng tông này ở header, `pages/Home` và `AuthLayout`, không mang sang trang khác.
+- **Ngoại lệ: header / footer chung (`SiteHeader`, `SiteFooter`, `BrandLogo`), trang chủ (`pages/Home`) và trang Đăng nhập / Đăng ký (`AuthLayout`)** dùng tông **navy + vàng**: nền đậm `blue-950` / `blue-900`, nút chính `bg-yellow-400 text-blue-950`, tiêu đề `text-blue-950`, nhãn nhỏ `text-blue-700`. Chỉ dùng tông này ở header / footer, `pages/Home` và `AuthLayout`, không mang sang trang khác.
+- **Font:** chữ thường dùng `Be Vietnam Pro` (mặc định, class `font-sans`); tiêu đề sang trọng dùng `Playfair Display` qua class `font-display` (đang dùng ở trang chủ). Font tải từ Google Fonts trong `index.html`, khai báo trong `@theme` của `src/index.css`.
+- **Icon:** dùng `Icon` từ `@/components/common` (`components/common/Icon.jsx`, bộ Heroicons outline – MIT, license ở `src/assets/images/HEROICONS-LICENSE.txt`), VD `<Icon name="map-pin" />`. Cần icon mới thì thêm path Heroicons vào `ICON_PATHS`, không nhúng SVG rời, không dùng emoji làm icon.
+- **Chuyển động:** bọc section / card bằng `<Reveal delay={ms}>` để hiện dần khi cuộn. Các hiệu ứng có sẵn trong `index.css`:
+  - Animation: `animate-fade-up`, `animate-float-slow`, `animate-ken-burns` (ảnh nền zoom chậm), `animate-drift` / `animate-drift-reverse` (đốm sáng trôi), `animate-gradient-x` (chữ gradient chạy), `animate-marquee` (dải chữ chạy), `animate-spin-slow`, `animate-twinkle`, `animate-rise` (hạt sáng bay lên), `animate-draw-loop` (nét SVG tự vẽ lặp lại, cần `strokeDasharray="320"`), `animate-aurora` (vầng sáng xoay), `animate-glow-pulse` (viền sáng nhấp nháy), `animate-bob` (nhún nhẹ).
+  - Nền navy có hiệu ứng: dùng `<AmbientBackground particles={n} />` (`components/common`) bên trong phần tử `relative isolate overflow-hidden` (đang dùng ở hero trang chủ và `AuthLayout`).
+  - **Giảm chuyển động:** khi người dùng bật *reduce motion*, `index.css` chỉ tắt hiệu ứng mạnh (parallax, ken-burns, drift, aurora, rise, bob, float, fade-up, reveal); hiệu ứng nhẹ (twinkle, gradient, glow, draw-loop, shine, marquee chậm) vẫn chạy. Thêm animation mạnh mới thì nhớ thêm vào danh sách tắt trong `@media (prefers-reduced-motion: reduce)`.
+  - Lưu ý: mỗi phần tử chỉ nhận **một** class `animate-*`. Cần 2 hiệu ứng thì bọc thêm 1 thẻ ngoài.
+  - Class: `.shine` (vệt sáng lướt khi hover), `.line-grow` (gạch kéo dài khi `Reveal` hiện), `.pop-on-reveal` + biến `--pop-delay` (bật ra khi `Reveal` hiện), `.skeleton` (khung xương khi tải).
+  - Hook `useParallax(speed)` (`hooks/useParallax.js`) cho hiệu ứng parallax khi cuộn. Không tự viết keyframes mới trong component. Hiệu ứng mạnh tự tắt khi người dùng bật *reduce motion* (xem bên dưới).
 - Bo góc: card `rounded-2xl` / `rounded-3xl`, nút `rounded-xl` / `rounded-full`.
 - Trạng thái lỗi: `rounded-2xl border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-600`.
 - Trạng thái rỗng: khung `border-dashed border-emerald-200 bg-emerald-50/50` + tiêu đề + mô tả ngắn.
@@ -554,6 +614,7 @@ example: {                                 example: {
 - Ngày, giờ, tiền: luôn dùng `utils/format.js`. Các hàm này tự theo ngôn ngữ hiện tại (`getLocale()`). Không viết cứng `'vi-VN'`.
 - Thông báo truyền qua `navigate(..., { state })` thì truyền **key** (`messageKey: 'dashboard.joinSuccess'`), không truyền chuỗi đã dịch.
 - Nội dung đến từ API (tên hoạt động, mô tả…) giữ nguyên, **không** dịch.
+- Sản phẩm của Phimium là **tour tại TP. Hồ Chí Minh, gồm 2 dòng: Food tour và History tour**, dành cho khách đi một mình, cặp đôi và nhóm nhỏ, có hướng dẫn viên địa phương nói tiếng Anh. Mọi nội dung marketing phải đúng với định vị này (không viết workshop, cafe, board game…).
 - Khi đổi ngôn ngữ, `LanguageProvider` mount lại toàn app (`key={language}`) để dữ liệu đã map được tính lại. Không cần tự xử lý trong từng trang.
 - Thêm ngôn ngữ thứ 3: thêm vào `LANGUAGES` (`constants/app.js`), `DICTIONARIES` / `LOCALES` (`utils/i18n.js`), tạo `locales/<lang>.js` và thêm nút trong `LanguageSwitcher`.
 

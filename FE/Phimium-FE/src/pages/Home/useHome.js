@@ -19,6 +19,7 @@ export function useHome() {
   const [selectedType, setSelectedType] = useState(ALL_TYPES)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -52,7 +53,7 @@ export function useHome() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [reloadKey])
 
   // Link dạng /#popular-activities (menu header): cuộn tới section sau khi tải xong
   useEffect(() => {
@@ -85,6 +86,7 @@ export function useHome() {
     featuredActivities,
     loading,
     meetingPoints,
+    retry: () => setReloadKey((current) => current + 1),
     selectedType,
     setSelectedType,
   }

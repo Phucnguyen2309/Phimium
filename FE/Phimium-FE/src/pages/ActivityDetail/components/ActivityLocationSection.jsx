@@ -1,5 +1,5 @@
 import { useLanguage } from '@/context/languageContext.js'
-import { hasValidCoordinates } from '@/pages/ActivityDetail/activityDetailUtils.js'
+import { hasValidCoordinates } from '@/utils/geo.js'
 
 import { LocationIcon } from './ActivityDetailIcons.jsx'
 
@@ -37,4 +37,4 @@ export function ActivityLocationSection({ activity }) {
       </div>
     </section>
   )
-}
+}

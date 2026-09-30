@@ -1,9 +1,449 @@
 @import "tailwindcss";
 
+/* Font & animation dùng chung (font tải trong index.html) */
+@theme {
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-fade-up: fade-up 0.8s var(--ease-out-soft) both;
+  --animate-float-slow: float-slow 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-ken-burns: ken-burns 16s ease-in-out infinite alternate;
+  --animate-drift: drift 14s ease-in-out infinite;
+  --animate-drift-reverse: drift 18s ease-in-out infinite reverse;
+  --animate-gradient-x: gradient-x 5s ease infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-spin-slow: spin-slow 10s linear infinite;
+  --animate-twinkle: twinkle 3.2s ease-in-out infinite;
+  --animate-pop-in: pop-in 0.7s var(--ease-out-soft) both;
+  --animate-rise: rise 9s linear infinite;
+  --animate-draw-loop: draw-loop 4s ease-in-out infinite;
+  --animate-aurora: aurora 18s linear infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-bob: bob 4s ease-in-out infinite;
+  --animate-shake: shake 0.45s ease-in-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float-slow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes ken-burns {
+    from {
+      transform: scale(1.05) translate(0, 0);
+    }
+    to {
+      transform: scale(1.18) translate(-2%, -2%);
+    }
+  }
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(40px, -30px) scale(1.08);
+    }
+    66% {
+      transform: translate(-30px, 20px) scale(0.95);
+    }
+  }
+
+  @keyframes gradient-x {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes rise {
+    0% {
+      opacity: 0;
+      transform: translateY(0) scale(0.6);
+    }
+    15% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-70vh) scale(1.2);
+    }
+  }
+
+  @keyframes draw-loop {
+    0% {
+      stroke-dashoffset: 320;
+    }
+    45%,
+    70% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -320;
+    }
+  }
+
+  @keyframes aurora {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      box-shadow: 0 30px 80px -20px rgba(2, 6, 23, 0.7), 0 0 0 0 rgba(253, 199, 0, 0);
+    }
+    50% {
+      box-shadow: 0 30px 80px -20px rgba(2, 6, 23, 0.7), 0 0 0 6px rgba(253, 199, 0, 0.18);
+    }
+  }
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.2;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-6px);
+    }
+    40%,
+    80% {
+      transform: translateX(6px);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: -400px 0;
+    }
+    to {
+      background-position: 400px 0;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+}
+
+::selection {
+  background-color: #fdc700;
+  color: #162456;
+}
+
+/* Hiệu ứng hiện dần khi cuộn (component Reveal) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Gạch vàng tự kéo dài khi section hiện ra (dùng trong SectionHeading) */
+.line-grow {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out-soft) 0.25s;
+}
+
+.is-visible .line-grow {
+  transform: scaleX(1);
+}
+
+/* Vệt sáng lướt qua khi hover (nút, ảnh card): thêm class .shine vào phần tử cha có overflow-hidden */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transition: transform 0.9s var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.shine:hover::after,
+.group:hover .shine::after {
+  transform: translateX(120%) skewX(-20deg);
+}
+
+/* Ghim / phần tử bật ra khi section hiện ra (dùng với Reveal) */
+.pop-on-reveal {
+  opacity: 0;
+}
+
+.is-visible .pop-on-reveal {
+  animation: var(--animate-pop-in);
+  animation-delay: var(--pop-delay, 0ms);
+}
+
+/* Marquee dừng khi rê chuột */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Bản đồ Leaflet (features/map/PointsMap.jsx) */
+.leaflet-container {
+  font-family: inherit;
+}
+
+/* Làm dịu màu tile để hợp tông navy + vàng */
+.map-soft .leaflet-tile-pane {
+  filter: saturate(0.55) contrast(0.95) brightness(1.04);
+}
+
+.map-pin-icon {
+  background: none;
+  border: 0;
+}
+
+.map-pin {
+  position: relative;
+  display: block;
+  width: 36px;
+  height: 44px;
+  transition: transform 0.3s var(--ease-out-soft);
+  transform-origin: 50% 100%;
+}
+
+.map-pin--active {
+  transform: scale(1.18);
+}
+
+.map-pin__body {
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-blue-950);
+  box-shadow: 0 8px 18px -6px rgba(22, 36, 86, 0.55);
+  transform: rotate(-45deg);
+}
+
+.map-pin--active .map-pin__body {
+  background: var(--color-yellow-400);
+}
+
+.map-pin__label {
+  transform: rotate(45deg);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.map-pin--active .map-pin__label {
+  color: var(--color-blue-950);
+}
+
+.map-pin__pulse {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-bottom: -7px;
+  border-radius: 9999px;
+  background: rgba(253, 199, 0, 0.7);
+  animation: map-ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes map-ping {
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -16px rgba(22, 36, 86, 0.45);
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+}
+
+.map-popup__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-blue-950);
+}
+
+.map-popup__address {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--color-slate-500);
+}
+
+.leaflet-container a.map-popup__link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-blue-950);
+  text-decoration: underline;
+  text-decoration-color: var(--color-yellow-400);
+  text-underline-offset: 3px;
+}
+
+/* Khung xương khi đang tải */
+.skeleton {
+  background: linear-gradient(90deg, #eef2f7 0px, #f8fafc 160px, #eef2f7 320px);
+  background-size: 800px 100%;
+  animation: var(--animate-shimmer);
+}
+
+/*
+ * Người dùng bật "giảm chuyển động" (Windows: tắt Animation effects):
+ * - TẮT hiệu ứng mạnh dễ gây chóng mặt: parallax, zoom ảnh nền, vầng sáng xoay,
+ *   đốm trôi, hạt bay lên, nhún, trượt vào khi cuộn.
+ * - GIỮ hiệu ứng nhẹ: lấp lánh, chữ đổi sắc, viền sáng, nét tự vẽ, vệt sáng hover,
+ *   khung xương, dải chữ chạy (chậm lại).
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-ken-burns,
+  .animate-drift,
+  .animate-drift-reverse,
+  .animate-aurora,
+  .animate-rise,
+  .animate-bob,
+  .animate-float-slow,
+  .animate-spin-slow,
+  .animate-fade-up,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  .animate-rise {
+    display: none;
+  }
+
+  .animate-marquee {
+    animation-duration: 90s;
+  }
+
+  .reveal,
+  .pop-on-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none !important;
+    transition: none;
+  }
+
+  .line-grow {
+    transform: none;
+  }
 }
 
 /* Thanh cuộn mảnh cho các danh sách dài (Buddy dashboard) */
