@@ -12,5 +12,10 @@ public interface PaymentMapper {
             target = "registrationId",
             source = "registration.registrationId"
     )
+    @Mapping(
+            target = "customerName",
+            source = "registration.user.fullName"
+    )
     PaymentResponse toResponse(Payment payment);
+
 }

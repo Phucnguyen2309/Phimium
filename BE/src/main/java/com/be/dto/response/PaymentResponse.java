@@ -36,4 +36,6 @@ public class PaymentResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime paidAt;
+
+    private String customerName;
 }
