@@ -38,7 +38,7 @@ export function AdminOverviewSection({
         return {
           label: isVi ? 'Chờ ghép Buddy' : 'Waiting for Buddy',
           badgeClass: 'bg-amber-50 text-amber-900 border-amber-300 font-bold',
-          dotClass: 'bg-amber-500 animate-ping',
+          dotClass: 'bg-amber-500',
         }
       case 'PENDING_PAYMENT':
         return {
@@ -103,157 +103,110 @@ export function AdminOverviewSection({
       {/* 1. HÀNG 4 THẺ CHỈ SỐ KPI CHÍNH */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Doanh thu */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {isVi ? 'Tổng doanh thu' : 'Total Revenue'}
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-              💰
-            </span>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:border-slate-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {isVi ? 'Tổng doanh thu' : 'Total Revenue'}
+          </p>
           <p className="mt-3 text-2xl font-black tracking-tight text-blue-950">
             {formatMoney(totalRevenue)}
           </p>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
-            <span>●</span>
-            <span>{isVi ? 'Doanh thu từ các tour thành công' : 'Revenue from successful tours'}</span>
-          </div>
+          <p className="mt-2 text-[11px] font-medium text-emerald-600">
+            {isVi ? 'Doanh thu từ các tour thành công' : 'Revenue from successful tours'}
+          </p>
         </div>
 
         {/* Lượt đặt tour */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {isVi ? 'Lượt đặt tour' : 'Total Bookings'}
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-800">
-              🎫
-            </span>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:border-slate-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {isVi ? 'Lượt đặt tour' : 'Total Bookings'}
+          </p>
           <p className="mt-3 text-2xl font-black tracking-tight text-blue-950">
             {totalBookings}
           </p>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-            <span>{isVi ? 'Tổng số đơn đặt trên hệ thống' : 'Total reservations in system'}</span>
-          </div>
+          <p className="mt-2 text-[11px] font-medium text-slate-400">
+            {isVi ? 'Tổng số đơn đặt trên hệ thống' : 'Total reservations in system'}
+          </p>
         </div>
 
         {/* Khách hàng */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {isVi ? 'Khách hàng' : 'Customers'}
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-700">
-              👥
-            </span>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:border-slate-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {isVi ? 'Khách hàng' : 'Customers'}
+          </p>
           <p className="mt-3 text-2xl font-black tracking-tight text-blue-950">
             {totalUsers}
           </p>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-            <span>{isVi ? 'Tài khoản khách đăng ký' : 'Registered user accounts'}</span>
-          </div>
+          <p className="mt-2 text-[11px] font-medium text-slate-400">
+            {isVi ? 'Tài khoản khách đăng ký' : 'Registered user accounts'}
+          </p>
         </div>
 
         {/* Buddy hoạt động */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {isVi ? 'Đội ngũ Buddy' : 'Active Buddies'}
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-              🤝
-            </span>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:border-slate-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {isVi ? 'Đội ngũ Buddy' : 'Active Buddies'}
+          </p>
           <p className="mt-3 text-2xl font-black tracking-tight text-blue-950">
             {activeBuddies}
           </p>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
-            <span>{isVi ? 'Đang sẵn sàng nhận dẫn tour' : 'Ready to guide tours'}</span>
-          </div>
+          <p className="mt-2 text-[11px] font-medium text-emerald-600">
+            {isVi ? 'Đang sẵn sàng nhận dẫn tour' : 'Ready to guide tours'}
+          </p>
         </div>
       </div>
 
-      {/* 2. CÁC TÁC VỤ CẦN XỬ LÝ NGAY (Actionable Operational Widgets) */}
+      {/* 2. CÁC TÁC VỤ CẦN XỬ LÝ (Actionable Operational Widgets) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Đơn chờ thanh toán */}
-        <div className="flex items-center justify-between rounded-2xl border border-amber-200/80 bg-amber-50/50 p-5">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-amber-900">{isVi ? 'Đơn chờ thanh toán' : 'Pending Payments'}</p>
-              <p className="text-xl font-black text-amber-950">
-                {isVi ? `${pendingPayments} đơn` : `${pendingPayments} bookings`}
-              </p>
-            </div>
+        <div className="flex items-center justify-between rounded-2xl border border-amber-200/70 bg-amber-50/40 p-5">
+          <div>
+            <p className="text-xs font-bold text-amber-900">{isVi ? 'Đơn chờ thanh toán' : 'Pending Payments'}</p>
+            <p className="mt-1 text-2xl font-black text-amber-950">
+              {isVi ? `${pendingPayments} đơn` : `${pendingPayments} bookings`}
+            </p>
           </div>
           <button
             type="button"
             onClick={() => onNavigateTab(ADMIN_TABS.bookings)}
-            className="rounded-xl bg-amber-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-amber-700 active:scale-95"
+            className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-amber-700 active:scale-95"
           >
-            {isVi ? 'Kiểm tra ngay →' : 'Check Now →'}
+            {isVi ? 'Kiểm tra ngay' : 'Check Now'}
           </button>
         </div>
 
         {/* Đơn chờ ghép Buddy */}
         <div
-          className={`flex items-center justify-between rounded-2xl border p-5 transition-all duration-300 ${
+          className={`flex items-center justify-between rounded-2xl border p-5 transition-all ${
             waitingForBuddyCount > 0
-              ? 'border-rose-300 bg-rose-50/70 shadow-sm ring-2 ring-rose-200/50'
-              : 'border-blue-200/80 bg-blue-50/50'
+              ? 'border-rose-300 bg-rose-50/60'
+              : 'border-slate-200/80 bg-white'
           }`}
         >
-          <div className="flex items-center gap-3.5">
-            <div
-              className={`flex h-11 w-11 items-center justify-center rounded-xl transition ${
-                waitingForBuddyCount > 0
-                  ? 'bg-rose-500 text-white shadow-md shadow-rose-200 animate-pulse'
-                  : 'bg-blue-100 text-blue-800'
-              }`}
-            >
-              {waitingForBuddyCount > 0 ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                </svg>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className={`text-xs font-bold ${waitingForBuddyCount > 0 ? 'text-rose-900' : 'text-slate-700'}`}>
+                {isVi ? 'Đơn chờ xếp Buddy' : 'Waiting for Buddy'}
+              </p>
+              {waitingForBuddyCount > 0 && (
+                <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">
+                  {isVi ? 'Cần xử lý' : 'Action needed'}
+                </span>
               )}
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <p className={`text-xs font-bold ${waitingForBuddyCount > 0 ? 'text-rose-900' : 'text-blue-900'}`}>
-                  {isVi ? 'Đơn chờ xếp Buddy' : 'Waiting for Buddy'}
-                </p>
-                {waitingForBuddyCount > 0 && (
-                  <span className="inline-flex items-center rounded-full bg-rose-200/80 px-1.5 py-0.5 text-[10px] font-extrabold text-rose-800 animate-pulse">
-                    {isVi ? 'Cần xử lý' : 'Action needed'}
-                  </span>
-                )}
-              </div>
-              <p className={`text-xl font-black ${waitingForBuddyCount > 0 ? 'text-rose-950' : 'text-blue-950'}`}>
-                {isVi ? `${waitingForBuddyCount} đơn` : `${waitingForBuddyCount} bookings`}
-              </p>
-            </div>
+            <p className={`mt-1 text-2xl font-black ${waitingForBuddyCount > 0 ? 'text-rose-950' : 'text-blue-950'}`}>
+              {isVi ? `${waitingForBuddyCount} đơn` : `${waitingForBuddyCount} bookings`}
+            </p>
           </div>
           <button
             type="button"
             onClick={() => onNavigateTab(ADMIN_TABS.bookings)}
-            className={`rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-sm transition active:scale-95 ${
+            className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-xs transition active:scale-95 ${
               waitingForBuddyCount > 0
-                ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
+                ? 'bg-rose-600 hover:bg-rose-700'
                 : 'bg-blue-950 hover:bg-blue-900'
             }`}
           >
-            {isVi ? 'Gán Buddy ngay →' : 'Assign Buddy →'}
+            {isVi ? 'Gán Buddy ngay' : 'Assign Buddy'}
           </button>
         </div>
       </div>
@@ -373,13 +326,9 @@ export function AdminOverviewSection({
                         <button
                           type="button"
                           onClick={() => setSelectedBookingId(bookingId)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-blue-950 transition hover:bg-slate-100 shadow-sm"
+                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-blue-950 shadow-xs transition hover:bg-slate-50 hover:border-slate-300"
                         >
-                          <svg className="h-3 w-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span>{isVi ? 'Xem' : 'View'}</span>
+                          {isVi ? 'Xem' : 'View'}
                         </button>
                       </td>
                     </tr>

@@ -128,20 +128,10 @@ export function AdminSidebar({
               <button
                 type="button"
                 onClick={toggleCollapse}
-                className="group flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 transition hover:bg-white/20 hover:scale-105 active:scale-95"
+                className="group flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 transition hover:bg-white/20 hover:scale-105 active:scale-95"
                 title={isVi ? 'Mở rộng menu' : 'Expand sidebar'}
               >
-                <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden="true">
-                  <path
-                    d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-                </svg>
+                <img src="/logo.png" alt="Phimium" className="h-8 w-8 object-contain drop-shadow-sm" />
               </button>
               {/* Expand arrow */}
               <button
@@ -159,18 +149,8 @@ export function AdminSidebar({
             <>
               {/* Expanded Brand: Logo + PHIMIUM */}
               <div className="flex items-center gap-2.5">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 shadow-sm">
-                  <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden="true">
-                    <path
-                      d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="3.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-                  </svg>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 p-1 ring-1 ring-white/20 shadow-sm">
+                  <img src="/logo.png" alt="Phimium" className="h-7 w-7 object-contain drop-shadow-sm" />
                 </span>
                 <div className="flex flex-col leading-none">
                   <span className="text-base font-black tracking-wide text-white">PHIMIUM</span>
@@ -236,20 +216,10 @@ export function AdminSidebar({
         {collapsed ? (
           <div className="flex flex-col items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20"
               title={isVi ? 'Quản trị viên (Trực tuyến)' : 'Administrator (Online)'}
             >
-              <svg viewBox="0 0 32 32" className="h-5 w-5" aria-hidden="true">
-                <path
-                  d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-              </svg>
+              <img src="/logo.png" alt="Phimium" className="h-7 w-7 object-contain" />
             </div>
             <button
               type="button"
@@ -269,18 +239,8 @@ export function AdminSidebar({
         ) : (
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
-                <svg viewBox="0 0 32 32" className="h-5 w-5" aria-hidden="true">
-                  <path
-                    d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-                </svg>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 p-1 ring-1 ring-white/20">
+                <img src="/logo.png" alt="Phimium" className="h-6 w-6 object-contain" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-bold text-slate-200">

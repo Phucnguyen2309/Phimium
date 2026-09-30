@@ -19,23 +19,17 @@ export function BrandLogo({ className = '', tone = 'dark' }) {
       className={`group inline-flex items-center gap-2.5 ${className}`}
     >
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm transition ${
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl p-1 transition ${
           isLight
             ? 'bg-white/10 ring-1 ring-white/20 group-hover:bg-white/20'
-            : 'bg-blue-950 group-hover:bg-blue-900'
+            : 'bg-white shadow-xs border border-slate-100 group-hover:shadow-md'
         }`}
       >
-        <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden="true">
-          <path
-            d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-            fill="none"
-            stroke="white"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-        </svg>
+        <img
+          src="/logo.png"
+          alt={APP_NAME}
+          className="h-8 w-8 object-contain drop-shadow-xs"
+        />
       </span>
 
       <span className="flex flex-col leading-none">

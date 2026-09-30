@@ -185,20 +185,8 @@ export function AdminView({
             </button>
 
             {/* Profile Avatar Pill: Dùng Logo Phimium + chữ Admin (Không dùng email) */}
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 shadow-sm">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-950 shadow-inner">
-                <svg viewBox="0 0 32 32" className="h-3.5 w-3.5" aria-hidden="true">
-                  <path
-                    d="M10 26V7h8.2c4.3 0 7 2.4 7 6.1s-2.7 6.2-7 6.2H14.6"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="19" cy="13.1" r="2.3" fill="#facc15" />
-                </svg>
-              </div>
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1.5 pr-3 shadow-xs">
+              <img src="/logo.png" alt="Phimium Admin" className="h-6 w-6 object-contain" />
               <span className="text-xs font-bold text-slate-800">
                 Admin
               </span>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 
 import { useLanguage } from '@/context/languageContext.js'
-import { formatMoney, matchSearchText } from '@/utils/format.js'
+import { formatDDMMYYYY, formatMoney, matchSearchText } from '@/utils/format.js'
 import { AdminBookingDetailModal } from './AdminBookingDetailModal.jsx'
 import { AdminPagination } from './AdminPagination.jsx'
 
@@ -324,7 +324,7 @@ export function AdminBookingsSection({
                         {b.activityTitle || '—'}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-slate-400">
-                        {b.departureDate || '—'} {b.departureTime ? `· ${b.departureTime}` : ''}
+                        {formatDDMMYYYY(b.departureDate) || '—'} {b.departureTime ? `· ${b.departureTime}` : ''}
                       </p>
                     </td>
 
@@ -339,10 +339,9 @@ export function AdminBookingsSection({
                     <td className="px-4 py-3.5 align-middle">
                       {b.buddyName ? (
                         <span
-                          className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-100/80 shadow-2xs truncate"
+                          className="inline-flex max-w-full items-center rounded-lg bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-100/80 shadow-2xs truncate"
                           title={b.buddyName}
                         >
-                          <span className="shrink-0">👤</span>
                           <span className="truncate">{b.buddyName}</span>
                         </span>
                       ) : (
@@ -355,13 +354,8 @@ export function AdminBookingsSection({
                     {/* Trạng thái */}
                     <td className="px-4 py-3.5 align-middle">
                       <span
-                        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusInfo.badgeClass}`}
+                        className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusInfo.badgeClass}`}
                       >
-                        {b.status === 'WAITING_FOR_BUDDY' && (
-                          <span className="text-xs shrink-0 animate-pulse" title={isVi ? 'Đang cần điều phối Buddy' : 'Action required: Needs Buddy'}>
-                            ⚠️
-                          </span>
-                        )}
                         <span>{statusInfo.label}</span>
                       </span>
                     </td>
