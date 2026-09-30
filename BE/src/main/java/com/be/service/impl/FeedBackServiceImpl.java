@@ -15,6 +15,8 @@ import com.be.repository.BuddyRepository;
 import com.be.repository.FeedBackRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.FeedBackService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -159,9 +161,14 @@ public class FeedBackServiceImpl implements FeedBackService {
             // 3. Tìm kiếm từ khóa xuất hiện ở bình luận Tour hoặc Buddy
             if (search != null) {
                 String pattern = "%" + search + "%";
+                Join<FeedBack, User> reviewerJoin = root.join("reviewer", JoinType.LEFT);
+                Join<FeedBack, Buddy> buddyJoin = root.join("buddy", JoinType.LEFT);
+                Join<Buddy, User> buddyUserJoin = buddyJoin.join("user", JoinType.LEFT);
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("tourComment")), pattern),
-                        cb.like(cb.lower(root.get("buddyComment")), pattern)
+                        cb.like(cb.lower(root.get("buddyComment")), pattern),
+                        cb.like(cb.lower(reviewerJoin.get("fullName")), pattern),
+                        cb.like(cb.lower(buddyUserJoin.get("fullName")), pattern)
                 ));
             }
 

@@ -50,6 +50,7 @@ public class ActivityMapper {
                     .map(d -> ActivityDepartureResponse.builder()
                             .departureId(d.getDepartureId())
                             .activityId(activity.getId())
+                            .departureDate(d.getDepartureDate())
                             .startTime(d.getStartTime())
                             .endTime(d.getEndTime())
                             .capacity(d.getCapacity())

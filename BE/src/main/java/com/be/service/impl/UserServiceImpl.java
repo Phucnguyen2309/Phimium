@@ -2,12 +2,15 @@ package com.be.service.impl;
 
 import com.be.dto.response.UserResponse;
 import com.be.entity.User;
+import com.be.enums.BuddyStatus;
 import com.be.enums.UserRole;
 import com.be.enums.UserStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.mapper.UserMapper;
+import com.be.repository.BuddyRepository;
 import com.be.repository.UserRepository;
+import com.be.service.BuddyService;
 import com.be.service.UserService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final BuddyRepository buddyRepository;
+    private final BuddyService buddyService;
 
     @Override
     @Transactional(readOnly = true)
@@ -77,6 +82,11 @@ public class UserServiceImpl implements UserService {
 
         user.setStatus(status);
         User saved = userRepository.save(user);
+        if (user.getRole() == UserRole.BUDDY && status != UserStatus.ACTIVE) {
+            buddyRepository.findByUser_UserId(userId).ifPresent(buddy -> {
+                buddyService.updateBuddyStatus(buddy.getBuddyId(), BuddyStatus.INACTIVE);
+            });
+        }
         return userMapper.toResponse(saved);
     }
 }

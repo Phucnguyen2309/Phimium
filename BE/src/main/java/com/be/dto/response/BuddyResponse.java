@@ -24,4 +24,5 @@ public class BuddyResponse {
     private BigDecimal averageRating;
     private Integer totalReviews;
     private BuddyStatus status;
+    private Integer affectedRegistrations;
 }

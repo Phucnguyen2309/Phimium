@@ -12,6 +12,8 @@ import com.be.service.BookingLifecycleService;
 import com.be.service.PaymentService;
 import com.be.util.DateTimeUtils;
 import com.be.util.SePaySignatureUtil;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -200,11 +202,14 @@ public class PaymentServiceImpl implements PaymentService {
             // 2. Tìm kiếm theo mã hóa đơn, mã đơn provider, mã giao dịch SePay hoặc mô tả
             if (search != null) {
                 String pattern = "%" + search + "%";
+                Join<Payment, Registration> registrationJoin = root.join("registration", JoinType.LEFT);
+                Join<Registration, User> userJoin = registrationJoin.join("user", JoinType.LEFT);
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("invoiceNumber")), pattern),
                         cb.like(cb.lower(root.get("providerOrderId")), pattern),
                         cb.like(cb.lower(root.get("providerTransactionId")), pattern),
-                        cb.like(cb.lower(root.get("description")), pattern)
+                        cb.like(cb.lower(root.get("description")), pattern),
+                        cb.like(cb.lower(userJoin.get("fullName")), pattern)
                 ));
             }
 
