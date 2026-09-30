@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import adminService from '@/services/adminService.js'
 import { getErrorMessage } from '@/utils/response.js'
 import { useLanguage } from '@/context/languageContext.js'
+import { formatDDMMYYYY } from '@/utils/format.js'
 
 export function AdminAddDepartureModal({
   isOpen,
@@ -121,18 +122,11 @@ export function AdminAddDepartureModal({
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-950 text-yellow-400 shadow-sm">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
-            <div>
-              <h3 className="text-sm font-black text-blue-950">
-                {isVi ? 'Thêm ca khởi hành mới' : 'Add New Departure Slot'}
-              </h3>
-              <p className="line-clamp-1 text-[11px] font-medium text-slate-400">{activity.title}</p>
-            </div>
+          <div>
+            <h3 className="text-sm font-black text-blue-950">
+              {isVi ? 'Thêm ca khởi hành mới' : 'Add New Departure Slot'}
+            </h3>
+            <p className="line-clamp-1 text-[11px] font-medium text-slate-400">{activity.title}</p>
           </div>
           <button
             type="button"
@@ -365,16 +359,9 @@ export function AdminEditCapacityModal({
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-950 text-yellow-400">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </span>
-            <h3 className="text-sm font-black text-blue-950">
-              {isVi ? 'Điều chỉnh sức chứa ca' : 'Adjust Slot Capacity'}
-            </h3>
-          </div>
+          <h3 className="text-sm font-black text-blue-950">
+            {isVi ? 'Điều chỉnh sức chứa ca' : 'Adjust Slot Capacity'}
+          </h3>
           <button
             type="button"
             disabled={loading}
@@ -396,7 +383,9 @@ export function AdminEditCapacityModal({
             <p className="font-semibold text-blue-950">
               {departure.startTime} – {departure.endTime}
             </p>
-            <p className="mt-0.5 text-slate-400">{departure.departureDate}</p>
+            <p className="mt-0.5 font-medium text-slate-500">
+              {formatDDMMYYYY(departure.departureDate)}
+            </p>
           </div>
 
           <div>
@@ -421,10 +410,9 @@ export function AdminEditCapacityModal({
                   />
                   {reservedGuests > 0 ? (
                     <div className="mt-2.5 rounded-xl border border-blue-100 bg-blue-50/70 p-2.5 text-xs text-blue-900">
-                      <div className="flex items-center gap-1.5 font-bold text-blue-950">
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-200 text-[10px]">👥</span>
-                        <span>{isVi ? `Đã có ${reservedGuests} khách đặt vé ở ca này` : `${reservedGuests} booked guests in this slot`}</span>
-                      </div>
+                      <p className="font-bold text-blue-950">
+                        {isVi ? `Đã có ${reservedGuests} khách đặt vé ở ca này` : `${reservedGuests} booked guests in this slot`}
+                      </p>
                     </div>
                   ) : (
                     <p className="mt-1 text-[11px] text-slate-400">

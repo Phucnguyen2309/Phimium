@@ -97,3 +97,19 @@ export const matchSearchText = (target, search) => {
   if (t.includes(s)) return true
   return removeVietnameseTones(t).includes(removeVietnameseTones(s))
 }
+
+/** Định dạng ngày thành dd-mm-yyyy chuẩn (ví dụ: 05-10-2026) */
+export const formatDDMMYYYY = (value, fallback = '—') => {
+  if (!value) return fallback
+  const str = String(value).trim().split('T')[0]
+  const parts = str.split('-')
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`
+  }
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return str
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}-${month}-${year}`
+}
