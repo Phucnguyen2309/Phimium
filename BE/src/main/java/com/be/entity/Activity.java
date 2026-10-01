@@ -42,6 +42,13 @@ public class Activity {
     @Column(name = "thumbnail_url", length = 500)
     private String thumbnailUrl;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "activity_images", joinColumns = @JoinColumn(name = "activity_id"))
+    @OrderColumn(name = "image_order")
+    @Column(name = "image_url", nullable = false, length = 2048)
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
+
     @Column(name = "location_name", nullable = false, length = 255)
     private String locationName;
 

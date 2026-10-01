@@ -238,6 +238,17 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  /* Be Vietnam Pro có khoảng trắng hẹp (~0.21em): nới thêm để chữ tiếng Việt không bị dính vào nhau */
+  word-spacing: 0.08em;
+}
+
+/* Ẩn thanh cuộn ngang (Windows hiện thanh xám) nhưng vẫn vuốt / cuộn được */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 ::selection {
@@ -504,4 +515,4 @@ body {
 
 .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.3);
-}
+}

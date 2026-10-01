@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class ActivityDetailResponse {
     private String title;
     private String description;
     private String thumbnailUrl;
+    private List<String> imageUrls;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String locationName;

@@ -1,5 +1,4 @@
 import { getCoordinates } from '@/utils/geo.js'
-import { t } from '@/utils/i18n.js'
 import { getValidText } from '@/utils/text.js'
 
 export const ALL_TYPES = 'ALL'
@@ -9,37 +8,6 @@ export const getActivityTypes = (activities) => [
   ALL_TYPES,
   ...new Set(activities.map((activity) => activity.activityType).filter(Boolean)),
 ]
-
-/** Gom các Buddy đang tổ chức hoạt động (lấy từ dữ liệu activity thật). */
-export const getBuddiesFromActivities = (activities, limit = 3) => {
-  const buddies = new Map()
-
-  activities.forEach((activity) => {
-    const name = getValidText(activity.hostBuddyName)
-    if (!name || name === t('activity.unknownBuddy')) return
-
-    const key = activity.hostBuddyId ?? name
-    const current = buddies.get(key) ?? {
-      id: key,
-      name,
-      activityTitles: [],
-      activityTypes: new Set(),
-    }
-
-    current.activityTitles.push(activity.title)
-    if (activity.activityType) current.activityTypes.add(activity.activityType)
-
-    buddies.set(key, current)
-  })
-
-  return [...buddies.values()]
-    .sort((a, b) => b.activityTitles.length - a.activityTitles.length)
-    .slice(0, limit)
-    .map((buddy) => ({
-      ...buddy,
-      activityTypes: [...buddy.activityTypes],
-    }))
-}
 
 /** Các điểm hẹn (địa điểm) khác nhau của hoạt động, kèm toạ độ thật nếu Backend có. */
 export const getMeetingPoints = (activities, limit = 5) => {

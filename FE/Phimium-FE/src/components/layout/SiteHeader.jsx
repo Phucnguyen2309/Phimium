@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Modal } from 'antd'
 
 import { LanguageSwitcher } from '@/components/common'
 import { BrandLogo } from '@/components/layout/BrandLogo.jsx'
@@ -99,11 +100,19 @@ function AccountMenu() {
   const { t } = useLanguage()
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const [confirmLogout, setConfirmLogout] = useState(false)
   const close = useCallback(() => setOpen(false), [])
+  const cancelLogout = useCallback(() => setConfirmLogout(false), [])
   const ref = useClickOutside(close)
 
+  const handleLogout = () => {
+    setConfirmLogout(false)
+    logout()
+  }
+
   const userRole = normalizeRole(user?.role)
-  const displayName = (user?.username || t('nav.myAccount')).split('@')[0].trim()
+  const displayName =
+    user?.fullName?.trim() || (user?.username || t('nav.myAccount')).split('@')[0].trim()
 
   return (
     <div ref={ref} className="relative">
@@ -154,7 +163,7 @@ function AccountMenu() {
                 type="button"
                 onClick={() => {
                   close()
-                  logout()
+                  setConfirmLogout(true)
                 }}
                 className={`${menuItemClass} border-t border-slate-100 text-red-600 hover:text-red-700`}
               >
@@ -162,17 +171,27 @@ function AccountMenu() {
               </button>
             </>
           ) : (
-            <>
-              <Link to={ROUTES.login} onClick={close} className={menuItemClass}>
-                {t('nav.login')}
-              </Link>
-              <Link to={ROUTES.register} onClick={close} className={menuItemClass}>
-                {t('nav.becomeBuddy')}
-              </Link>
-            </>
+            <Link to={ROUTES.login} onClick={close} className={menuItemClass}>
+              {t('nav.login')}
+            </Link>
           )}
         </div>
       )}
+
+      {/* Hỏi lại trước khi đăng xuất (antd Modal) */}
+      <Modal
+        open={confirmLogout}
+        title={t('nav.logoutConfirmTitle')}
+        okText={t('nav.logout')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ danger: true }}
+        onOk={handleLogout}
+        onCancel={cancelLogout}
+        centered
+        width={400}
+      >
+        <p className="text-sm leading-6 text-slate-600">{t('nav.logoutConfirmMessage')}</p>
+      </Modal>
     </div>
   )
 }

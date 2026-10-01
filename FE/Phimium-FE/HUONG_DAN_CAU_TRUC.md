@@ -30,6 +30,7 @@
 | UI | React 19, JavaScript (`.js` / `.jsx`, **không** TypeScript) |
 | Build | Vite |
 | Style | Tailwind CSS 4 (class trực tiếp trong JSX, **không** viết file CSS riêng cho component) |
+| Hộp thoại xác nhận | **antd** `Modal` (theme navy cấu hình bằng `ConfigProvider` trong `src/main.jsx`). VD: hỏi lại khi đăng xuất ở `SiteHeader`. Bố cục và style còn lại vẫn dùng Tailwind, không dùng component antd thay cho UI đã có |
 | Router | React Router 7 (`BrowserRouter` + `Routes` trong `src/app/App.jsx`) |
 | HTTP | Axios qua instance `src/services/http.js` |
 | State | `useState` / `useMemo` + React Context (`AuthProvider`). **Chưa** dùng Redux / Zustand / React Query. |
@@ -68,8 +69,7 @@ src/
     AuthProvider.jsx        login / logout / user
   features/                 module dùng ở NHIỀU trang (có hook / mapper / component riêng)
     activity/activityMapper.js
-    myActivities/           MyActivitiesPanel, useMyActivities, myActivitiesMapper, constants, components/
-    myGroups/               MyGroupsPanel, useMyGroups, myGroupsMapper, components/
+    myGroups/               myGroupsMapper (map nhóm từ /v1/registrations/my-groups)
     googleAuth/             GoogleAuthSection, GoogleSignInButton, useGoogleAuth, loadGoogleScript
     map/                    PointsMap (bản đồ Leaflet thật), loadLeaflet
   hooks/
@@ -89,8 +89,9 @@ src/
   services/
     http.js                 axios instance (tự gắn Bearer token)
     authService.js  activityService.js  groupService.js  buddyService.js
+    registrationService.js  feedbackService.js  paymentService.js  pricingService.js  adminService.js
   utils/                    hàm thuần JS, KHÔNG import React
-    format.js  response.js  image.js  text.js  role.js  i18n.js  jwt.js  geo.js
+    format.js  response.js  image.js  text.js  role.js  i18n.js  jwt.js  geo.js  checkout.js
   locales/                  từ điển đa ngôn ngữ
     vi.js                   tiếng Việt (mặc định)
     en.js                   tiếng Anh – cùng bộ key với vi.js
@@ -379,7 +380,7 @@ Nếu BE chưa có API cho một tính năng: vẫn làm UI, nhưng hiện trạ
 ## 10. Auth
 
 - Lấy user bằng `const { user, isAuthenticated, login, logout } = useAuth()` từ `@/context/authContext.js`.
-- Object `user` gồm: `username`, `role`, `userId`, `buddyId`.
+- Object `user` gồm: `username` (email), `fullName` (họ tên, lấy từ `LoginResponse.fullName` hoặc claim `fullName` trong JWT), `role`, `userId`, `buddyId`. Hiển thị tên thì ưu tiên `fullName`.
 - **Không đọc / ghi `localStorage` trực tiếp** trong component, hook hay trang. Chỉ `AuthProvider.jsx`, `LanguageProvider.jsx` và `http.js` được đụng tới storage, và luôn qua `STORAGE_KEYS`.
 - Sau khi login, điều hướng bằng `getDefaultRouteByRole(role)`.
 - `login(response)` tự lấy token từ `accessToken` / `token` / `jwt`, thiếu field nào thì bổ sung từ claim trong JWT (`sub` → `userId`).
@@ -394,6 +395,40 @@ Nếu BE chưa có API cho một tính năng: vẫn làm UI, nhưng hiện trạ
 6. F5 làm mất router state: trang hiện thêm ô nhập email.
 
 Lỗi Backend có dạng `{ success: false, code, message }`. `toApiError` gắn `error.code` để hook so với `AUTH_ERROR_CODES` và hiện câu dịch sẵn, **không** hiện thẳng `message` tiếng Anh của Backend khi đã có key dịch.
+
+### Đặt tour & thanh toán (`pages/ActivityDetail/`)
+
+- Ảnh tour ở trang chi tiết lấy từ `imageUrls` của `GET /activity/{id}` (**không** dùng `thumbnailUrl`, thumbnail chỉ dùng cho thẻ ở danh sách). `DetailGallery` hiển thị lưới 1 ảnh lớn + tối đa 4 ảnh nhỏ, bấm mở `PhotoLightbox`.
+- API chi tiết `GET /activity/{id}` **không** có lịch khởi hành -> `buildActivityDetail` ghép thêm bản ghi trong `GET /activity/getAll` (lịch khởi hành, loại tour, giá trẻ em, cỡ nhóm).
+- Giá: đã đăng nhập thì gọi `pricingService.getQuote` (`POST /v1/pricing/quote`, có mã giảm giá); chưa đăng nhập thì `estimatePrice` tạm tính theo giá niêm yết.
+- Đặt tour: kiểm tra form -> `SafetyTermsModal` -> `registrationService.create` (`POST /v1/registrations` với `{ departureId, adultCount, childCount, isSafetyTermsAccepted: true, pickupLocation, couponCode }`).
+- Thanh toán: `paymentService.createPayment` (`POST /payment/registration/{id}`) trả `{ checkoutUrl, fields }` -> `submitCheckoutForm` (`utils/checkout.js`) POST form sang SePay. Tour 0đ thì về trang cá nhân luôn. Không tạo được thanh toán thì chỗ vẫn được giữ, khách bấm "Thanh toán ngay" ở trang cá nhân.
+
+### Kết quả thanh toán (`pages/PaymentResult/`)
+
+- Route `/payment/:result` (`success` | `error` | `cancel`), cần đăng nhập. SePay quay về đây với `?paymentId=` (Backend tự gắn vào `SEPAY_SUCCESS_URL` / `SEPAY_ERROR_URL` / `SEPAY_CANCEL_URL`).
+- **Không tin URL**: trạng thái thật lấy từ `paymentService.getPayment` (`GET /payment/{id}`). `getResultState` (`paymentResultMapper.js`) đổi `status` + `result` thành trạng thái hiển thị.
+- Về `success` mà còn `PENDING` (IPN chưa tới) thì hỏi lại mỗi 3 giây, tối đa 10 lần; quá thì hiện nút "Kiểm tra lại".
+- `FAILED` / `EXPIRED` / huỷ mà đăng ký còn chờ thanh toán thì có nút "Thanh toán lại" (`createPayment` -> `submitCheckoutForm`).
+
+### Trang cá nhân (`pages/UserDashboard/`)
+
+Ghép 5 API theo `registrationId` trong `userDashboardMapper.js` (`buildJourneys`):
+
+| API | Service | Dùng cho |
+| --- | --- | --- |
+| `GET /v1/registrations/me` | `registrationService.getMyRegistrations` | Danh sách chuyến đi (bắt buộc, lỗi thì báo lỗi cả trang) |
+| `GET /activity/joined` | `activityService.getMyActivities` | Ảnh, loại tour, điểm hẹn của chuyến |
+| `GET /feedback/me` | `feedbackService.getMyFeedbacks` | Đánh giá đã viết |
+| `GET /payment/me` | `paymentService.getMyPayments` | Lịch sử thanh toán |
+| `GET /v1/registrations/my-groups` | `groupService.getMyGroups` | Nhóm của tôi |
+
+API phụ lỗi thì phần đó trống, trang vẫn hiển thị. Quy tắc nghiệp vụ lấy theo Backend, **đặt trong mapper**, không viết lại trong component:
+
+- `getJourneyGroup`: `UPCOMING` / `COMPLETED` / `CANCELLED`.
+- `getCheckInState`: check-in khi `BUDDY_ASSIGNED` + đã thanh toán, mở 60 phút trước giờ đi, đóng khi tour kết thúc.
+- `canCancel`: chưa khởi hành, chưa check-in, chưa thanh toán (đã trả tiền thì Backend bắt duyệt hoàn tiền).
+- `canReview`: đã đi, có Buddy, chưa đánh giá. Gửi đánh giá: `POST /feedback/registrations/{id}` với `{ tourRating, tourComment, buddyRating, buddyComment }`.
 
 ### Đăng nhập / đăng ký bằng Google
 
@@ -436,6 +471,9 @@ export function ActivityCard({ activity, viewMode = 'GRID' }) {
 - List phải có `key` ổn định (`item.id`). Chỉ dùng `index` khi thật sự không có id.
 - `<img>` phải có `alt`. Ảnh từ API đi qua `getValidImage()`. Nên có `onError` để ẩn ảnh lỗi (xem `UserAvatar`).
 - Nút không submit form phải có `type="button"`.
+- Hàng cuộn ngang (chip, tab, carousel) thêm class `no-scrollbar` (định nghĩa trong `index.css`) để Windows không hiện thanh cuộn xám.
+- Không bỏ `word-spacing` của `body` trong `index.css`: font Be Vietnam Pro có khoảng trắng rất hẹp, bỏ đi chữ tiếng Việt sẽ bị dính.
+- **Modal / lightbox / overlay toàn màn hình** phải render bằng `createPortal(..., document.body)` và dùng `z-[1000]`. Nhiều trang bọc nội dung trong `relative isolate` (tạo stacking context), nếu không dùng portal thì header (`z-[999]`) sẽ đè lên modal.
 
 ### Component dùng chung đã có – dùng lại
 
@@ -449,6 +487,7 @@ export function ActivityCard({ activity, viewMode = 'GRID' }) {
 | `FormField` | `@/components/common` | Ô nhập có label + icon (`user`, `mail`, `lock`, `phone`, `calendar`), props còn lại truyền xuống `<input>` |
 | `PasswordField` | `@/components/common` | Ô mật khẩu có nút hiện / ẩn |
 | `AuthAlert` | `@/components/common` | Hộp thông báo trong form (`tone="error" \| "success" \| "info"`) |
+| `RatingStars` | `@/components/common` | Hàng sao 1–5. Chỉ xem: `<RatingStars value={4.5} />`. Chọn điểm: thêm `onChange` (+ `label`) |
 | `OtpInput` | `@/components/common` | Ô nhập mã OTP nhiều số: tự nhảy ô, Backspace lùi, dán cả mã. Ô trống là dấu cách trong `value`, đủ mã khi khớp `/^\d{6}$/`. Đổi `shakeKey` để ô rung khi sai |
 | `AuthLayout` | `@/layouts/AuthLayout.jsx` | Khung trang Đăng nhập / Đăng ký |
 | `SiteHeader` | `@/components/layout/SiteHeader.jsx` | Header chung (đã gắn sẵn trong `MainLayout`): logo, 3 mục menu, VI/EN, tài khoản |

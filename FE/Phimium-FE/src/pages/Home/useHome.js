@@ -7,7 +7,6 @@ import activityService from '@/services/activityService.js'
 import {
   ALL_TYPES,
   getActivityTypes,
-  getBuddiesFromActivities,
   getMeetingPoints,
 } from './homeMapper.js'
 
@@ -75,13 +74,11 @@ export function useHome() {
     return list.slice(0, FEATURED_LIMIT)
   }, [activities, selectedType])
 
-  const buddies = useMemo(() => getBuddiesFromActivities(activities), [activities])
 
   const meetingPoints = useMemo(() => getMeetingPoints(activities), [activities])
 
   return {
     activityTypes,
-    buddies,
     error,
     featuredActivities,
     loading,

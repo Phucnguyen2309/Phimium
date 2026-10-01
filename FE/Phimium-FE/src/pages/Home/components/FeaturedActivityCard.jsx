@@ -41,9 +41,9 @@ export function FeaturedActivityCard({ activity }) {
   const imageUrl = imageFailed ? '' : getValidImage(activity.thumbnailUrl)
   const detailPath = buildActivityDetailPath(activity.id)
   const highlights = [
-    activity.hostBuddyName &&
-      t('activities.ledBy', { name: activity.hostBuddyName }),
     activity.address,
+    // Buddy chỉ được xếp sau khi khách đặt tour -> không hiện tên Buddy ở đây
+    t('home.featured.buddyAfterBooking'),
     t('home.featured.safetyNote'),
   ].filter(Boolean)
 

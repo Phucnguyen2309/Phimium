@@ -21,7 +21,7 @@ class ActivityCreationTests {
         request.setTitle("Food tour"); request.setActivityType(TourType.FOODTOUR);
         request.setRegistrationDeadline(LocalDateTime.now().plusDays(2));
         request.setLocationName("HCM"); request.setAddress("District 1");
-        request.setMinimumParticipants(1); request.setMaximumParticipants(20);
+        request.setMinimumParticipants(2); request.setMaximumParticipants(20);
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             assertTrue(factory.getValidator().validate(request).isEmpty());
         }
@@ -33,7 +33,7 @@ class ActivityCreationTests {
             return activity;
         });
         var service = new ActivityServiceImpl(repository, new ActivityMapper(), null, null, null, null);
-        var response = service.createActivity(request, null, new User());
+        var response = service.createActivity(request, null, null, new User());
         assertNotNull(response.getId());
         assertTrue(response.getDepartures().isEmpty());
         var json = new ObjectMapper().findAndRegisterModules().valueToTree(request);

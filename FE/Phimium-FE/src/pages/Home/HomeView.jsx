@@ -1,6 +1,5 @@
 import { SiteFooter } from '@/components/layout/SiteFooter.jsx'
 
-import { BuddiesSection } from './components/BuddiesSection.jsx'
 import { FeaturedActivitiesSection } from './components/FeaturedActivitiesSection.jsx'
 import { HeroSection } from './components/HeroSection.jsx'
 import { HighlightMarquee } from './components/HighlightMarquee.jsx'
@@ -11,7 +10,6 @@ import { SafetyBannerSection } from './components/SafetyBannerSection.jsx'
 
 export function HomeView({
   activityTypes,
-  buddies,
   error,
   featuredActivities,
   isAuthenticated,
@@ -43,7 +41,6 @@ export function HomeView({
 
       <JoinStepsSection isAuthenticated={isAuthenticated} />
 
-      <BuddiesSection buddies={buddies} />
 
       <SafetyBannerSection isAuthenticated={isAuthenticated} />
 
