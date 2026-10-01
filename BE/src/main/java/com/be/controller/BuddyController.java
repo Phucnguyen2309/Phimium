@@ -2,6 +2,7 @@ package com.be.controller;
 
 import com.be.dto.request.UpgradeBuddyRequest;
 import com.be.dto.response.*;
+import com.be.enums.BuddyStatus;
 import com.be.service.BuddyScheduleService;
 import com.be.entity.User;
 import com.be.exception.AppException;
@@ -96,4 +97,19 @@ public class BuddyController {
         List<TourMemberResponse> members = buddyScheduleService.getTourMembers(departureId, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khách tham gia thành công", members));
     }
+
+    @PatchMapping("/me/status")
+    @PreAuthorize("hasRole('BUDDY')")
+    @Operation(summary = "[BUDDY] Tự cập nhật trạng thái hoạt động (ACTIVE / INACTIVE)")
+    public ResponseEntity<ApiResponse<BuddyResponse>> updateMyStatus(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam BuddyStatus status
+    ) {
+        if (status == BuddyStatus.SUSPENDED) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+        BuddyResponse response = buddyService.updateMyStatus(currentUser, status);
+        return ResponseEntity.ok(ApiResponse.success("Status successfully updated", response));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.be.service;
 
 import com.be.dto.request.UpgradeBuddyRequest;
 import com.be.dto.response.BuddyResponse;
+import com.be.entity.User;
 import com.be.enums.BuddyStatus;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,5 +21,7 @@ public interface BuddyService {
     List<BuddyResponse> getAllBuddies(BuddyStatus status);
 
     BuddyResponse updateBuddyStatus(UUID buddyId, BuddyStatus status);
+
+    BuddyResponse updateMyStatus(User currentUser, BuddyStatus status);
 
 }

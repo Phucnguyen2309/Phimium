@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,5 +132,53 @@ public class BuddyServiceImpl implements BuddyService {
         registrationRepository.saveAll(assignedRegistrations);
         return assignedRegistrations.size();
     }
+    @Override
+    @Transactional
+    public BuddyResponse updateMyStatus(User currentUser, BuddyStatus targetStatus) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Buddy buddy = buddyRepository.findByUser_UserId(currentUser.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.BUDDY_NOT_FOUND));
+
+        // 2. Chặn nếu tài khoản đang bị Admin kỷ luật
+        if (buddy.getStatus() == BuddyStatus.SUSPENDED) {
+            throw new AppException(ErrorCode.BUDDY_SUSPENDED_BY_ADMIN);
+        }
+
+        int affectedCount = 0;
+
+        // 3. Nếu Buddy chuyển sang tạm nghỉ (INACTIVE)
+        if (targetStatus == BuddyStatus.INACTIVE) {
+            List<Registration> assignedRegistrations = registrationRepository
+                    .findByBuddy_BuddyIdAndStatus(buddy.getBuddyId(), RegistrationStatus.BUDDY_ASSIGNED);
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime limitTime = now.plusHours(24);
+
+            // Kiểm tra xem có ca tour nào sắp chạy trong 24h tới không
+            boolean hasUrgentTour = assignedRegistrations.stream().anyMatch(reg -> {
+                if (reg.getDeparture() == null) return false;
+                LocalDateTime tourStart = reg.getDeparture().getDepartureDate()
+                        .atTime(reg.getDeparture().getStartTime());
+                return tourStart.isAfter(now) && tourStart.isBefore(limitTime);
+            });
+
+            if (hasUrgentTour) {
+                throw new AppException(ErrorCode.BUDDY_HAS_URGENT_TOUR);
+            }
+
+            affectedCount = handleUpcomingRegistrationsWhenBuddyUnavailable(buddy);
+        }
+
+        buddy.setStatus(targetStatus);
+        Buddy saved = buddyRepository.save(buddy);
+
+        BuddyResponse response = buddyMapper.toResponse(saved);
+        response.setAffectedRegistrations(affectedCount);
+        return response;
+    }
+
 }
 
