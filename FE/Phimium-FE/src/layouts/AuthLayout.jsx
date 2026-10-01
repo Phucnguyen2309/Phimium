@@ -20,7 +20,7 @@ export function AuthLayout({ title, subtitle, sideTitle, sideText, children }) {
 
   return (
     <div className="flex min-h-screen bg-white">
-      <aside className="relative isolate hidden w-[46%] flex-col justify-between overflow-hidden bg-blue-950 p-12 text-white lg:flex">
+      <aside className="relative isolate hidden w-[46%] flex-col justify-between overflow-hidden bg-blue-950 p-8 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen xl:p-12">
         <img
           src={authBackground}
           alt=""
@@ -46,27 +46,27 @@ export function AuthLayout({ title, subtitle, sideTitle, sideText, children }) {
 
           <h2
             style={fadeUp(200)}
-            className="mt-6 animate-fade-up font-display text-4xl font-bold leading-tight xl:text-5xl"
+            className="mt-4 animate-fade-up font-display text-3xl font-bold leading-tight xl:mt-6 xl:text-4xl 2xl:text-5xl"
           >
             <span className="bg-gradient-to-r from-white via-yellow-200 to-white bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">
               {sideTitle}
             </span>
           </h2>
-          <p style={fadeUp(300)} className="mt-4 animate-fade-up text-base leading-7 text-blue-100">
+          <p style={fadeUp(300)} className="mt-3 animate-fade-up text-sm leading-6 text-blue-100 xl:mt-4 xl:text-base xl:leading-7">
             {sideText}
           </p>
 
-          <ul className="mt-8 space-y-3">
+          <ul className="mt-5 space-y-2.5 xl:mt-8 xl:space-y-3">
             {BENEFITS.map((id, index) => (
               <li key={id} style={fadeUp(420 + index * 120)} className="animate-fade-up">
-                <div className="shine group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur transition duration-300 hover:translate-x-1 hover:border-yellow-400/40 hover:bg-white/10">
+                <div className="shine group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 backdrop-blur transition duration-300 hover:translate-x-1 hover:border-yellow-400/40 hover:bg-white/10 xl:px-4 xl:py-3">
                   <span
                     style={{ animationDelay: `${index * 0.5}s` }}
-                    className="flex h-8 w-8 shrink-0 animate-bob items-center justify-center rounded-full bg-yellow-400 text-sm font-black text-blue-950 shadow-[0_0_18px_rgba(253,199,0,0.45)]"
+                    className="flex h-7 w-7 shrink-0 animate-bob items-center justify-center rounded-full bg-yellow-400 text-xs font-black text-blue-950 shadow-[0_0_18px_rgba(253,199,0,0.45)] xl:h-8 xl:w-8 xl:text-sm"
                   >
                     ✓
                   </span>
-                  <span className="text-sm font-semibold">{t(`auth.benefits.${id}`)}</span>
+                  <span className="text-xs font-semibold xl:text-sm">{t(`auth.benefits.${id}`)}</span>
                 </div>
               </li>
             ))}

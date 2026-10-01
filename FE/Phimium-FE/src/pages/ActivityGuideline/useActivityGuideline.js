@@ -13,6 +13,7 @@ export function useActivityGuideline() {
   const { t } = useLanguage()
 
   const [guideline, setGuideline] = useState(null)
+  const [activity, setActivity] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [acknowledged, setAcknowledged] = useState(false)
@@ -24,15 +25,24 @@ export function useActivityGuideline() {
 
     let isMounted = true
 
-    const fetchGuideline = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        const response = await activityService.getGuidelineByActivityId(id)
+        const [guidelineRes, activityRes] = await Promise.allSettled([
+          activityService.getGuidelineByActivityId(id),
+          activityService.getActivityById(id),
+        ])
 
         if (isMounted) {
-          setGuideline(getResponseData(response))
+          if (guidelineRes.status === 'fulfilled') {
+            setGuideline(getResponseData(guidelineRes.value))
+          }
+          if (activityRes.status === 'fulfilled') {
+            const detail = activityRes.value?.data?.data ?? activityRes.value?.data
+            setActivity(detail)
+          }
         }
       } catch (err) {
         if (err?.response?.status !== 403) {
@@ -50,7 +60,7 @@ export function useActivityGuideline() {
       }
     }
 
-    fetchGuideline()
+    fetchData()
 
     return () => {
       isMounted = false
@@ -59,6 +69,7 @@ export function useActivityGuideline() {
 
   return {
     acknowledged,
+    activity,
     error,
     guideline,
     id,
