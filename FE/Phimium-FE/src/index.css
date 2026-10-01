@@ -3,7 +3,7 @@
 /* Font & animation dùng chung (font tải trong index.html) */
 @theme {
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-display: 'Gelasio', Georgia, 'Times New Roman', serif;
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -30,6 +30,7 @@
       opacity: 0;
       transform: translateY(24px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -37,10 +38,12 @@
   }
 
   @keyframes float-slow {
+
     0%,
     100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-8px);
     }
@@ -50,29 +53,35 @@
     from {
       transform: scale(1.05) translate(0, 0);
     }
+
     to {
       transform: scale(1.18) translate(-2%, -2%);
     }
   }
 
   @keyframes drift {
+
     0%,
     100% {
       transform: translate(0, 0) scale(1);
     }
+
     33% {
       transform: translate(40px, -30px) scale(1.08);
     }
+
     66% {
       transform: translate(-30px, 20px) scale(0.95);
     }
   }
 
   @keyframes gradient-x {
+
     0%,
     100% {
       background-position: 0% 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
@@ -82,6 +91,7 @@
     from {
       transform: translateX(0);
     }
+
     to {
       transform: translateX(-50%);
     }
@@ -92,12 +102,15 @@
       opacity: 0;
       transform: translateY(0) scale(0.6);
     }
+
     15% {
       opacity: 1;
     }
+
     85% {
       opacity: 0.9;
     }
+
     100% {
       opacity: 0;
       transform: translateY(-70vh) scale(1.2);
@@ -108,10 +121,12 @@
     0% {
       stroke-dashoffset: 320;
     }
+
     45%,
     70% {
       stroke-dashoffset: 0;
     }
+
     100% {
       stroke-dashoffset: -320;
     }
@@ -121,26 +136,31 @@
     from {
       transform: translate(-50%, -50%) rotate(0deg);
     }
+
     to {
       transform: translate(-50%, -50%) rotate(360deg);
     }
   }
 
   @keyframes glow-pulse {
+
     0%,
     100% {
       box-shadow: 0 30px 80px -20px rgba(2, 6, 23, 0.7), 0 0 0 0 rgba(253, 199, 0, 0);
     }
+
     50% {
       box-shadow: 0 30px 80px -20px rgba(2, 6, 23, 0.7), 0 0 0 6px rgba(253, 199, 0, 0.18);
     }
   }
 
   @keyframes bob {
+
     0%,
     100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-6px);
     }
@@ -153,11 +173,13 @@
   }
 
   @keyframes twinkle {
+
     0%,
     100% {
       opacity: 0.2;
       transform: scale(0.8);
     }
+
     50% {
       opacity: 1;
       transform: scale(1.2);
@@ -169,6 +191,7 @@
       opacity: 0;
       transform: translateY(-12px) scale(0.6);
     }
+
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -176,14 +199,17 @@
   }
 
   @keyframes shake {
+
     0%,
     100% {
       transform: translateX(0);
     }
+
     20%,
     60% {
       transform: translateX(-6px);
     }
+
     40%,
     80% {
       transform: translateX(6px);
@@ -194,6 +220,7 @@
     from {
       background-position: -400px 0;
     }
+
     to {
       background-position: 400px 0;
     }
@@ -353,6 +380,7 @@ body {
 }
 
 @keyframes map-ping {
+
   75%,
   100% {
     transform: scale(2.6);

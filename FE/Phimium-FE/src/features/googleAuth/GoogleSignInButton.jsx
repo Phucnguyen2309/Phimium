@@ -26,7 +26,7 @@ export function GoogleSignInButton({ onCredential, mode = 'signin', disabled = f
 
     let cancelled = false
 
-    loadGoogleScript()
+    loadGoogleScript(language)
       .then((google) => {
         const container = containerRef.current
         if (cancelled || !container) return
