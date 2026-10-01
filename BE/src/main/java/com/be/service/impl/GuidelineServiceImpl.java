@@ -29,11 +29,16 @@ public class GuidelineServiceImpl {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
 
-        ActivityGuideline guideline = guidelineRepository.findByActivity(activity)
-                .orElseThrow(() -> new AppException(ErrorCode.GUIDELINE_NOT_FOUND));
-
-        // Dùng mapper
-        return guidelineMapper.toResponse(guideline);
+        return guidelineRepository.findByActivity(activity)
+                .map(guidelineMapper::toResponse)
+                .orElseGet(() -> {
+                    ActivityGuideline defaultGuideline = ActivityGuideline.builder()
+                            .activity(activity)
+                            .instructions("Vui lòng tập trung đúng giờ tại điểm hẹn và tuân thủ theo sự hướng dẫn của Buddy.")
+                            .safetyGuidelines(GuidelineConstants.HARDCODED_SAFETY_RULES)
+                            .build();
+                    return guidelineMapper.toResponse(defaultGuideline);
+                });
     }
 
     // ================== CREATE ==================
