@@ -75,6 +75,7 @@ public class JwtService {
         var builder = Jwts.builder()
                 .setSubject(user.getUserId().toString()).id(java.util.UUID.randomUUID().toString()).claim("tokenType", tokenType)
                 .claim("username", user.getEmail())
+                .claim("fullName", user.getFullName())
                 .claim("role", user.getRole().name())
                 .setIssuedAt(now)
                 .setExpiration(exp);

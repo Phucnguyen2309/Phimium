@@ -27,7 +27,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
         String access = jwtService.generateAccessToken(user);
         return LoginResponse.builder().accessToken(access)
                 .refreshToken(jwtService.generateRefreshToken(user))
-                .username(user.getEmail()).role(user.getRole())
+                .username(user.getEmail()).fullName(user.getFullName()).role(user.getRole())
                 .buddyId(jwtService.extractBuddyId(access)).build();
     }
 }

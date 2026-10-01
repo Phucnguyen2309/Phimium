@@ -53,7 +53,7 @@ export function TourFilters({
       <div
         role="radiogroup"
         aria-label={t('activities.filters.typeLabel')}
-        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
+        className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
       >
         {typeOptions.map((type) => {
           const isActive = filters.type === type

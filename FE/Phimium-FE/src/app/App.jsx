@@ -13,6 +13,7 @@ import GroupDetailPage from '@/pages/GroupDetail/GroupDetailPage.jsx'
 import HomePage from '@/pages/Home/HomePage.jsx'
 import LoginPage from '@/pages/Login/LoginPage.jsx'
 import NotFoundPage from '@/pages/NotFound/NotFoundPage.jsx'
+import PaymentResultPage from '@/pages/PaymentResult/PaymentResultPage.jsx'
 import RegisterPage from '@/pages/Register/RegisterPage.jsx'
 import UserDashboardPage from '@/pages/UserDashboard/UserDashboardPage.jsx'
 import VerifyEmailPage from '@/pages/VerifyEmail/VerifyEmailPage.jsx'
@@ -56,6 +57,10 @@ function App() {
         <Route
           path={ROUTES.userDashboard}
           element={withRoles([USER_ROLES.user], <UserDashboardPage />)}
+        />
+        <Route
+          path={ROUTES.paymentResult}
+          element={withRoles([USER_ROLES.user], <PaymentResultPage />)}
         />
         <Route
           path={ROUTES.groupDetail}

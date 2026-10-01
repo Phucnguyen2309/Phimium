@@ -152,7 +152,7 @@ export const mapActivity = (activity) => ({
   childParticipationFee: activity?.childParticipationFee ?? null,
   departures: mapDepartures(activity?.departures),
   hostBuddyId: activity?.hostBuddyId ?? null,
-  hostBuddyName: activity?.hostBuddyName ?? t('activity.unknownBuddy'),
+  hostBuddyName: activity?.hostBuddyName ?? '',
   createdById: activity?.createdById ?? null,
   createdAt: activity?.createdAt ?? null,
   updatedAt: activity?.updatedAt ?? null,

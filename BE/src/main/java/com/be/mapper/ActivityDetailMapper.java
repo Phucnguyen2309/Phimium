@@ -3,6 +3,7 @@ package com.be.mapper;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.entity.Activity;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Component
 public class ActivityDetailMapper {
@@ -15,6 +16,7 @@ public class ActivityDetailMapper {
                 .title(activity.getTitle())
                 .description(activity.getDescription())
                 .thumbnailUrl(activity.getThumbnailUrl())
+                .imageUrls(activity.getImageUrls() == null ? List.of() : List.copyOf(activity.getImageUrls()))
                 .locationName(activity.getLocationName())
                 .address(activity.getAddress())
                 .participationFee(activity.getParticipationFee())

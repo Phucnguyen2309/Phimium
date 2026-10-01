@@ -41,13 +41,21 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional
-    public ActivityResponse createActivity(ActivityRequest request, MultipartFile image, User currentUser) throws IOException {
+    public ActivityResponse createActivity(ActivityRequest request, MultipartFile image, List<MultipartFile> images, User currentUser) throws IOException {
 
         Activity activity = activityMapper.toEntity(request, currentUser);
 
         if (image != null && !image.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(image);
             activity.setThumbnailUrl(imageUrl);
+        }
+
+        if (images != null) {
+            for (MultipartFile galleryImage : images) {
+                if (galleryImage != null && !galleryImage.isEmpty()) {
+                    activity.getImageUrls().add(cloudinaryService.uploadImage(galleryImage));
+                }
+            }
         }
 
         Activity savedActivity =
@@ -85,6 +93,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
     public ActivityDetailResponse getActivityDetail(UUID activityId) {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() ->

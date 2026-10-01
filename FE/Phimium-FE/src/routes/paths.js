@@ -7,6 +7,7 @@ export const ROUTES = {
   register: '/register',
   completeProfile: '/complete-profile',
   verifyEmail: '/verify-email',
+  paymentResult: '/payment/:result',
   activities: '/activities',
   activityDetail: '/activities/:id',
   activityGuidelines: '/activities/:id/guidelines',
@@ -17,6 +18,15 @@ export const ROUTES = {
   forbidden: '/403',
   notFound: '*',
 }
+
+// Kết quả SePay chuyển về: /payment/success | /payment/error | /payment/cancel (?paymentId=...)
+export const PAYMENT_RESULTS = {
+  success: 'success',
+  error: 'error',
+  cancel: 'cancel',
+}
+
+export const buildPaymentResultPath = (result) => ROUTES.paymentResult.replace(':result', result)
 
 export const buildActivityDetailPath = (id) => `${ROUTES.activities}/${id}`
 

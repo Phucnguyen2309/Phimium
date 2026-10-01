@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 import { useLanguage } from '@/context/languageContext.js'
 
@@ -27,8 +28,8 @@ export function SafetyTermsModal({
     return null
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-[28px] bg-white p-6 shadow-2xl sm:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -84,6 +85,7 @@ export function SafetyTermsModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

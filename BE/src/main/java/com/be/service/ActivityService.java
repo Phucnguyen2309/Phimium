@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public interface ActivityService {
 
-    ActivityResponse createActivity(ActivityRequest activityRequest, MultipartFile image, User currentUser) throws IOException;
+    ActivityResponse createActivity(ActivityRequest activityRequest, MultipartFile image, List<MultipartFile> images, User currentUser) throws IOException;
 
     List<ActivityResponse> getAllActivities();
 

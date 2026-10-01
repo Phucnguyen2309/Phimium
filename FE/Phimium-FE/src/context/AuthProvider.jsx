@@ -31,7 +31,10 @@ const readStoredUser = () => {
   }
 
   try {
-    return JSON.parse(storedUser)
+    const user = JSON.parse(storedUser)
+
+    // Phiên đăng nhập cũ chưa lưu fullName -> lấy từ claim của JWT (nếu Backend đã có)
+    return user.fullName ? user : { ...user, fullName: decodeJwtPayload(token)?.fullName ?? '' }
   } catch {
     clearStoredAuth()
     return null
@@ -51,6 +54,7 @@ const extractAuthData = (loginResponse) => {
     token,
     username:
       payload?.username ?? claims.username ?? payload?.name ?? payload?.email ?? '',
+    fullName: payload?.fullName ?? claims.fullName ?? '',
     role: normalizeRole(rawRole),
     userId: payload?.userId ?? claims.sub,
     buddyId: payload?.buddyId ?? claims.buddyId,
@@ -73,6 +77,7 @@ export function AuthProvider({ children }) {
 
     const userInfo = {
       username: authData.username,
+      fullName: authData.fullName,
       role: authData.role,
       userId: authData.userId,
       buddyId: authData.buddyId,

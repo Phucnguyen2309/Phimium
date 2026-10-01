@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/activities")
@@ -51,6 +52,10 @@ public class AdminActivityController {
                                     @Encoding(
                                             name = "image",
                                             contentType = "image/*"
+                                    ),
+                                    @Encoding(
+                                            name = "images",
+                                            contentType = "image/*"
                                     )
                             }
                     )
@@ -59,12 +64,14 @@ public class AdminActivityController {
     public ResponseEntity<ApiResponse<ActivityResponse>> createActivity(
             @Valid @RequestPart("request") ActivityRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal User currentUser
     ) throws IOException {
 
         ActivityResponse response = activityService.createActivity(
                 request,
                 image,
+                images,
                 currentUser
         );
 
