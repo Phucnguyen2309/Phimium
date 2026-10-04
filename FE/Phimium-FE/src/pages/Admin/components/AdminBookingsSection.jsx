@@ -268,8 +268,8 @@ export function AdminBookingsSection({
           <p className="mt-1 text-xs text-slate-500">{t('admin.bookings.emptyDesc')}</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-          <table className="w-full table-fixed text-left text-sm text-slate-600">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+          <table className="w-full min-w-[760px] table-fixed text-left text-sm text-slate-600">
             <colgroup>
               <col className="w-[20%]" />
               <col className="w-[25%]" />

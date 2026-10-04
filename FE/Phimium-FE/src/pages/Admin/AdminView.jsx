@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ADMIN_TABS } from '@/constants/admin.js'
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
+import { ROUTES } from '@/routes/paths.js'
 
 import { AdminActivitiesSection } from './components/AdminActivitiesSection.jsx'
 import { AdminAssignBuddyModal } from './components/AdminAssignBuddyModal.jsx'
@@ -107,7 +109,9 @@ export function AdminView({
   const isVi = language === 'vi'
   const tabTitles = GET_TAB_TITLES(isVi)
   const { logout } = useAuth()
+  const navigate = useNavigate()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   const handleConfirmLogout = () => {
@@ -117,47 +121,64 @@ export function AdminView({
       title: isVi ? 'Đăng xuất' : 'Sign Out',
       message: isVi ? 'Đang đăng xuất khỏi hệ thống...' : 'Signing out of the system...',
     })
-    setTimeout(() => {
-      logout?.()
+    setTimeout(async () => {
+      await logout?.()
+      navigate(ROUTES.login, { replace: true, state: {} })
     }, 400)
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* 1. SIDEBAR TRÁI: Cố định 100% theo chiều cao màn hình (viewport) */}
+      {/* 1. SIDEBAR TRÁI: Cố định trên desktop, Drawer trượt trên mobile */}
       <AdminSidebar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onLogout={() => setIsLogoutModalOpen(true)}
       />
 
-      {/* 2. KHU VỰC NỘI DUNG CHÍNH BÊN PHẢI: Tự động trượt margin-left theo chiều rộng sidebar */}
+      {/* 2. KHU VỰC NỘI DUNG CHÍNH BÊN PHẢI: Trượt margin-left trên desktop, ml-0 trên mobile */}
       <div
-        className={`flex min-h-screen flex-1 flex-col min-w-0 transition-[margin] duration-300 ease-in-out ${
-          isSidebarCollapsed ? 'ml-20' : 'ml-64'
+        className={`flex min-h-screen flex-1 flex-col min-w-0 transition-[margin] duration-300 ease-in-out ml-0 ${
+          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
       >
         {/* Top Navbar Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/95 px-6 backdrop-blur-md">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3.5 sm:px-6 backdrop-blur-md">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Hamburger Button for Mobile Drawer */}
+            <button
+              type="button"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 active:scale-95"
+              aria-label="Open mobile menu"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+
+            {/* Desktop Collapse Toggle */}
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-95"
+              className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-95"
               title={isSidebarCollapsed ? (isVi ? 'Mở rộng sidebar' : 'Expand sidebar') : (isVi ? 'Thu gọn sidebar' : 'Collapse sidebar')}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <h1 className="text-base font-black tracking-tight text-blue-950">
+
+            <h1 className="text-sm sm:text-base font-black tracking-tight text-blue-950 truncate max-w-[140px] xs:max-w-xs sm:max-w-none">
               {tabTitles[activeTab] || 'Dashboard'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Chuyển đổi ngôn ngữ Anh - Việt */}
             <LanguageSwitcher variant="pill" />
 
@@ -166,7 +187,7 @@ export function AdminView({
               type="button"
               onClick={refreshCurrentTab}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 disabled:opacity-50"
             >
               <svg
                 className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`}
@@ -181,11 +202,11 @@ export function AdminView({
                   d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
                 />
               </svg>
-              <span>{loading ? (isVi ? 'Đang tải...' : 'Loading...') : (isVi ? 'Làm mới' : 'Refresh')}</span>
+              <span className="hidden sm:inline">{loading ? (isVi ? 'Đang tải...' : 'Loading...') : (isVi ? 'Làm mới' : 'Refresh')}</span>
             </button>
 
             {/* Profile Avatar Pill: Dùng Logo Phimium + chữ Admin (Không dùng email) */}
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1.5 pr-3 shadow-xs">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1.5 pr-2.5 sm:pr-3 shadow-xs">
               <img src="/logo.png" alt="Phimium Admin" className="h-6 w-6 object-contain" />
               <span className="text-xs font-bold text-slate-800">
                 Admin
@@ -195,7 +216,7 @@ export function AdminView({
         </header>
 
         {/* Nội dung từng tab */}
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8">
           {error && (
             <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-semibold text-rose-700 shadow-sm">
               {t('admin.common.loadError')}

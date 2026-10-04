@@ -566,7 +566,7 @@ export function useAdmin() {
   }
 
   // Activity Actions
-  const handleCreateActivity = async ({ data, imageFile }) => {
+  const handleCreateActivity = async ({ data, imageFile, galleryFiles = [] }) => {
     try {
       setActionLoading(true)
       const formData = new FormData()
@@ -574,6 +574,13 @@ export function useAdmin() {
       formData.append('request', requestBlob)
       if (imageFile) {
         formData.append('image', imageFile)
+      }
+      if (Array.isArray(galleryFiles) && galleryFiles.length > 0) {
+        galleryFiles.forEach((file) => {
+          if (file) {
+            formData.append('images', file)
+          }
+        })
       }
       await adminService.createActivity(formData)
       setIsActivityModalOpen(false)

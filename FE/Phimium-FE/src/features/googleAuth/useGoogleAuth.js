@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
-import { getDefaultRouteByRole, ROUTES } from '@/routes/paths.js'
+import { getDefaultRouteByRole, getTargetRouteAfterLogin, ROUTES } from '@/routes/paths.js'
 import authService from '@/services/authService.js'
 import { getResponseData } from '@/utils/response.js'
 
@@ -47,7 +47,8 @@ export function useGoogleAuth() {
           if (!currentUser) throw new Error(t('auth.sessionFailed'))
 
           const role = currentUser?.role
-          navigate(fromPath === ROUTES.home ? getDefaultRouteByRole(role) : fromPath, {
+          const targetPath = getTargetRouteAfterLogin(role, fromPath)
+          navigate(targetPath, {
             replace: true,
           })
           return

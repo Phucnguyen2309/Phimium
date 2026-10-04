@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { AUTH_ERROR_CODES } from '@/constants/app.js'
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
-import { getDefaultRouteByRole, ROUTES } from '@/routes/paths.js'
+import { getDefaultRouteByRole, getTargetRouteAfterLogin, ROUTES } from '@/routes/paths.js'
 import authService from '@/services/authService.js'
 
 export function useLogin() {
@@ -30,9 +30,10 @@ export function useLogin() {
       const currentUser = await login()
       if (!currentUser) throw new Error(t('auth.sessionFailed'))
       const payload = responseData?.data ?? responseData
-      const defaultPath = getDefaultRouteByRole(currentUser?.role ?? payload?.role)
+      const effectiveRole = currentUser?.role ?? payload?.role
+      const targetPath = getTargetRouteAfterLogin(effectiveRole, fromPath)
 
-      navigate(fromPath === ROUTES.home ? defaultPath : fromPath, {
+      navigate(targetPath, {
         replace: true,
       })
     } catch (err) {
