@@ -136,6 +136,7 @@ export const mapActivity = (activity) => ({
   activityType: activity?.activityType ?? 'ACTIVITY',
   status: activity?.status ?? null,
   thumbnailUrl: activity?.thumbnailUrl ?? '',
+  imageUrls: Array.isArray(activity?.imageUrls) ? activity.imageUrls : [],
   startTime: activity?.startTime ?? null,
   endTime: activity?.endTime ?? null,
   registrationDeadline: activity?.registrationDeadline ?? null,

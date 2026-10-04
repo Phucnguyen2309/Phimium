@@ -32,6 +32,8 @@ export function AdminCreateActivityModal({
   const [formData, setFormData] = useState(DEFAULT_FORM)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  const [galleryFiles, setGalleryFiles] = useState([])
+  const [galleryPreviews, setGalleryPreviews] = useState([])
   const [errorMsg, setErrorMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -41,9 +43,20 @@ export function AdminCreateActivityModal({
       setFormData(DEFAULT_FORM)
       setImageFile(null)
       setImagePreview(null)
+      galleryPreviews.forEach((url) => URL.revokeObjectURL(url))
+      setGalleryFiles([])
+      setGalleryPreviews([])
       setErrorMsg('')
     }
   }, [isOpen])
+
+  // Dọn dẹp URL khi component unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
+      galleryPreviews.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [imagePreview, galleryPreviews])
 
   // Đóng modal khi bấm ESC
   useEffect(() => {
@@ -74,6 +87,7 @@ export function AdminCreateActivityModal({
   const handleImageChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
     }
@@ -83,6 +97,23 @@ export function AdminCreateActivityModal({
     setImageFile(null)
     if (imagePreview) URL.revokeObjectURL(imagePreview)
     setImagePreview(null)
+  }
+
+  const handleGalleryImagesChange = (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    const previews = files.map((file) => URL.createObjectURL(file))
+    setGalleryFiles((prev) => [...prev, ...files])
+    setGalleryPreviews((prev) => [...prev, ...previews])
+    e.target.value = ''
+  }
+
+  const handleRemoveGalleryImage = (indexToRemove) => {
+    if (galleryPreviews[indexToRemove]) {
+      URL.revokeObjectURL(galleryPreviews[indexToRemove])
+    }
+    setGalleryFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove))
+    setGalleryPreviews((prev) => prev.filter((_, idx) => idx !== indexToRemove))
   }
 
   const handleSubmit = async (e) => {
@@ -183,7 +214,7 @@ export function AdminCreateActivityModal({
 
     try {
       setSubmitting(true)
-      await onSubmit({ data: payload, imageFile })
+      await onSubmit({ data: payload, imageFile, galleryFiles })
     } catch (err) {
       console.error('Lỗi khi tạo tour:', err)
       setErrorMsg(getErrorMessage(err, isVi ? 'Lỗi tạo tour mới. Vui lòng kiểm tra lại thông tin.' : 'Failed to create new tour. Please check inputs.'))
@@ -310,7 +341,7 @@ export function AdminCreateActivityModal({
                 {/* Ảnh đại diện / Thumbnail */}
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-xs font-bold text-slate-700">
-                    {isVi ? 'Ảnh đại diện tour' : 'Cover Image'}
+                    {isVi ? 'Ảnh đại diện tour (Thumbnail)' : 'Cover Image (Thumbnail)'}
                   </label>
                   {imagePreview ? (
                     <div className="relative inline-block overflow-hidden rounded-xl border border-slate-200">
@@ -334,7 +365,7 @@ export function AdminCreateActivityModal({
                         <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span>{isVi ? 'Tải ảnh lên từ máy tính' : 'Upload from computer'}</span>
+                        <span>{isVi ? 'Tải ảnh đại diện lên' : 'Upload cover image'}</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -345,6 +376,61 @@ export function AdminCreateActivityModal({
                       <span className="text-[11px] text-slate-400">{isVi ? 'Hỗ trợ JPG, PNG, WEBP' : 'Supports JPG, PNG, WEBP'}</span>
                     </div>
                   )}
+                </div>
+
+                {/* Bộ sưu tập ảnh chi tiết / Gallery Images */}
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      {isVi ? 'Bộ sưu tập ảnh chi tiết (Album ảnh tour)' : 'Activity Gallery Images (Album)'}
+                    </label>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {galleryFiles.length > 0
+                        ? `${galleryFiles.length} ${isVi ? 'ảnh đã chọn' : 'images selected'}`
+                        : isVi ? 'Không bắt buộc' : 'Optional'}
+                    </span>
+                  </div>
+
+                  {galleryPreviews.length > 0 && (
+                    <div className="mb-3 grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                      {galleryPreviews.map((previewUrl, idx) => (
+                        <div key={idx} className="relative group aspect-video overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                          <img
+                            src={previewUrl}
+                            alt={`Gallery ${idx + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGalleryImage(idx)}
+                            className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600/90 text-[10px] font-bold text-white opacity-90 transition hover:bg-rose-700 hover:scale-110 shadow-xs"
+                            title={isVi ? 'Xóa ảnh này' : 'Remove this image'}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:border-slate-400">
+                      <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>{isVi ? 'Thêm ảnh vào bộ sưu tập' : 'Add gallery images'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleGalleryImagesChange}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      {isVi ? 'Có thể chọn nhiều ảnh cùng lúc' : 'Select multiple images at once'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

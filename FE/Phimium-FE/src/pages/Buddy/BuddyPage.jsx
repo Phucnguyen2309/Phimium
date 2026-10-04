@@ -11,9 +11,9 @@ const BuddyPage = () => {
   useDocumentTitle(t('buddy.pageTitle'))
 
   const { user } = useAuth()
-  const buddy = useBuddy(user?.buddyId)
+  const buddy = useBuddy(user)
 
-  return <BuddyView {...buddy} />
+  return <BuddyView {...buddy} user={user} />
 }
 
 export default BuddyPage

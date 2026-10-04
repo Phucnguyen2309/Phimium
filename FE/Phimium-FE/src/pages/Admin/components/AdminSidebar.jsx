@@ -84,6 +84,8 @@ export function AdminSidebar({
   onSelectTab,
   isCollapsed: externalCollapsed,
   onToggleCollapse: externalToggleCollapse,
+  isMobileOpen = false,
+  onCloseMobile,
   onLogout,
 }) {
   const { logout } = useAuth()
@@ -109,109 +111,131 @@ export function AdminSidebar({
     externalToggleCollapse || (() => setInternalCollapsed((prev) => !prev))
 
   return (
-    <aside
-      className={`fixed left-0 top-0 bottom-0 h-screen shrink-0 flex flex-col justify-between border-r border-slate-800/80 bg-[#121626] text-white transition-all duration-300 ease-in-out z-40 ${
-        collapsed ? 'w-20' : 'w-64'
-      }`}
-    >
-      {/* Brand Header & Menu */}
-      <div className={`flex flex-1 min-h-0 flex-col overflow-y-auto custom-scrollbar-dark ${collapsed ? 'px-2 py-4' : 'p-5'}`}>
-        {/* Logo & Collapse button */}
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isMobileOpen && (
         <div
-          className={`mb-6 flex shrink-0 items-center ${
-            collapsed ? 'flex-col justify-center gap-3' : 'justify-between px-1 pt-1'
-          }`}
-        >
-          {collapsed ? (
-            <>
-              {/* Collapsed Logo button -> expands sidebar */}
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                className="group flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 transition hover:bg-white/20 hover:scale-105 active:scale-95"
-                title={isVi ? 'Mở rộng menu' : 'Expand sidebar'}
-              >
-                <img src="/logo.png" alt="Phimium" className="h-8 w-8 object-contain drop-shadow-sm" />
-              </button>
-              {/* Expand arrow */}
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition hover:text-white"
-                title={isVi ? 'Mở rộng menu' : 'Expand sidebar'}
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <>
-              {/* Expanded Brand: Logo + PHIMIUM */}
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 p-1 ring-1 ring-white/20 shadow-sm">
-                  <img src="/logo.png" alt="Phimium" className="h-7 w-7 object-contain drop-shadow-sm" />
-                </span>
-                <div className="flex flex-col leading-none">
-                  <span className="text-base font-black tracking-wide text-white">PHIMIUM</span>
-                  <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                    {isVi ? 'Sài Gòn Chọn Lọc' : 'Curated Saigon'}
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs md:hidden animate-fade-in"
+          onClick={onCloseMobile}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 bottom-0 h-screen shrink-0 flex flex-col justify-between border-r border-slate-800/80 bg-[#121626] text-white transition-all duration-300 ease-in-out z-50 md:z-40 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } ${collapsed ? 'md:w-20' : 'w-64 md:w-64'}`}
+      >
+        {/* Brand Header & Menu */}
+        <div className={`flex flex-1 min-h-0 flex-col overflow-y-auto custom-scrollbar-dark ${collapsed ? 'px-2 py-4' : 'p-5'}`}>
+          {/* Logo & Collapse button */}
+          <div
+            className={`mb-6 flex shrink-0 items-center ${
+              collapsed ? 'flex-col justify-center gap-3' : 'justify-between px-1 pt-1'
+            }`}
+          >
+            {collapsed ? (
+              <>
+                {/* Collapsed Logo button -> expands sidebar */}
+                <button
+                  type="button"
+                  onClick={toggleCollapse}
+                  className="group flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 transition hover:bg-white/20 hover:scale-105 active:scale-95"
+                  title={isVi ? 'Mở rộng menu' : 'Expand sidebar'}
+                >
+                  <img src="/logo.png" alt="Phimium" className="h-8 w-8 object-contain drop-shadow-sm" />
+                </button>
+                {/* Expand arrow */}
+                <button
+                  type="button"
+                  onClick={toggleCollapse}
+                  className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition hover:text-white"
+                  title={isVi ? 'Mở rộng menu' : 'Expand sidebar'}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Expanded Brand: Logo + PHIMIUM */}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 p-1 ring-1 ring-white/20 shadow-sm">
+                    <img src="/logo.png" alt="Phimium" className="h-7 w-7 object-contain drop-shadow-sm" />
                   </span>
+                  <div className="flex flex-col leading-none">
+                    <span className="text-base font-black tracking-wide text-white">PHIMIUM</span>
+                    <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      {isVi ? 'Sài Gòn Chọn Lọc' : 'Curated Saigon'}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Collapse button */}
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white"
-                title={isVi ? 'Thu gọn menu' : 'Collapse sidebar'}
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-            </>
-          )}
+                {/* Mobile Close Button */}
+                <button
+                  type="button"
+                  onClick={onCloseMobile}
+                  className="flex md:hidden h-8 w-8 items-center justify-center rounded-lg border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white active:scale-95"
+                  aria-label="Close menu"
+                >
+                  ✕
+                </button>
+
+                {/* Desktop Collapse button */}
+                <button
+                  type="button"
+                  onClick={toggleCollapse}
+                  className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  title={isVi ? 'Thu gọn menu' : 'Collapse sidebar'}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Navigation list: Dynamically translated based on language */}
+          <nav className="flex flex-col gap-1.5">
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeTab === item.id
+              // t() trả lại chính key khi thiếu bản dịch -> khi đó dùng defaultLabel
+              const tabKey = `admin.tabs.${String(item.id).toLowerCase()}`
+              const translatedLabel = t(tabKey)
+              const itemLabel = translatedLabel === tabKey ? item.defaultLabel : translatedLabel
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectTab(item.id)
+                    onCloseMobile?.()
+                  }}
+                  title={itemLabel}
+                  className={`relative flex items-center rounded-xl text-xs font-semibold transition-all ${
+                    collapsed
+                      ? 'mx-auto h-11 w-11 justify-center'
+                      : 'w-full gap-3 px-3.5 py-2.5'
+                  } ${
+                    isActive
+                      ? 'bg-[#212946] text-white shadow-sm ring-1 ring-white/10'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                  }`}
+                >
+                  <span className={`shrink-0 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`}>
+                    {item.icon}
+                  </span>
+                  {!collapsed && <span className="truncate">{itemLabel}</span>}
+                  {collapsed && isActive && (
+                    <span className="absolute left-1 h-5 w-1 rounded-r-full bg-indigo-500" />
+                  )}
+                </button>
+              )
+            })}
+          </nav>
         </div>
-
-        {/* Navigation list: Dynamically translated based on language */}
-        <nav className="flex flex-col gap-1.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive = activeTab === item.id
-            // t() trả lại chính key khi thiếu bản dịch -> khi đó dùng defaultLabel
-            const tabKey = `admin.tabs.${String(item.id).toLowerCase()}`
-            const translatedLabel = t(tabKey)
-            const itemLabel = translatedLabel === tabKey ? item.defaultLabel : translatedLabel
-
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onSelectTab(item.id)}
-                title={itemLabel}
-                className={`relative flex items-center rounded-xl text-xs font-semibold transition-all ${
-                  collapsed
-                    ? 'mx-auto h-11 w-11 justify-center'
-                    : 'w-full gap-3 px-3.5 py-2.5'
-                } ${
-                  isActive
-                    ? 'bg-[#212946] text-white shadow-sm ring-1 ring-white/10'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
-                }`}
-              >
-                <span className={`shrink-0 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`}>
-                  {item.icon}
-                </span>
-                {!collapsed && <span className="truncate">{itemLabel}</span>}
-                {collapsed && isActive && (
-                  <span className="absolute left-1 h-5 w-1 rounded-r-full bg-indigo-500" />
-                )}
-              </button>
-            )
-          })}
-        </nav>
-      </div>
 
       {/* Footer: Clean Logo Avatar + Sign out (Fixed at bottom of viewport) */}
       <div className={`shrink-0 border-t border-slate-800/80 bg-[#121626] ${collapsed ? 'p-3' : 'p-4'}`}>
@@ -268,5 +292,6 @@ export function AdminSidebar({
         )}
       </div>
     </aside>
+    </>
   )
 }

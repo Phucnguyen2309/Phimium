@@ -56,3 +56,43 @@ export const getDefaultRouteByRole = (role) => {
 
   return ROUTES.home
 }
+
+/**
+ * Tính toán đường dẫn chuyển hướng sau khi đăng nhập an toàn:
+ * Tránh việc user thường bị redirect vào /admin hoặc Admin bị redirect vào /user-dashboard
+ * gây ra lỗi 403 Forbidden.
+ */
+export const getTargetRouteAfterLogin = (role, fromPath) => {
+  const defaultPath = getDefaultRouteByRole(role)
+  if (
+    !fromPath ||
+    fromPath === ROUTES.home ||
+    fromPath === ROUTES.forbidden ||
+    fromPath === ROUTES.login ||
+    fromPath === ROUTES.register
+  ) {
+    return defaultPath
+  }
+
+  const normalizedRole = normalizeRole(role)
+
+  // Không cho role không phải ADMIN vào /admin
+  if (fromPath.startsWith(ROUTES.admin) && normalizedRole !== USER_ROLES.admin) {
+    return defaultPath
+  }
+
+  // Không cho role không phải BUDDY vào /buddy
+  if (fromPath.startsWith(ROUTES.buddy) && normalizedRole !== USER_ROLES.buddy) {
+    return defaultPath
+  }
+
+  // Admin hoặc Buddy không bị ép vào các trang dành riêng cho USER
+  if (
+    (normalizedRole === USER_ROLES.admin || normalizedRole === USER_ROLES.buddy) &&
+    (fromPath.startsWith(ROUTES.userDashboard) || fromPath.startsWith('/payment/'))
+  ) {
+    return defaultPath
+  }
+
+  return fromPath
+}
