@@ -69,6 +69,18 @@ const authService = {
     }
   },
 
+  /** Người dùng đang đăng nhập (đọc từ cookie HttpOnly ở Backend). Chưa đăng nhập -> lỗi 401 */
+  me: async () => {
+    const response = await http.get('/auth/me')
+    return response.data
+  },
+
+  /** Thu hồi token và xoá cookie đăng nhập */
+  logout: async () => {
+    const response = await http.post('/auth/logout')
+    return response.data
+  },
+
   register: async (userData) => {
     try {
       const response = await http.post('/auth/register', userData)

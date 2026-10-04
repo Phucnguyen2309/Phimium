@@ -4,11 +4,12 @@ export const APP_NAME = 'Phimium'
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 export const STORAGE_KEYS = {
-  token: 'token',
-  user: 'user',
-  authSession: 'phimium_auth_session',
   language: 'phimium_language',
 }
+
+// Khoá cũ từng lưu token / user trong storage. Token giờ nằm trong cookie HttpOnly,
+// AuthProvider chỉ dùng danh sách này để xoá dữ liệu cũ còn sót lại.
+export const LEGACY_AUTH_STORAGE_KEYS = ['token', 'user', 'phimium_auth_session']
 
 export const USER_ROLES = {
   user: 'USER',

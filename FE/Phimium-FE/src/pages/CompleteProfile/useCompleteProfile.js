@@ -5,7 +5,6 @@ import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
 import { getDefaultRouteByRole, ROUTES } from '@/routes/paths.js'
 import authService from '@/services/authService.js'
-import { decodeJwtPayload } from '@/utils/jwt.js'
 import { getResponseData } from '@/utils/response.js'
 
 export function useCompleteProfile() {
@@ -42,9 +41,10 @@ export function useCompleteProfile() {
         await authService.completeProfile(onboardingToken, formData),
       )
 
-      login(result)
+      const currentUser = await login()
+      if (!currentUser) throw new Error(t('auth.sessionFailed'))
 
-      const role = result?.role ?? decodeJwtPayload(result?.accessToken)?.role
+      const role = currentUser?.role ?? result?.role
       navigate(fromPath === ROUTES.home ? getDefaultRouteByRole(role) : fromPath, {
         replace: true,
       })

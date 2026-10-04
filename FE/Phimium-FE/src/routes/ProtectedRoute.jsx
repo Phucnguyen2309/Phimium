@@ -5,9 +5,18 @@ import { ROUTES } from '@/routes/paths.js'
 import { normalizeRole } from '@/utils/role.js'
 
 export function ProtectedRoute({ allowedRoles, children }) {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, isInitializing, user } = useAuth()
   const location = useLocation()
   const userRole = normalizeRole(user?.role)
+
+  // Đang hỏi Backend phiên đăng nhập (cookie) -> chưa điều hướng về trang đăng nhập
+  if (isInitializing) {
+    return (
+      <div className="flex min-h-[60svh] items-center justify-center">
+        <span className="h-10 w-10 animate-spin rounded-full border-4 border-blue-950 border-t-transparent" />
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return (

@@ -147,6 +147,7 @@ const vi = {
         missingEmail: 'Vui lòng nhập email đã đăng ký.',
       },
     },
+    sessionFailed: 'Không lưu được phiên đăng nhập. Hãy cho phép cookie cho trang này rồi thử lại.',
   },
   activityStatus: {
     PUBLISHED: 'Đã đăng',

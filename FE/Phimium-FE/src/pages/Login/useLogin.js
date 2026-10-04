@@ -27,11 +27,10 @@ export function useLogin() {
 
     try {
       const responseData = await authService.login(email, password)
-      login(responseData)
+      const currentUser = await login()
+      if (!currentUser) throw new Error(t('auth.sessionFailed'))
       const payload = responseData?.data ?? responseData
-      const defaultPath = getDefaultRouteByRole(
-        payload?.role ?? payload?.authorities?.[0],
-      )
+      const defaultPath = getDefaultRouteByRole(currentUser?.role ?? payload?.role)
 
       navigate(fromPath === ROUTES.home ? defaultPath : fromPath, {
         replace: true,
