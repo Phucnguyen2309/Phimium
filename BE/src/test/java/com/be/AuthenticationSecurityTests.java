@@ -15,6 +15,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import jakarta.servlet.http.Cookie;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import static org.mockito.Mockito.*;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(properties = "TOKEN_SECRET_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", controllers = {AuthController.class, AuthenticationSecurityTests.ProbeController.class})
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, JwtService.class,
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, JwtService.class, AuthCookieService.class,
         GoogleAuthServiceImpl.class, AuthTokenServiceImpl.class, AuthenticationSecurityTests.ProbeController.class})
 class AuthenticationSecurityTests {
     @Autowired MockMvc mvc;
@@ -75,6 +76,24 @@ class AuthenticationSecurityTests {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test void accessCookieAuthorizesButRefreshCookieValueDoesNot() throws Exception {
+        User user = user(true);
+        mvc.perform(get("/api/private-probe").cookie(new Cookie(AuthCookieService.ACCESS_COOKIE, jwt.generateAccessToken(user))))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/private-probe").cookie(new Cookie(AuthCookieService.ACCESS_COOKIE, jwt.generateRefreshToken(user))))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/auth/me").cookie(new Cookie(AuthCookieService.ACCESS_COOKIE, jwt.generateAccessToken(user))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.username").value("abc@gmail.com"));
+        mvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
+    }
+
+    @Test void logoutClearsCookiesEvenWithoutValidToken() throws Exception {
+        mvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(cookie().maxAge(AuthCookieService.ACCESS_COOKIE, 0))
+                .andExpect(cookie().maxAge(AuthCookieService.REFRESH_COOKIE, 0));
+    }
+
     @Test void completeProfileRequiresOnboardingTokenAndCannotReplay() throws Exception {
         User user = user(false); String token = jwt.generateOnboardingToken(user);
         String body = "{\"fullName\":\"Nguyen Van A\",\"birthday\":\"2002-05-10\",\"phone\":\"0912345678\"}";
@@ -82,7 +101,11 @@ class AuthenticationSecurityTests {
                 .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/auth/complete-profile").header("Authorization", "Bearer " + token)
                 .contentType("application/json").content(body))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.accessToken").isNotEmpty());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").doesNotExist())
+                .andExpect(cookie().exists(AuthCookieService.ACCESS_COOKIE))
+                .andExpect(cookie().httpOnly(AuthCookieService.ACCESS_COOKIE, true))
+                .andExpect(cookie().httpOnly(AuthCookieService.REFRESH_COOKIE, true));
         mvc.perform(post("/api/auth/complete-profile").header("Authorization", "Bearer " + token)
                 .contentType("application/json").content(body)).andExpect(status().isUnauthorized());
     }

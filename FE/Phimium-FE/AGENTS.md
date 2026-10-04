@@ -33,7 +33,7 @@ node scripts/check-i18n.mjs   # vi.js và en.js phải đủ key
 7. Import ngoài folder hiện tại: alias `@/…`, có đuôi `.js` / `.jsx`. Không dùng `../`.
 8. Component dùng `export function Xxx()` (named export).
 9. Màn hình có gọi API phải có đủ loading / error / empty.
-10. Không `console.log`. Không đọc `localStorage` ngoài `AuthProvider.jsx`, `LanguageProvider.jsx` và `http.js`. User hiện tại lấy từ `useAuth()`.
+10. Không `console.log`. Token đăng nhập nằm trong cookie HttpOnly do Backend đặt: **không** lưu token / user vào `localStorage` / `sessionStorage`, không tự gắn `Authorization` (trừ onboarding Google). Storage chỉ dùng cho ngôn ngữ (`LanguageProvider.jsx`). User hiện tại lấy từ `useAuth()`.
 11. Đã có `antd` (dùng `Modal` cho hộp thoại xác nhận, theme ở `src/main.jsx`). Không thêm dependency khác, không sửa `package.json` / `vite.config.js` / `eslint.config.js` nếu task không yêu cầu.
 12. **Không gõ cứng chữ hiển thị** (kể cả `placeholder`, `alt`, `aria-label`). Dùng `const { t } = useLanguage()` trong component/hook, `t` từ `@/utils/i18n.js` trong mapper/utils. Thêm key vào **cả** `vi.js` và `en.js` (mục 16 của hướng dẫn).
 13. Style: 2 space, không `;`, nháy đơn, line ending **CRLF**, Tailwind class inline, màu chính `emerald` (riêng header/footer, trang chủ, Login/Register dùng navy + vàng, xem mục 11 của hướng dẫn).

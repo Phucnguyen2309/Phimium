@@ -22,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final AuthCookieService authCookieService;
 
     @Override
     protected void doFilterInternal(
@@ -32,14 +33,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null
-                || !authHeader.startsWith("Bearer ")) {
+        /*
+         * Ưu tiên header Bearer (Swagger, onboarding Google), nếu không có thì đọc cookie HttpOnly
+         * mà FE nhận được khi đăng nhập.
+         */
+        String token = authHeader != null && authHeader.startsWith("Bearer ")
+                ? authHeader.substring(7)
+                : authCookieService.readAccessToken(request).orElse(null);
 
+        if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        String token = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(token) || !"ACCESS".equals(jwtService.extractTokenType(token))) {
             filterChain.doFilter(request, response);
@@ -90,4 +95,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-}
+}

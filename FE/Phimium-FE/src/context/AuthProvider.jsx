@@ -1,107 +1,109 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { STORAGE_KEYS, USER_ROLES } from '@/constants/app.js'
+import { LEGACY_AUTH_STORAGE_KEYS, USER_ROLES } from '@/constants/app.js'
 import { AuthContext } from '@/context/authContext.js'
-import { decodeJwtPayload } from '@/utils/jwt.js'
+import authService from '@/services/authService.js'
+import { AUTH_EXPIRED_EVENT } from '@/services/http.js'
+import { getResponseData } from '@/utils/response.js'
 import { normalizeRole } from '@/utils/role.js'
 
-const normalizeToken = (token) => {
-  if (!token || token === 'undefined' || token === 'null') {
-    return ''
-  }
-
-  return token
-}
-
-const clearStoredAuth = () => {
-  localStorage.removeItem(STORAGE_KEYS.token)
-  localStorage.removeItem(STORAGE_KEYS.user)
-  sessionStorage.removeItem(STORAGE_KEYS.authSession)
-}
-
-const readStoredUser = () => {
-  const hasActiveSession =
-    sessionStorage.getItem(STORAGE_KEYS.authSession) === 'true'
-  const token = normalizeToken(localStorage.getItem(STORAGE_KEYS.token))
-  const storedUser = localStorage.getItem(STORAGE_KEYS.user)
-
-  if (!hasActiveSession || !token || !storedUser) {
-    clearStoredAuth()
-    return null
-  }
-
+// Bản cũ lưu token trong localStorage -> dọn đi để không còn token nằm trong trình duyệt
+const clearLegacyStorage = () => {
   try {
-    const user = JSON.parse(storedUser)
-
-    // Phiên đăng nhập cũ chưa lưu fullName -> lấy từ claim của JWT (nếu Backend đã có)
-    return user.fullName ? user : { ...user, fullName: decodeJwtPayload(token)?.fullName ?? '' }
+    LEGACY_AUTH_STORAGE_KEYS.forEach((key) => {
+      localStorage.removeItem(key)
+      sessionStorage.removeItem(key)
+    })
   } catch {
-    clearStoredAuth()
-    return null
+    // Trình duyệt chặn storage -> bỏ qua
   }
 }
 
-const extractAuthData = (loginResponse) => {
-  const payload = loginResponse?.data ?? loginResponse
-  const token = normalizeToken(payload?.accessToken ?? payload?.token ?? payload?.jwt)
-
-  // Response đăng nhập Google chỉ có token -> lấy thêm thông tin từ claims của JWT
-  const claims = decodeJwtPayload(token) ?? {}
-  const rawRole =
-    payload?.role ?? payload?.authorities?.[0] ?? claims.role ?? USER_ROLES.user
+// GET /auth/me -> thông tin hiển thị (không có token)
+const toUser = (me) => {
+  if (!me) return null
 
   return {
-    token,
-    username:
-      payload?.username ?? claims.username ?? payload?.name ?? payload?.email ?? '',
-    fullName: payload?.fullName ?? claims.fullName ?? '',
-    role: normalizeRole(rawRole),
-    userId: payload?.userId ?? claims.sub,
-    buddyId: payload?.buddyId ?? claims.buddyId,
+    userId: me.userId,
+    username: me.username ?? '',
+    fullName: me.fullName ?? '',
+    role: normalizeRole(me.role ?? USER_ROLES.user),
+    buddyId: me.buddyId ?? undefined,
   }
 }
 
+/**
+ * Phiên đăng nhập dùng cookie HttpOnly do Backend đặt. FE không giữ token,
+ * chỉ giữ thông tin người dùng trong bộ nhớ và hỏi lại Backend khi tải trang.
+ */
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => readStoredUser())
+  const [user, setUser] = useState(null)
+  const [isInitializing, setIsInitializing] = useState(true)
 
-  const login = useCallback((loginResponse) => {
-    const authData = extractAuthData(loginResponse)
-
-    if (authData.token) {
-      localStorage.setItem(STORAGE_KEYS.token, authData.token)
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.token)
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const nextUser = toUser(getResponseData(await authService.me()))
+      setUser(nextUser)
+      return nextUser
+    } catch {
+      setUser(null)
+      return null
     }
-
-    sessionStorage.setItem(STORAGE_KEYS.authSession, 'true')
-
-    const userInfo = {
-      username: authData.username,
-      fullName: authData.fullName,
-      role: authData.role,
-      userId: authData.userId,
-      buddyId: authData.buddyId,
-    }
-
-    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userInfo))
-    setUser(userInfo)
   }, [])
 
-  const logout = useCallback(() => {
-    clearStoredAuth()
+  useEffect(() => {
+    clearLegacyStorage()
+
+    let active = true
+
+    authService
+      .me()
+      .then((response) => {
+        if (active) setUser(toUser(getResponseData(response)))
+      })
+      .catch(() => {
+        if (active) setUser(null)
+      })
+      .finally(() => {
+        if (active) setIsInitializing(false)
+      })
+
+    // Refresh token cũng hết hạn -> về trạng thái chưa đăng nhập
+    const handleExpired = () => setUser(null)
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleExpired)
+
+    return () => {
+      active = false
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpired)
+    }
+  }, [])
+
+  /**
+   * Gọi sau khi API đăng nhập thành công (cookie đã được đặt).
+   * Trả về user để trang đăng nhập điều hướng theo role.
+   */
+  const login = useCallback(() => loadCurrentUser(), [loadCurrentUser])
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout()
+    } catch {
+      // Mất mạng / token hỏng: vẫn đăng xuất phía giao diện
+    }
+
     setUser(null)
   }, [])
 
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: Boolean(
-        user && normalizeToken(localStorage.getItem(STORAGE_KEYS.token)),
-      ),
+      isAuthenticated: Boolean(user),
+      isInitializing,
       login,
       logout,
+      refreshUser: loadCurrentUser,
     }),
-    [login, logout, user],
+    [isInitializing, loadCurrentUser, login, logout, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

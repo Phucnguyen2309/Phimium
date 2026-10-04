@@ -147,6 +147,7 @@ const en = {
         missingEmail: 'Please enter the email you signed up with.',
       },
     },
+    sessionFailed: 'Couldn\'t keep you signed in. Please allow cookies for this site and try again.',
   },
   activityStatus: {
     PUBLISHED: 'Published',

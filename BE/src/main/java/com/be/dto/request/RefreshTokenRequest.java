@@ -1,8 +1,7 @@
 package com.be.dto.request;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 @Data
 public class RefreshTokenRequest {
-    @NotBlank
+    /** Không bắt buộc: FE web gửi refresh token qua cookie HttpOnly, body chỉ dùng cho client khác (Swagger, test). */
     private String refreshToken;
 }

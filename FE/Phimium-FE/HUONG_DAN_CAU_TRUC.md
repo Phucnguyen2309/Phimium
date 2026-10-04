@@ -38,7 +38,7 @@
 
 Env (xem `.env.example`):
 
-- `VITE_API_BASE_URL`: mặc định là `http://localhost:8080/api`.
+- `VITE_API_BASE_URL`: mặc định là `/api` (cùng domain). Dev: Vite proxy `/api` → `VITE_DEV_API_TARGET` (mặc định `http://localhost:8080`). Vercel: `vercel.json` rewrite `/api/*` → Backend Render. **Không** trỏ thẳng sang domain Backend, nếu không cookie đăng nhập thành cookie bên thứ ba và bị trình duyệt chặn.
 - `VITE_GOOGLE_CLIENT_ID`: OAuth Client ID của Google, **giống** `GOOGLE_CLIENT_ID` của Backend. Đọc qua `GOOGLE_CLIENT_ID` trong `constants/app.js`, không đọc `import.meta.env` rải rác.
 - `VITE_MAP_TILE_URL`, `VITE_MAP_ATTRIBUTION` (tuỳ chọn): đổi nguồn tile bản đồ. Mặc định là OpenStreetMap (miễn phí, không key, chỉ hợp lượng truy cập nhỏ). CARTO giờ bắt buộc API key, đừng dùng lại URL CARTO không key.
 
@@ -87,7 +87,7 @@ src/
     paths.js                ROUTES, buildXxxPath(), getDefaultRouteByRole()
     ProtectedRoute.jsx      chặn theo đăng nhập + role
   services/
-    http.js                 axios instance (tự gắn Bearer token)
+    http.js                 axios instance (gửi cookie, tự refresh khi 401)
     authService.js  activityService.js  groupService.js  buddyService.js
     registrationService.js  feedbackService.js  paymentService.js  pricingService.js  adminService.js
   utils/                    hàm thuần JS, KHÔNG import React
@@ -303,7 +303,7 @@ navigate(ROUTES.userDashboard, { state: { activeTab: 'GROUPS' } })
 | `getLocale()` | `utils/i18n.js` | `'vi-VN'` / `'en-US'` cho `Intl` / `toLocaleString` |
 | `getCoordinates(item)` / `hasValidCoordinates(item)` | `utils/geo.js` | `{ lat, lng }` từ `latitude` / `longitude`, `null` nếu thiếu hoặc bằng 0 |
 | `buildGoogleMapsUrl(item)` / `buildDirectionsUrl(item)` | `utils/geo.js` | Link Google Maps xem vị trí / chỉ đường (ưu tiên toạ độ, không có thì theo tên + địa chỉ) |
-| `decodeJwtPayload(token)` | `utils/jwt.js` | đọc claim (`sub`, `username`, `role`, `buddyId`) từ JWT, lỗi thì trả `null`. Chỉ để **đọc**, không dùng để xác thực |
+| `decodeJwtPayload(token)` | `utils/jwt.js` | đọc claim từ JWT, lỗi thì trả `null`. Hiện **không còn dùng** vì FE không giữ token |
 
 Cho activity thì dùng thêm `@/features/activity/activityMapper.js`: `mapActivity`, `mapActivitiesResponse`, `formatActivityType`, `formatStatus`, `formatPrice`, `getRemainingSlots`.
 
@@ -317,7 +317,7 @@ Cần helper mới dùng chung thì **thêm vào file utils phù hợp**, không
 
 - Một domain là một file: `authService`, `activityService`, `groupService`, `buddyService`. Domain mới thì tạo `xxxService.js`.
 - Mỗi service là **một object, `export default`**. Mỗi method trả về **Promise của axios** (chưa bóc `.data`), trừ `authService` đã bóc sẵn `.data` và chuẩn hoá lỗi.
-- Luôn dùng instance `http` từ `@/services/http.js`. Instance này tự gắn `Authorization: Bearer <token>`.
+- Luôn dùng instance `http` từ `@/services/http.js`. Instance này gửi kèm cookie đăng nhập (`withCredentials`), gặp 401 thì tự gọi `POST /auth/refresh` một lần rồi gửi lại request; refresh hỏng thì phát sự kiện `AUTH_EXPIRED_EVENT` để `AuthProvider` đăng xuất.
 - Query string truyền qua `params`, không nối chuỗi.
 
 ```js
@@ -379,11 +379,12 @@ Nếu BE chưa có API cho một tính năng: vẫn làm UI, nhưng hiện trạ
 
 ## 10. Auth
 
-- Lấy user bằng `const { user, isAuthenticated, login, logout } = useAuth()` từ `@/context/authContext.js`.
-- Object `user` gồm: `username` (email), `fullName` (họ tên, lấy từ `LoginResponse.fullName` hoặc claim `fullName` trong JWT), `role`, `userId`, `buddyId`. Hiển thị tên thì ưu tiên `fullName`.
-- **Không đọc / ghi `localStorage` trực tiếp** trong component, hook hay trang. Chỉ `AuthProvider.jsx`, `LanguageProvider.jsx` và `http.js` được đụng tới storage, và luôn qua `STORAGE_KEYS`.
-- Sau khi login, điều hướng bằng `getDefaultRouteByRole(role)`.
-- `login(response)` tự lấy token từ `accessToken` / `token` / `jwt`, thiếu field nào thì bổ sung từ claim trong JWT (`sub` → `userId`).
+- Lấy user bằng `const { user, isAuthenticated, isInitializing, login, logout } = useAuth()` từ `@/context/authContext.js`.
+- **Token không nằm ở FE.** Backend đặt 2 cookie `HttpOnly; Secure; SameSite=Lax` khi đăng nhập: `phimium_access` (path `/api`) và `phimium_refresh` (path `/api/auth`). JavaScript không đọc được, trình duyệt tự gửi kèm. Response đăng nhập **không** còn `accessToken` / `refreshToken`.
+- Khi tải trang, `AuthProvider` gọi `GET /auth/me` để biết ai đang đăng nhập; trong lúc đó `isInitializing = true` và `ProtectedRoute` hiện vòng xoay thay vì đẩy về trang đăng nhập.
+- Object `user` gồm: `username` (email), `fullName`, `role`, `userId`, `buddyId` (lấy từ `/auth/me`). Hiển thị tên thì ưu tiên `fullName`.
+- Gọi API đăng nhập xong thì `const currentUser = await login()` (hàm này gọi lại `/auth/me`), rồi điều hướng bằng `getDefaultRouteByRole(currentUser.role)`. `logout()` gọi `POST /auth/logout` để Backend thu hồi token và xoá cookie.
+- **Không lưu token / user vào `localStorage` hay `sessionStorage`.** Storage chỉ còn lưu ngôn ngữ (`STORAGE_KEYS.language`, trong `LanguageProvider.jsx`). `LEGACY_AUTH_STORAGE_KEYS` chỉ để xoá dữ liệu của bản cũ.
 
 ### Đăng ký tài khoản thường + xác thực email (OTP)
 
@@ -445,10 +446,10 @@ Luồng với Backend:
 
 1. Google trả `credential` (ID token) → `authService.googleAuth(credential)` gọi `POST /auth/google`.
 2. BE trả `status`:
-   - `AUTHENTICATED`: có `accessToken` → `login()` rồi điều hướng theo role (hoặc về trang `from`).
+   - `AUTHENTICATED`: Backend đã đặt cookie → `await login()` rồi điều hướng theo role (hoặc về trang `from`).
    - `PROFILE_REQUIRED`: tài khoản mới, có `onboardingToken` → chuyển sang `ROUTES.completeProfile` kèm `state: { onboardingToken, email, fullName, from }`.
    - `ACCOUNT_LINK_REQUIRED`: email đã có tài khoản thường → báo người dùng đăng nhập bằng mật khẩu (tone `info` của `AuthAlert`).
-3. Trang `CompleteProfile` gọi `authService.completeProfile(onboardingToken, { fullName, birthday, phone })` → `POST /auth/complete-profile` với header `Authorization: Bearer <onboardingToken>`, nhận token thật rồi `login()`.
+3. Trang `CompleteProfile` gọi `authService.completeProfile(onboardingToken, { fullName, birthday, phone })` → `POST /auth/complete-profile` với header `Authorization: Bearer <onboardingToken>`, Backend đặt cookie đăng nhập rồi FE `await login()`.
 
 `onboardingToken` chỉ sống trong router state, **không** lưu storage. `http.js` không ghi đè header `Authorization` nếu request đã tự đặt.
 
@@ -581,7 +582,7 @@ import { ActivityCard } from './components/ActivityCard.jsx'
 - [ ] `npm run lint` không có lỗi mới.
 - [ ] Không có import `../`, không thiếu đuôi file, không có import thừa.
 - [ ] Không có mock data, không có URL ảnh bên ngoài, không có rating / badge gõ cứng.
-- [ ] Không có `console.log`, không đọc `localStorage` ngoài `AuthProvider`, `LanguageProvider` và `http`.
+- [ ] Không có `console.log`, không lưu token vào storage, không đọc `localStorage` ngoài `LanguageProvider` (và `AuthProvider` để dọn khoá cũ).
 - [ ] Không còn chữ hiển thị gõ cứng; `node scripts/check-i18n.mjs` báo ✅ (vi.js và en.js đủ key).
 - [ ] Mọi màn hình gọi API có đủ loading / error / empty.
 - [ ] Đường dẫn dùng `ROUTES` / `buildXxxPath`.

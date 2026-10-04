@@ -36,7 +36,8 @@ Xem chi tiết quy ước trong `HUONG_DAN_CAU_TRUC.md`.
 Copy `.env.example` thành `.env` rồi chỉnh:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
+VITE_API_BASE_URL=/api
+# VITE_DEV_API_TARGET=http://localhost:8080  # Backend mà Vite proxy /api tới khi chạy dev
 VITE_GOOGLE_CLIENT_ID=<giống GOOGLE_CLIENT_ID của Backend>
 ```
 

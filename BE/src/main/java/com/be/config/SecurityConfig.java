@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login",
                                 "/api/auth/verify-otp", "/api/auth/resend-otp", "/api/auth/google",
                                 "/api/auth/refresh",
-                                // JWT is verified explicitly by the onboarding service, never used as ACCESS.
+                                "/api/auth/logout",
                                 "/api/auth/complete-profile").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
