@@ -213,7 +213,7 @@ export function AdminUsersSection({
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
+            <table className="w-full min-w-[720px] text-left text-sm text-slate-600">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-blue-950">
                 <tr>
                   <th className="px-5 py-3.5">{isVi ? 'Thành viên' : 'User'}</th>
