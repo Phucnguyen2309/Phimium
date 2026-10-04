@@ -98,6 +98,17 @@ public class BuddyController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khách tham gia thành công", members));
     }
 
+    @PostMapping("/me/schedules/{departureId}/members/{registrationId}/check-in")
+    @PreAuthorize("hasRole('BUDDY')")
+    @Operation(summary = "[BUDDY] Điểm danh / Đã đón khách cho đơn đăng ký")
+    public ResponseEntity<ApiResponse<TourMemberResponse>> checkInMember(
+            @PathVariable UUID departureId,
+            @PathVariable UUID registrationId,
+            @AuthenticationPrincipal User currentUser) {
+        TourMemberResponse response = buddyScheduleService.checkInMember(departureId, registrationId, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật điểm danh thành công", response));
+    }
+
     @PatchMapping("/me/status")
     @PreAuthorize("hasRole('BUDDY')")
     @Operation(summary = "[BUDDY] Tự cập nhật trạng thái hoạt động (ACTIVE / INACTIVE)")

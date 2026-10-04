@@ -38,36 +38,43 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
         LocalDateTime departureEnd =
                 departure.getEndDateTime();
 
+        int requiredBuddies = (registration.getAdultCount() != null ? registration.getAdultCount() : 0)
+                + (registration.getChildCount() != null ? registration.getChildCount() : 0);
+        if (requiredBuddies <= 0) {
+            requiredBuddies = 1;
+        }
+
         // 1. Lọc điều kiện cứng: Buddy ACTIVE
         List<Buddy> activeBuddies = buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE);
 
         // 2. Lọc điều kiện cứng: Không trùng lịch tour
         List<Buddy> eligibleBuddies = activeBuddies.stream()
-                .filter(buddy -> !hasScheduleConflict(buddy.getBuddyId(),departureStart, departureEnd))
+                .filter(buddy -> !hasScheduleConflict(buddy.getBuddyId(), departureStart, departureEnd))
                 .collect(Collectors.toList());
 
-        if (eligibleBuddies.isEmpty()) {
+        if (eligibleBuddies.size() < requiredBuddies) {
             return null;
         }
 
-        // 3. Xếp hạng đa tiêu chí (Rating -> Total Reviews -> Workload)
+        // 3. Xếp hạng đa tiêu chí (Rating -> Total Reviews)
         Comparator<Buddy> multiTierComparator = Comparator
                 // Tiêu chí 1: Rating cao nhất
                 .comparing((Buddy b) -> b.getAverageRating() != null ? b.getAverageRating() : BigDecimal.ZERO)
                 // Tiêu chí 2: Số lượt review nhiều hơn khi bằng rating
                 .thenComparing(b -> b.getTotalReviews() != null ? b.getTotalReviews() : 0);
 
-        Buddy bestBuddy = eligibleBuddies.stream()
-                .max(multiTierComparator)
-                .orElse(eligibleBuddies.get(0));
+        eligibleBuddies.sort(multiTierComparator.reversed());
 
-        // 4. Gán Buddy vào đơn đăng ký
-        registration.setBuddy(bestBuddy);
+        // Lấy top N Buddy có rating & review cao nhất để phục vụ N khách
+        List<Buddy> selectedBuddies = eligibleBuddies.subList(0, requiredBuddies);
+
+        // 4. Gán danh sách Buddy vào đơn đăng ký (selectedBuddies.get(0) là Lead Buddy)
+        registration.assignBuddies(selectedBuddies);
         registration.setBuddyAssignedAt(DateTimeUtils.nowVietnam());
         registration.setStatus(RegistrationStatus.BUDDY_ASSIGNED);
 
         registrationRepository.save(registration);
-        return bestBuddy;
+        return selectedBuddies.get(0);
     }
 
     @Override

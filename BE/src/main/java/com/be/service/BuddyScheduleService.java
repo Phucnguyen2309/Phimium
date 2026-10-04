@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface BuddyScheduleService {
     List<BuddyScheduleResponse> getMySchedules(User currentUser);
     List<TourMemberResponse> getTourMembers(UUID departureId, User currentUser);
+    TourMemberResponse checkInMember(UUID departureId, UUID registrationId, User currentUser);
 }

@@ -97,6 +97,22 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AppException(ErrorCode.INSUFFICIENT_CAPACITY);
         }
 
+        // Kiểm tra số lượng Buddy khả dụng trong khung giờ khởi hành (mỗi Buddy 1 xe chở 1 khách)
+        List<Buddy> activeBuddies = buddyRepository.findByStatus(BuddyStatus.ACTIVE);
+        List<UUID> busyBuddyIds = registrationRepository.findBusyBuddyIdsInTimeRange(
+                departure.getDepartureDate(),
+                departure.getStartTime(),
+                departure.getEndTime(),
+                RegistrationStatus.CANCELLED
+        );
+        long availableBuddiesCount = activeBuddies.stream()
+                .filter(b -> !busyBuddyIds.contains(b.getBuddyId()))
+                .count();
+
+        if (availableBuddiesCount < totalGuests) {
+            throw new AppException(ErrorCode.INSUFFICIENT_BUDDIES_AVAILABLE);
+        }
+
         List<Registration> existingRegistrations = registrationRepository.findByUser(user);
         boolean isAlreadyRegistered = existingRegistrations.stream()
                 .anyMatch(reg -> reg.getDeparture().getDepartureId().equals(departure.getDepartureId())
@@ -485,7 +501,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             );
         }
 
-        registration.setBuddy(buddy);
+        registration.assignBuddies(List.of(buddy));
         registration.setBuddyAssignedAt(
                 DateTimeUtils.nowVietnam()
         );

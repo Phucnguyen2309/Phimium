@@ -41,9 +41,24 @@ public class RegistrationMapper {
 
         // 2. Map Buddy
         RegistrationResponse.BuddyInfo buddyInfo = null;
+        List<RegistrationResponse.BuddyInfo> buddyInfoList = null;
+
+        if (registration.getBuddies() != null && !registration.getBuddies().isEmpty()) {
+            buddyInfoList = registration.getBuddies().stream()
+                    .map(b -> RegistrationResponse.BuddyInfo.builder()
+                            .buddyId(b.getBuddyId())
+                            .name(b.getUser() != null ? b.getUser().getFullName() : null)
+                            .averageRating(b.getAverageRating())
+                            .build())
+                    .toList();
+        }
+
         Buddy buddy = registration.getBuddy();
         if (buddy != null) {
             String buddyName = buddy.getUser() != null ? buddy.getUser().getFullName() : null;
+            if (registration.getBuddies() != null && registration.getBuddies().size() > 1) {
+                buddyName = buddyName + " (+" + (registration.getBuddies().size() - 1) + " Buddies)";
+            }
             buddyInfo = RegistrationResponse.BuddyInfo.builder()
                     .buddyId(buddy.getBuddyId())
                     .name(buddyName)
@@ -62,6 +77,7 @@ public class RegistrationMapper {
                 .discountAmount(registration.getDiscountAmount())
                 .totalAmount(registration.getTotalAmount())
                 .buddy(buddyInfo)
+                .buddies(buddyInfoList)
                 .checkInStatus(registration.getCheckInStatus())
                 .registeredAt(registration.getRegisteredAt())
                 .paymentExpiresAt(registration.getPaymentExpiresAt())

@@ -25,6 +25,7 @@ public class BuddyScheduleMapper {
                 .activityId(departure.getActivity() != null ? departure.getActivity().getId() : null)
                 .activityTitle(departure.getActivity() != null ? departure.getActivity().getTitle() : null)
                 .location(departure.getActivity() != null ? departure.getActivity().getLocationName() : null)
+                .departureDate(departure.getDepartureDate())
                 .startTime(departure.getStartTime())
                 .endTime(departure.getEndTime())
                 .totalGuests(totalGuests)
@@ -49,6 +50,7 @@ public class BuddyScheduleMapper {
                 .adultCount(adults)
                 .childCount(children)
                 .participantCount(adults + children)
+                .pickupLocation(registration.getPickupLocation())
                 .checkInStatus(registration.getCheckInStatus())
                 .checkedInAt(registration.getCheckedInAt())
                 .build();

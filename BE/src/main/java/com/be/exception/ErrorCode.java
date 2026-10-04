@@ -274,6 +274,11 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST,
                     "You have a tour shift departing within the next 24 hours. You cannot take a break at this time; please contact the Admin!"
     ),
+    INSUFFICIENT_BUDDIES_AVAILABLE(
+            4007,
+            HttpStatus.CONFLICT,
+            "Không đủ Hướng dẫn viên (Buddy) khả dụng để phục vụ số lượng khách của chuyến đi này"
+    ),
     // ================= GUIDELINE (6000 - 6999) =================
     GUIDELINE_NOT_FOUND(
             6001,
