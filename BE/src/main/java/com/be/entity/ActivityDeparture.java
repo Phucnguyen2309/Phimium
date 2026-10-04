@@ -19,6 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ActivityDeparture {
 
     @Id
@@ -28,6 +29,7 @@ public class ActivityDeparture {
             nullable = false,
             updatable = false
     )
+    @EqualsAndHashCode.Include
     private UUID departureId;
 
     @ManyToOne(

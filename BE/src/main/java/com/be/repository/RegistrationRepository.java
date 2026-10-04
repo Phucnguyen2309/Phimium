@@ -64,11 +64,20 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             UUID groupId,
             UUID userId
     );
-    List<Registration> findByBuddy_BuddyIdAndStatusIn(UUID buddyId, List<RegistrationStatus> statuses);
+    @Query("SELECT DISTINCT r FROM Registration r " +
+            "LEFT JOIN r.buddies b " +
+            "WHERE (r.buddy.buddyId = :buddyId OR b.buddyId = :buddyId) " +
+            "AND r.status IN :statuses")
+    List<Registration> findByBuddy_BuddyIdAndStatusIn(
+            @Param("buddyId") UUID buddyId,
+            @Param("statuses") List<RegistrationStatus> statuses
+    );
+
     @Query("""
-    SELECT DISTINCT r.buddy.buddyId 
+    SELECT DISTINCT COALESCE(b.buddyId, r.buddy.buddyId) 
     FROM Registration r 
-    WHERE r.buddy IS NOT NULL 
+    LEFT JOIN r.buddies b
+    WHERE (b.buddyId IS NOT NULL OR r.buddy.buddyId IS NOT NULL) 
       AND r.status != :cancelledStatus 
       AND r.departure.departureDate = :departureDate
       AND r.departure.startTime < :endTime
@@ -84,7 +93,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     @Query("""
     SELECT COUNT(r) > 0 
     FROM Registration r 
-    WHERE r.buddy = :buddy 
+    LEFT JOIN r.buddies b
+    WHERE (r.buddy = :buddy OR b = :buddy) 
       AND r.status != :cancelledStatus 
       AND r.departure.departureDate = :departureDate
       AND r.departure.startTime < :endTime
@@ -98,17 +108,19 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             @Param("cancelledStatus") RegistrationStatus cancelledStatus
     );
 
-    // Lấy danh sách các đơn đã gán cho Buddy
-    @Query("SELECT r FROM Registration r " +
-            "WHERE r.buddy.buddyId = :buddyId " +
-            "AND r.status = com.be.enums.RegistrationStatus.BUDDY_ASSIGNED " +
-            "ORDER BY r.departure.startTime ASC")
+    // Lấy danh sách các đơn đã gán cho Buddy (bao gồm đang phân công, đang chạy, và đã hoàn thành)
+    @Query("SELECT DISTINCT r FROM Registration r " +
+            "LEFT JOIN r.buddies b " +
+            "WHERE (r.buddy.buddyId = :buddyId OR b.buddyId = :buddyId) " +
+            "AND r.status IN (com.be.enums.RegistrationStatus.BUDDY_ASSIGNED, com.be.enums.RegistrationStatus.CONFIRMED, com.be.enums.RegistrationStatus.IN_PROGRESS, com.be.enums.RegistrationStatus.COMPLETED)")
     List<Registration> findByBuddyId(@Param("buddyId") UUID buddyId);
+
     // Lấy danh sách khách trong ca của Buddy
-    @Query("SELECT r FROM Registration r " +
-            "WHERE r.buddy.buddyId = :buddyId " +
+    @Query("SELECT DISTINCT r FROM Registration r " +
+            "LEFT JOIN r.buddies b " +
+            "WHERE (r.buddy.buddyId = :buddyId OR b.buddyId = :buddyId) " +
             "AND r.departure.departureId = :departureId " +
-            "AND r.status = com.be.enums.RegistrationStatus.BUDDY_ASSIGNED")
+            "AND r.status IN (com.be.enums.RegistrationStatus.BUDDY_ASSIGNED, com.be.enums.RegistrationStatus.CONFIRMED, com.be.enums.RegistrationStatus.IN_PROGRESS, com.be.enums.RegistrationStatus.COMPLETED)")
     List<Registration> findByBuddyIdAndDepartureId(
             @Param("buddyId") UUID buddyId,
             @Param("departureId") UUID departureId
@@ -124,5 +136,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
 
     List<Registration> findTop5ByOrderByRegisteredAtDesc();
 
-    List<Registration> findByBuddy_BuddyIdAndStatus(UUID buddyId, RegistrationStatus status);
+    @Query("SELECT DISTINCT r FROM Registration r " +
+            "LEFT JOIN r.buddies b " +
+            "WHERE (r.buddy.buddyId = :buddyId OR b.buddyId = :buddyId) " +
+            "AND r.status = :status")
+    List<Registration> findByBuddy_BuddyIdAndStatus(
+            @Param("buddyId") UUID buddyId,
+            @Param("status") RegistrationStatus status
+    );
 }

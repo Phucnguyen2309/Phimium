@@ -21,6 +21,7 @@ public class TourMemberResponse {
     private Integer adultCount;
     private Integer childCount;
     private Integer participantCount;
+    private String pickupLocation;
     private CheckInStatus checkInStatus;
     private LocalDateTime checkedInAt;
 }

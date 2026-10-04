@@ -125,9 +125,8 @@ public class BuddyServiceImpl implements BuddyService {
         }
 
         for (Registration reg : assignedRegistrations) {
-            reg.setBuddy(null);
+            reg.clearBuddies();
             reg.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
-            reg.setBuddyAssignedAt(null);
         }
         registrationRepository.saveAll(assignedRegistrations);
         return assignedRegistrations.size();

@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
         BookingLifecycleServiceImpl.class, BuddyMatchingServiceImpl.class, PaymentServiceImpl.class,
         RegistrationMapper.class, ActivityGroupMapper.class, BuddyMapper.class,
         InstructionAcknowledgementMapper.class, PricingMapper.class, PaymentMapperImpl.class,
-        SePayProperties.class, SePaySignatureUtil.class, AdminBookingServiceImpl.class})
+        CouponMapper.class, SePayProperties.class, SePaySignatureUtil.class, AdminBookingServiceImpl.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class BookingFlowTests {
     @Autowired AdminBookingService adminBookings;

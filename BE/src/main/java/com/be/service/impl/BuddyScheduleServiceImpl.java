@@ -71,10 +71,12 @@ public class BuddyScheduleServiceImpl implements BuddyScheduleService {
                 .sorted(
                         Comparator
                                 .comparing(
-                                        BuddyScheduleResponse::getDepartureDate
+                                        BuddyScheduleResponse::getDepartureDate,
+                                        Comparator.nullsLast(Comparator.naturalOrder())
                                 )
                                 .thenComparing(
-                                        BuddyScheduleResponse::getStartTime
+                                        BuddyScheduleResponse::getStartTime,
+                                        Comparator.nullsLast(Comparator.naturalOrder())
                                 )
                 )
                 .toList();
@@ -95,6 +97,44 @@ public class BuddyScheduleServiceImpl implements BuddyScheduleService {
         return regs.stream()
                 .map(buddyScheduleMapper::toTourMemberResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public TourMemberResponse checkInMember(UUID departureId, UUID registrationId, User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Buddy buddy = buddyRepository.findByUser_UserId(currentUser.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_AUTHORIZED));
+
+        Registration registration = registrationRepository.findByIdWithLock(registrationId)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+
+        if (registration.getDeparture() == null || !registration.getDeparture().getDepartureId().equals(departureId)) {
+            throw new AppException(ErrorCode.REGISTRATION_NOT_FOUND);
+        }
+
+        // Buddy phải được phân công trong ca tour này (lead buddy hoặc trong danh sách buddies)
+        boolean isAssigned = (registration.getBuddy() != null && registration.getBuddy().getBuddyId().equals(buddy.getBuddyId()))
+                || (registration.getBuddies() != null && registration.getBuddies().stream().anyMatch(b -> b.getBuddyId().equals(buddy.getBuddyId())));
+
+        if (!isAssigned) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        // Toggle điểm danh: nếu chưa có mặt -> chuyển sang PRESENT, nếu đã có mặt -> chuyển lại NOT_YET
+        if (registration.getCheckInStatus() == CheckInStatus.PRESENT) {
+            registration.setCheckInStatus(CheckInStatus.NOT_YET);
+            registration.setCheckedInAt(null);
+        } else {
+            registration.setCheckInStatus(CheckInStatus.PRESENT);
+            registration.setCheckedInAt(DateTimeUtils.nowVietnam());
+        }
+
+        Registration saved = registrationRepository.save(registration);
+        return buddyScheduleMapper.toTourMemberResponse(saved);
     }
 
     private BuddyScheduleResponse buildScheduleResponse(

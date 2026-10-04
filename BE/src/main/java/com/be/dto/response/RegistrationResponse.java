@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -31,6 +32,7 @@ public class RegistrationResponse {
     private BigDecimal discountAmount;
     private BigDecimal totalAmount;
     private BuddyInfo buddy;
+    private List<BuddyInfo> buddies;
     private CheckInStatus checkInStatus;
     private LocalDateTime registeredAt;
     private LocalDateTime paymentExpiresAt;

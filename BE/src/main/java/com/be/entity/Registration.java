@@ -44,10 +44,20 @@ public class Registration {
     @JoinColumn(name = "group_id")
     private ActivityGroup group;
 
-    // 1 Registration -> max 1 Buddy
+    // 1 Registration -> max 1 Lead Buddy (kept for backward compatibility)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buddy_id")
     private Buddy buddy;
+
+    // Multi-buddy assignment (each buddy carries 1 guest)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "registration_buddies",
+            joinColumns = @JoinColumn(name = "registration_id"),
+            inverseJoinColumns = @JoinColumn(name = "buddy_id")
+    )
+    @Builder.Default
+    private java.util.Set<Buddy> buddies = new java.util.HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
@@ -109,4 +119,25 @@ public class Registration {
     private LocalDateTime checkedInAt;
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
+
+    public void assignBuddies(java.util.List<Buddy> assignedBuddies) {
+        if (this.buddies == null) {
+            this.buddies = new java.util.HashSet<>();
+        }
+        this.buddies.clear();
+        if (assignedBuddies != null && !assignedBuddies.isEmpty()) {
+            this.buddies.addAll(assignedBuddies);
+            this.buddy = assignedBuddies.get(0);
+        } else {
+            this.buddy = null;
+        }
+    }
+
+    public void clearBuddies() {
+        if (this.buddies != null) {
+            this.buddies.clear();
+        }
+        this.buddy = null;
+        this.buddyAssignedAt = null;
+    }
 }
