@@ -78,16 +78,31 @@ export function AuthLayout({ title, subtitle, sideTitle, sideText, children }) {
         </p>
       </aside>
 
-      <main className="relative isolate flex flex-1 flex-col overflow-hidden">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+      <main className="relative isolate flex flex-1 flex-col overflow-x-hidden min-h-screen bg-blue-950 lg:bg-white text-slate-900">
+        {/* 1. Mobile Background: Nền tối + ảnh nhẹ + hạt bụi vàng phát sáng đồng bộ bản web */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-20 lg:hidden">
+          <img
+            src={authBackground}
+            alt=""
+            className="h-full w-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/90 via-blue-900/90 to-blue-950" />
+        </div>
+        <div className="pointer-events-none absolute inset-0 -z-10 lg:hidden">
+          <AmbientBackground particles={14} />
+        </div>
+
+        {/* 2. Desktop Ambient Spheres */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 hidden lg:block">
           <div className="absolute -right-24 -top-24 h-80 w-80 animate-drift rounded-full bg-yellow-200/40 blur-[90px]" />
           <div className="absolute -bottom-32 -left-20 h-96 w-96 animate-drift-reverse rounded-full bg-blue-200/40 blur-[110px]" />
         </div>
 
-        <div className="flex items-center justify-between gap-4 px-6 py-5 sm:px-10">
+        {/* Top Navbar Header */}
+        <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-8 lg:px-10 z-10">
           <Link
             to={ROUTES.home}
-            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-blue-950"
+            className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white/80 hover:text-white lg:text-slate-500 lg:hover:text-blue-950 transition"
           >
             <span aria-hidden="true" className="transition duration-300 group-hover:-translate-x-1">
               ←
@@ -95,31 +110,50 @@ export function AuthLayout({ title, subtitle, sideTitle, sideText, children }) {
             {t('auth.backHome')}
           </Link>
 
-          <LanguageSwitcher variant="plain" />
+          <LanguageSwitcher variant="pill" />
         </div>
 
-        <div className="flex flex-1 items-center justify-center px-6 pb-12 sm:px-10">
+        {/* Form Container */}
+        <div className="flex flex-1 items-center justify-center px-4 py-6 sm:px-8 lg:px-10">
           <div className="w-full max-w-md">
-            <BrandLogo className="mb-10 animate-fade-up lg:hidden" />
-
-            <h1
-              style={fadeUp(80)}
-              className="animate-fade-up font-display text-4xl font-bold tracking-tight text-blue-950"
-            >
-              {title}
-            </h1>
-            <p style={fadeUp(160)} className="mt-2 animate-fade-up text-sm text-slate-500">
-              {subtitle}
-            </p>
-            <span
-              aria-hidden="true"
-              style={fadeUp(220)}
-              className="mt-5 block h-1 w-14 animate-fade-up rounded-full bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 bg-[length:200%_auto]"
-            />
-
-            <div style={fadeUp(260)} className="mt-8 animate-fade-up">
-              {children}
+            {/* Header thương hiệu rút gọn trên mobile (Gọn gàng, không lặp từ) */}
+            <div className="mb-4 text-center lg:hidden animate-fade-up">
+              <div className="inline-flex justify-center mb-2">
+                <BrandLogo tone="light" />
+              </div>
+              <p className="text-sm font-bold text-blue-100">
+                <span className="bg-gradient-to-r from-white via-yellow-200 to-white bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">
+                  {sideTitle}
+                </span>
+              </p>
             </div>
+
+            {/* Khung Card Form: Card kính mờ trên mobile, trong suốt trên desktop */}
+            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 sm:p-8 shadow-2xl border border-white/40 ring-1 ring-black/5 lg:bg-transparent lg:p-0 lg:shadow-none lg:border-none lg:ring-0">
+              <h1
+                style={fadeUp(80)}
+                className="animate-fade-up font-display text-2xl sm:text-4xl font-bold tracking-tight text-blue-950 text-center lg:text-left"
+              >
+                {title}
+              </h1>
+              <p style={fadeUp(160)} className="mt-1.5 sm:mt-2 animate-fade-up text-xs sm:text-sm text-slate-500 text-center lg:text-left">
+                {subtitle}
+              </p>
+              <span
+                aria-hidden="true"
+                style={fadeUp(220)}
+                className="mt-4 sm:mt-5 block h-1 w-14 animate-fade-up rounded-full bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 bg-[length:200%_auto] mx-auto lg:mx-0"
+              />
+
+              <div style={fadeUp(260)} className="mt-6 sm:mt-8 animate-fade-up">
+                {children}
+              </div>
+            </div>
+
+            {/* Footer bản quyền trên mobile */}
+            <p className="mt-6 text-center text-[11px] text-blue-200/70 lg:hidden">
+              © 2026 {APP_NAME}. {t('auth.tagline')}
+            </p>
           </div>
         </div>
       </main>

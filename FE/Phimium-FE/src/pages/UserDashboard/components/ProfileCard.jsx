@@ -6,8 +6,8 @@ import { normalizeRole } from '@/utils/role.js'
 function Stat({ value, label, accent }) {
   return (
     <div className="min-w-0">
-      <p className={`font-display text-4xl font-bold leading-none sm:text-5xl ${accent}`}>{value}</p>
-      <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <p className={`font-display text-2xl font-bold leading-none sm:text-4xl lg:text-5xl ${accent}`}>{value}</p>
+      <p className="mt-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500 truncate">{label}</p>
     </div>
   )
 }
@@ -23,32 +23,32 @@ export function ProfileCard({ user, stats }) {
   const role = normalizeRole(user?.role) || USER_ROLES.user
 
   return (
-    <section className="rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-[0_24px_60px_-40px_rgba(22,36,86,0.45)] sm:p-8">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-5">
-          <div className="relative">
+    <section className="rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-[0_24px_60px_-40px_rgba(22,36,86,0.45)] sm:p-8">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3.5 sm:gap-5 min-w-0">
+          <div className="relative shrink-0">
             <UserAvatar
               name={displayName}
-              className="h-20 w-20 text-2xl ring-4 ring-white shadow-lg sm:h-24 sm:w-24 sm:text-3xl"
+              className="h-16 w-16 text-xl ring-4 ring-white shadow-lg sm:h-24 sm:w-24 sm:text-3xl"
               colorClassName="bg-gradient-to-br from-blue-950 to-blue-800 text-yellow-400"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white ring-4 ring-white">
-              <Icon name="check" className="h-3.5 w-3.5" strokeWidth={3} />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 sm:ring-4 ring-white">
+              <Icon name="check" className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={3} />
             </span>
           </div>
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-3xl font-extrabold tracking-tight text-blue-950 sm:text-4xl">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h1 className="truncate text-xl font-extrabold tracking-tight text-blue-950 sm:text-3xl lg:text-4xl">
                 {displayName}
               </h1>
-              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-900 ring-1 ring-blue-100">
+              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-blue-900 ring-1 ring-blue-100 shrink-0">
                 {t(`userDashboard.profile.roles.${role}`)}
               </span>
             </div>
             {email && (
-              <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
-                <Icon name="envelope" className="h-4 w-4 text-slate-400" />
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 truncate">
+                <Icon name="envelope" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-slate-400" />
                 <span className="truncate">{email}</span>
               </p>
             )}
@@ -75,7 +75,7 @@ export function ProfileCard({ user, stats }) {
         )}
       </div>
 
-      <div className="mt-7 grid grid-cols-1 gap-6 rounded-2xl bg-slate-50/80 px-5 py-6 ring-1 ring-slate-100 sm:grid-cols-3 sm:px-8">
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-6 rounded-2xl bg-slate-50/80 px-3 py-4 sm:px-8 sm:py-6 ring-1 ring-slate-100 text-center sm:text-left">
         <Stat value={stats.completed} label={t('userDashboard.profile.completed')} accent="text-blue-950" />
         <Stat value={stats.upcoming} label={t('userDashboard.profile.upcoming')} accent="text-yellow-600" />
         <Stat value={stats.reviews} label={t('userDashboard.profile.reviews')} accent="text-emerald-600" />
