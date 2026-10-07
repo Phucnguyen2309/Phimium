@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -31,9 +32,6 @@ public class UpdateActivityRequest {
     @NotNull(message = "Loại tour không được để trống")
     @Schema(example = "FOODTOUR")
     private TourType activityType;
-
-    @Schema(example = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5")
-    private String thumbnailUrl;
 
     @NotBlank(message = "Tên địa điểm không được để trống")
     @Schema(example = "Khu phố cổ Chợ Lớn")
@@ -80,4 +78,9 @@ public class UpdateActivityRequest {
 
     @Schema(example = "PUBLISHED")
     private ActivityStatus status;
+
+    @Schema(description = "Ảnh gallery hiện có muốn GIỮ LẠI, theo thứ tự hiển thị. "
+            + "Ảnh không có trong danh sách sẽ bị xoá. Bỏ trống (null) = giữ nguyên toàn bộ gallery. "
+            + "Part 'images' áp dụng theo vị trí trên danh sách đã giữ lại này.")
+    private List<String> keptImageUrls;
 }

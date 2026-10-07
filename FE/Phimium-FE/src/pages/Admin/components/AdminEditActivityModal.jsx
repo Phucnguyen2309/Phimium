@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { getErrorMessage } from '@/utils/response.js'
+import { useEffect, useRef, useState } from 'react'
+import { getErrorMessage, getResponseData } from '@/utils/response.js'
 import { useLanguage } from '@/context/languageContext.js'
+import activityService from '@/services/activityService.js'
 
 const GET_TOUR_TYPE_OPTIONS = (isVi) => [
   { value: 'FOODTOUR', label: isVi ? 'Food Tour (Ẩm thực)' : 'Food Tour' },
@@ -44,6 +45,36 @@ export function AdminEditActivityModal({
   const [errorMsg, setErrorMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // Ảnh đại diện mới (để trống = giữ ảnh cũ)
+  const [thumbnailFile, setThumbnailFile] = useState(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState('')
+
+  // Gallery: mỗi ô là 1 vị trí ảnh. url = ảnh đang có, file/preview = ảnh mới chọn để thay hoặc thêm
+  const [gallerySlots, setGallerySlots] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
+  const [galleryError, setGalleryError] = useState('')
+  // Ảnh đang có mà Admin bấm xoá (chỉ xoá thật khi bấm Lưu)
+  const [removedUrls, setRemovedUrls] = useState([])
+  const objectUrlsRef = useRef([])
+  const slotKeyRef = useRef(0)
+
+  const createPreview = (file) => {
+    const url = URL.createObjectURL(file)
+    objectUrlsRef.current.push(url)
+    return url
+  }
+
+  const releasePreview = (url) => {
+    if (!url) return
+    URL.revokeObjectURL(url)
+    objectUrlsRef.current = objectUrlsRef.current.filter((item) => item !== url)
+  }
+
+  const nextSlotKey = () => {
+    slotKeyRef.current += 1
+    return `slot-${slotKeyRef.current}`
+  }
+
   useEffect(() => {
     if (isOpen && activity) {
       setFormData({
@@ -67,6 +98,40 @@ export function AdminEditActivityModal({
     }
   }, [isOpen, activity])
 
+  // Danh sách getAll không có imageUrls -> lấy từ API chi tiết GET /activity/{id}
+  useEffect(() => {
+    if (!isOpen || !activity?.id) return undefined
+
+    let active = true
+    setThumbnailFile(null)
+    setThumbnailPreview('')
+    setGallerySlots([])
+    setRemovedUrls([])
+    setGalleryError('')
+    setGalleryLoading(true)
+
+    activityService
+      .getActivityById(activity.id)
+      .then((response) => {
+        if (!active) return
+        const detail = getResponseData(response)
+        const urls = Array.isArray(detail?.imageUrls) ? detail.imageUrls.filter(Boolean) : []
+        setGallerySlots(urls.map((url) => ({ key: nextSlotKey(), url, file: null, preview: '' })))
+      })
+      .catch((err) => {
+        if (active) setGalleryError(getErrorMessage(err, ''))
+      })
+      .finally(() => {
+        if (active) setGalleryLoading(false)
+      })
+
+    return () => {
+      active = false
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
+      objectUrlsRef.current = []
+    }
+  }, [isOpen, activity?.id])
+
   useEffect(() => {
     if (!isOpen) return
     const handleKeyDown = (e) => {
@@ -81,6 +146,73 @@ export function AdminEditActivityModal({
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
     setErrorMsg('')
+  }
+
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    releasePreview(thumbnailPreview)
+    setThumbnailFile(file)
+    setThumbnailPreview(createPreview(file))
+  }
+
+  const handleResetThumbnail = () => {
+    releasePreview(thumbnailPreview)
+    setThumbnailFile(null)
+    setThumbnailPreview('')
+  }
+
+  // Thay ảnh ở 1 vị trí đang có
+  const handleReplaceGalleryImage = (index, e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const current = gallerySlots[index]
+    if (!current) return
+    releasePreview(current.preview)
+    const preview = createPreview(file)
+    setGallerySlots((prev) => prev.map((slot, idx) => (idx === index ? { ...slot, file, preview } : slot)))
+  }
+
+  // Ảnh có sẵn: hoàn tác việc thay. Ảnh mới thêm: bỏ khỏi danh sách
+  const handleUndoGallerySlot = (index) => {
+    const current = gallerySlots[index]
+    if (!current) return
+    releasePreview(current.preview)
+    setGallerySlots((prev) =>
+      current.url
+        ? prev.map((item, idx) => (idx === index ? { ...item, file: null, preview: '' } : item))
+        : prev.filter((_, idx) => idx !== index),
+    )
+  }
+
+  // Xoá ảnh đang có. Ảnh chưa bị thay mới xoá được (đang thay thì phải hoàn tác trước)
+  const handleRemoveExistingImage = (index) => {
+    const current = gallerySlots[index]
+    if (!current?.url || current.file) return
+    setRemovedUrls((prev) => [...prev, current.url])
+    setGallerySlots((prev) => prev.filter((_, idx) => idx !== index))
+  }
+
+  // Khôi phục ảnh đã xoá: chèn lại sau các ảnh đang có, trước ảnh mới thêm
+  // (Backend áp dụng part "images" theo vị trí: ảnh giữ lại trước, ảnh thêm mới sau)
+  const handleRestoreRemovedImages = () => {
+    const restored = removedUrls.map((url) => ({ key: nextSlotKey(), url, file: null, preview: '' }))
+    setGallerySlots((prev) => {
+      const firstNew = prev.findIndex((slot) => !slot.url)
+      const splitAt = firstNew === -1 ? prev.length : firstNew
+      return [...prev.slice(0, splitAt), ...restored, ...prev.slice(splitAt)]
+    })
+    setRemovedUrls([])
+  }
+
+  const handleAddGalleryImages = (e) => {
+    const files = Array.from(e.target.files || [])
+    e.target.value = ''
+    if (files.length === 0) return
+    const added = files.map((file) => ({ key: nextSlotKey(), url: '', file, preview: createPreview(file) }))
+    setGallerySlots((prev) => [...prev, ...added])
   }
 
   const handlePreventNegativeKeys = (e) => {
@@ -145,7 +277,6 @@ export function AdminEditActivityModal({
       title: formData.title.trim(),
       description: formData.description?.trim() || null,
       activityType: formData.activityType,
-      thumbnailUrl: formData.thumbnailUrl?.trim() || null,
       locationName: formData.locationName.trim(),
       address: formData.address.trim(),
       latitude: lat,
@@ -161,7 +292,16 @@ export function AdminEditActivityModal({
 
     try {
       setSubmitting(true)
-      await onUpdate(activity.id, payload)
+      const galleryReady = !galleryLoading && !galleryError
+      await onUpdate(activity.id, {
+        data: {
+          ...payload,
+          // Ảnh gallery giữ lại theo thứ tự; null = Backend giữ nguyên gallery (khi chưa tải được ảnh hiện có)
+          keptImageUrls: galleryReady ? gallerySlots.filter((slot) => slot.url).map((slot) => slot.url) : null,
+        },
+        imageFile: thumbnailFile,
+        galleryFiles: galleryReady ? gallerySlots.map((slot) => slot.file) : [],
+      })
       onClose()
     } catch (err) {
       console.error('Lỗi cập nhật tour:', err)
@@ -304,43 +444,167 @@ export function AdminEditActivityModal({
               <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 {isVi ? '2. Hình ảnh đại diện' : '2. Cover Image'}
               </h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-700">
-                    {isVi ? 'URL hình ảnh đại diện (Thumbnail URL)' : 'Cover Image URL (Thumbnail URL)'}
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.thumbnailUrl}
-                    onChange={(e) => handleChange('thumbnailUrl', e.target.value)}
-                    placeholder="https://example.com/tour-image.jpg"
-                    className={inputClass}
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
+                {thumbnailPreview || formData.thumbnailUrl ? (
+                  <img
+                    src={thumbnailPreview || formData.thumbnailUrl}
+                    alt={isVi ? 'Ảnh đại diện tour' : 'Tour cover image'}
+                    className="h-16 w-24 shrink-0 rounded-lg object-cover shadow-sm"
                   />
-                </div>
-
-                {formData.thumbnailUrl && (
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-                    <img
-                      src={formData.thumbnailUrl}
-                      alt={isVi ? 'Xem trước ảnh tour' : 'Tour preview image'}
-                      className="h-16 w-24 rounded-lg object-cover shadow-sm"
-                      onError={(e) => {
-                        e.target.style.display = 'none'
-                      }}
-                    />
-                    <div className="min-w-0 flex-1 text-[11px] text-slate-500">
-                      <p className="font-semibold text-slate-700">{isVi ? 'Xem trước ảnh đại diện' : 'Cover image preview'}</p>
-                      <p className="truncate text-slate-400">{formData.thumbnailUrl}</p>
-                    </div>
-                  </div>
+                ) : (
+                  <span className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-[10px] font-semibold text-slate-400">
+                    {isVi ? 'Chưa có ảnh' : 'No image'}
+                  </span>
                 )}
+                <div className="min-w-0 flex-1 text-[11px] text-slate-500">
+                  <p className="font-semibold text-slate-700">
+                    {thumbnailFile
+                      ? (isVi ? 'Ảnh mới (sẽ tải lên khi lưu)' : 'New image (uploaded on save)')
+                      : (isVi ? 'Ảnh hiện tại' : 'Current image')}
+                  </p>
+                  <p className="truncate text-slate-400">{thumbnailFile ? thumbnailFile.name : formData.thumbnailUrl}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {thumbnailFile && (
+                    <button
+                      type="button"
+                      onClick={handleResetThumbnail}
+                      className="rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-200"
+                    >
+                      {isVi ? 'Hoàn tác' : 'Undo'}
+                    </button>
+                  )}
+                  <label className="cursor-pointer rounded-lg bg-blue-950 px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-blue-900">
+                    {isVi ? 'Đổi ảnh' : 'Change'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
+                  </label>
+                </div>
               </div>
             </div>
 
-            {/* 3. ĐỊA ĐIỂM & TỌA ĐỘ */}
+            {/* 3. BỘ SƯU TẬP ẢNH */}
+            <div className="border-t border-slate-100 pt-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  {isVi ? '3. Bộ sưu tập ảnh (trang chi tiết)' : '3. Gallery (detail page)'}
+                </h4>
+                {!galleryLoading && (
+                  <span className="text-[11px] font-semibold text-slate-400">
+                    {gallerySlots.length} {isVi ? 'ảnh' : 'images'}
+                  </span>
+                )}
+              </div>
+
+              {galleryError && (
+                <p className="mb-3 rounded-xl bg-rose-50 p-2.5 text-[11px] font-semibold text-rose-600">
+                  {isVi ? 'Không tải được bộ sưu tập ảnh hiện tại.' : 'Could not load the current gallery.'} {galleryError}
+                </p>
+              )}
+
+              {/* Chưa tải được ảnh hiện có thì không cho sửa, tránh ghi đè nhầm vị trí */}
+              {galleryError ? null : galleryLoading ? (
+                <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                  {[0, 1, 2, 3].map((item) => (
+                    <span key={item} className="aspect-[4/3] animate-pulse rounded-xl bg-slate-100" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                  {gallerySlots.map((slot, idx) => {
+                    const isNew = !slot.url
+                    const isReplaced = Boolean(slot.url && slot.file)
+
+                    return (
+                      <div
+                        key={slot.key}
+                        className={`group relative aspect-[4/3] overflow-hidden rounded-xl border bg-slate-100 ${
+                          slot.file ? 'border-yellow-400 ring-2 ring-yellow-300/60' : 'border-slate-200'
+                        }`}
+                      >
+                        <img
+                          src={slot.preview || slot.url}
+                          alt={`${isVi ? 'Ảnh' : 'Image'} ${idx + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                        <span className="absolute left-1.5 top-1.5 rounded-md bg-blue-950/80 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          {idx + 1}
+                        </span>
+                        {(isNew || isReplaced) && (
+                          <span className="absolute right-1.5 top-1.5 rounded-md bg-yellow-400 px-1.5 py-0.5 text-[10px] font-bold text-blue-950">
+                            {isNew ? (isVi ? 'Mới' : 'New') : (isVi ? 'Đã thay' : 'Replaced')}
+                          </span>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 flex gap-1 bg-gradient-to-t from-blue-950/85 to-transparent p-1.5 pt-5 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
+                          {slot.url && (
+                            <label className="flex-1 cursor-pointer rounded-md bg-white/90 py-1 text-center text-[10px] font-bold text-blue-950 transition hover:bg-white">
+                              {isVi ? 'Thay ảnh' : 'Replace'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleReplaceGalleryImage(idx, e)}
+                              />
+                            </label>
+                          )}
+                          {slot.url && !slot.file && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveExistingImage(idx)}
+                              className="flex-1 rounded-md bg-white/90 py-1 text-[10px] font-bold text-rose-600 transition hover:bg-white"
+                            >
+                              {isVi ? 'Xoá' : 'Delete'}
+                            </button>
+                          )}
+                          {slot.file && (
+                            <button
+                              type="button"
+                              onClick={() => handleUndoGallerySlot(idx)}
+                              className="flex-1 rounded-md bg-white/90 py-1 text-[10px] font-bold text-rose-600 transition hover:bg-white"
+                            >
+                              {isNew ? (isVi ? 'Bỏ' : 'Remove') : (isVi ? 'Hoàn tác' : 'Undo')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-blue-950 hover:text-blue-950">
+                    <span className="text-xl font-light leading-none">+</span>
+                    <span className="text-[10px] font-bold">{isVi ? 'Thêm ảnh' : 'Add images'}</span>
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddGalleryImages} />
+                  </label>
+                </div>
+              )}
+
+              {removedUrls.length > 0 && (
+                <div className="mt-2.5 flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-700">
+                  <span>
+                    {isVi
+                      ? `${removedUrls.length} ảnh sẽ bị xoá khi bấm Lưu`
+                      : `${removedUrls.length} image(s) will be deleted on save`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRestoreRemovedImages}
+                    className="rounded-lg px-2 py-1 font-bold text-rose-700 transition hover:bg-rose-100"
+                  >
+                    {isVi ? 'Khôi phục' : 'Restore'}
+                  </button>
+                </div>
+              )}
+
+              <p className="mt-2 text-[11px] text-slate-400">
+                {isVi
+                  ? 'Rê chuột vào ảnh để thay hoặc xoá. Ảnh mới được thêm vào cuối. Mọi thay đổi chỉ áp dụng khi bấm Lưu.'
+                  : 'Hover an image to replace or delete it. New images go to the end. Changes apply only when you save.'}
+              </p>
+            </div>
+
+            {/* 4. ĐỊA ĐIỂM & TỌA ĐỘ */}
             <div className="border-t border-slate-100 pt-4">
               <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                {isVi ? '3. Địa điểm & Tọa độ' : '3. Location & Coordinates'}
+                {isVi ? '4. Địa điểm & Tọa độ' : '4. Location & Coordinates'}
               </h4>
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 <div>
@@ -403,10 +667,10 @@ export function AdminEditActivityModal({
               </div>
             </div>
 
-            {/* 4. CHI PHÍ & QUY MÔ KHÁCH */}
+            {/* 5. CHI PHÍ & QUY MÔ KHÁCH */}
             <div className="border-t border-slate-100 pt-4">
               <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                {isVi ? '4. Chi phí & Quy mô khách' : '4. Pricing & Group Capacity'}
+                {isVi ? '5. Chi phí & Quy mô khách' : '5. Pricing & Group Capacity'}
               </h4>
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 <div>

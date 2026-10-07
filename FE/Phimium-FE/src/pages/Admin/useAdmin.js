@@ -603,10 +603,24 @@ export function useAdmin() {
     }
   }
 
-  const handleUpdateActivity = async (activityId, payload) => {
+  /**
+   * galleryFiles: mảng theo đúng vị trí ảnh gallery hiện có.
+   * - null: giữ nguyên ảnh ở vị trí đó (gửi file rỗng, Backend bỏ qua)
+   * - File: thay ảnh ở vị trí đó, hoặc thêm mới nếu vượt quá số ảnh hiện có
+   */
+  const handleUpdateActivity = async (activityId, { data, imageFile = null, galleryFiles = [] }) => {
     try {
       setActionLoading(true)
-      await adminService.updateActivity(activityId, payload)
+      const formData = new FormData()
+      formData.append('request', new Blob([JSON.stringify(data)], { type: 'application/json' }))
+      if (imageFile) {
+        formData.append('image', imageFile)
+      }
+      const lastChanged = galleryFiles.reduce((last, file, index) => (file ? index : last), -1)
+      for (let index = 0; index <= lastChanged; index += 1) {
+        formData.append('images', galleryFiles[index] ?? new File([], 'keep.jpg', { type: 'image/jpeg' }))
+      }
+      await adminService.updateActivity(activityId, formData)
       showToast({
         type: 'success',
         title: isVi ? 'Cập nhật tour thành công' : 'Tour Updated Successfully',

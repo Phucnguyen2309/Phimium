@@ -3,6 +3,7 @@ package com.be.controller;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.request.CreateActivityMultipartRequest;
 import com.be.dto.request.UpdateActivityRequest;
+import com.be.dto.request.UpdateActivityMultipartRequest;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.ApiResponse;
 import com.be.entity.User;
@@ -80,13 +81,23 @@ public class AdminActivityController {
         );
     }
 
-    @PutMapping("/{activityId}")
-    @Operation(summary = "Chỉnh sửa thông tin Tour/Hoạt động")
+    @PutMapping(value = "/{activityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Chỉnh sửa thông tin Tour/Hoạt động",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = UpdateActivityMultipartRequest.class),
+                            encoding = {
+                                    @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE),
+                                    @Encoding(name = "image", contentType = "image/*"),
+                                    @Encoding(name = "images", contentType = "image/*")
+                            })))
     public ResponseEntity<ApiResponse<ActivityResponse>> updateActivity(
             @PathVariable UUID activityId,
-            @Valid @RequestBody UpdateActivityRequest request
-    ) {
-        ActivityResponse response = activityService.updateActivity(activityId, request);
+            @Valid @RequestPart("request") UpdateActivityRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) throws IOException {
+        ActivityResponse response = activityService.updateActivity(activityId, request, image, images);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật tour thành công", response));
     }
 

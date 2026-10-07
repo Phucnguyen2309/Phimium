@@ -10,8 +10,11 @@ const adminService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 
-  updateActivity: (activityId, payload) =>
-    http.put(`/v1/admin/activities/${activityId}`, payload),
+  // Backend nhận multipart: part "request" (JSON), "image" (thumbnail mới), "images" (ảnh gallery theo vị trí)
+  updateActivity: (activityId, formData) =>
+    http.put(`/v1/admin/activities/${activityId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 
   deleteActivity: (activityId) =>
     http.delete(`/v1/admin/activities/${activityId}`),

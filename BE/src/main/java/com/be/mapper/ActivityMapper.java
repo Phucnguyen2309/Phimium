@@ -112,9 +112,6 @@ public class ActivityMapper {
         if (request.getActivityType() != null) {
             activity.setActivityType(request.getActivityType());
         }
-        if (request.getThumbnailUrl() != null) {
-            activity.setThumbnailUrl(request.getThumbnailUrl());
-        }
         if (request.getLocationName() != null) {
             activity.setLocationName(request.getLocationName());
         }
