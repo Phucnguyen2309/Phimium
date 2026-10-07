@@ -26,7 +26,8 @@ public interface ActivityService {
 
     ActivityDetailResponse getActivityDetail(UUID activityId);
 
-    ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request);
+    ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request, MultipartFile image,
+                                    List<MultipartFile> images) throws IOException;
 
     void deleteActivity(UUID activityId);
 }

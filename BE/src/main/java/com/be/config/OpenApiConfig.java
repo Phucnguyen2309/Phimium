@@ -23,10 +23,12 @@ public class OpenApiConfig {
             if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
                 return;
             }
-            var multipart = openApi.getComponents().getSchemas().get("CreateActivityMultipartRequest");
-            if (multipart != null) {
-                multipart.addProperty("images", new ArraySchema().items(new BinarySchema())
-                        .description("Gallery images to upload to Cloudinary, in display order"));
+            for (String schemaName : java.util.List.of("CreateActivityMultipartRequest", "UpdateActivityMultipartRequest")) {
+                var multipart = openApi.getComponents().getSchemas().get(schemaName);
+                if (multipart != null) {
+                    multipart.addProperty("images", new ArraySchema().items(new BinarySchema())
+                            .description("Gallery files in display order; empty files preserve existing images on update"));
+                }
             }
         };
     }

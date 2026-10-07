@@ -104,8 +104,9 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    @Transactional
-    public ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request) {
+    @Transactional(rollbackOn = IOException.class)
+    public ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request, MultipartFile image,
+                                           List<MultipartFile> images) throws IOException {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
 
@@ -115,6 +116,37 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         activityMapper.updateEntity(request, activity);
+
+        if (image != null && !image.isEmpty()) {
+            activity.setThumbnailUrl(cloudinaryService.uploadImage(image));
+        }
+
+        // Xoá ảnh gallery: chỉ giữ những URL đang có của tour mà Admin chọn giữ lại (không nhận URL lạ)
+        if (request.getKeptImageUrls() != null) {
+            List<String> current = activity.getImageUrls();
+            List<String> kept = request.getKeptImageUrls().stream()
+                    .filter(url -> url != null && current.contains(url))
+                    .distinct()
+                    .toList();
+            current.clear();
+            current.addAll(kept);
+        }
+
+        if (images != null) {
+            List<String> imageUrls = activity.getImageUrls();
+            for (int i = 0; i < images.size(); i++) {
+                MultipartFile galleryImage = images.get(i);
+                if (galleryImage == null || galleryImage.isEmpty()) {
+                    continue;
+                }
+                String imageUrl = cloudinaryService.uploadImage(galleryImage);
+                if (i < imageUrls.size()) {
+                    imageUrls.set(i, imageUrl);
+                } else {
+                    imageUrls.add(imageUrl);
+                }
+            }
+        }
 
         Activity updated = activityRepository.save(activity);
         return activityMapper.toResponse(updated);
