@@ -8,10 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpgradeBuddyRequest {
+public class UpgradeBuddyRequest extends BuddyMatchingProfileRequest {
     @Size(max = 1000, message = "Bio must not exceed 1000 characters")
     private String bio;
 

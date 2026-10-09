@@ -5,6 +5,14 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
+    AI_NOT_CONFIGURED(6001, HttpStatus.SERVICE_UNAVAILABLE, "Gemini API key/model are not configured"),
+    AI_UNAVAILABLE(6002, HttpStatus.SERVICE_UNAVAILABLE, "AI matching is temporarily unavailable"),
+    AI_INVALID_RESPONSE(6003, HttpStatus.BAD_GATEWAY, "AI returned an invalid matching response"),
+    AI_RATE_LIMITED(6004, HttpStatus.TOO_MANY_REQUESTS, "Too many matching requests; please try again later"),
+    MATCH_RESULT_NOT_FOUND(6005, HttpStatus.NOT_FOUND, "Matching result not found"),
+    MATCH_RESULT_EXPIRED(6006, HttpStatus.CONFLICT, "Matching result expired; please search again"),
+    MATCH_RESULT_CHANGED(6007, HttpStatus.CONFLICT, "Matching conditions changed; please confirm a new match"),
+    MATCH_RESULT_ALREADY_USED(6008, HttpStatus.CONFLICT, "Matching result has already been used"),
     BOOKING_EXPIRED(3010, HttpStatus.CONFLICT, "Booking hold expired; please book again"),
     PAYMENT_REVIEW_REQUIRED(9010, HttpStatus.CONFLICT, "Payment requires manual review"),
     SEPAY_NOT_CONFIGURED(9011, HttpStatus.SERVICE_UNAVAILABLE, "SePay configuration is incomplete"),

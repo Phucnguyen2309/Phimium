@@ -68,6 +68,19 @@ sepay:
 booking:
   hold-minutes: ${BOOKING_HOLD_MINUTES:15}
 
+matching:
+  result-minutes: ${MATCHING_RESULT_MINUTES:10}
+  max-results: ${MATCHING_MAX_RESULTS:3}
+  candidate-limit: ${MATCHING_CANDIDATE_LIMIT:12}
+  buddy-limit: ${MATCHING_BUDDY_LIMIT:50}
+  requests-per-minute: ${MATCHING_REQUESTS_PER_MINUTE:6}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+    timeout-millis: ${GEMINI_TIMEOUT_MILLIS:20000}
+    max-concurrent: ${GEMINI_MAX_CONCURRENT:4}
+
 auth:
   cookie:
     secure: ${AUTH_COOKIE_SECURE:true}

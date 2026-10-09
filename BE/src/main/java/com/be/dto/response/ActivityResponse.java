@@ -19,6 +19,8 @@ import java.util.UUID;
 public class ActivityResponse {
     private UUID id;
     private String title;
+    private java.util.Set<com.be.enums.MatchingTag> tags;
+    private java.util.List<com.be.entity.ItineraryStop> itineraryStops;
     private String description;
     private TourType activityType;
     private String thumbnailUrl;

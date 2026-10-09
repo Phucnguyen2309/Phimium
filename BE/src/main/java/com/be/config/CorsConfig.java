@@ -17,7 +17,8 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "https://phimium.vercel.app",
-                "https://phimium-re8hgyem5-phimium-fe.vercel.app"
+                "https://phimium-re8hgyem5-phimium-fe.vercel.app",
+                "https://phimiumsaigon.io.vn"
 
         ));
         config.setAllowedMethods(List.of(

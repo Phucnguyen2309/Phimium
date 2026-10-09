@@ -50,6 +50,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final BuddyMatchingService buddyMatchingService;
     private final com.be.service.BookingLifecycleService lifecycle;
     private final PaymentRepository paymentRepository;
+    private final AiMatchResultRepository matchResultRepository;
 
     @org.springframework.beans.factory.annotation.Value("${booking.hold-minutes:15}")
     private long holdMinutes;
@@ -83,6 +84,28 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTURE_NOT_FOUND));
 
         Activity activity = departure.getActivity();
+        AiMatchResult match = null;
+        List<Buddy> heldBuddies = List.of();
+        if (request.getMatchResultId() != null) {
+            match = matchResultRepository.findByIdWithLock(request.getMatchResultId())
+                    .orElseThrow(() -> new AppException(ErrorCode.MATCH_RESULT_NOT_FOUND));
+            if (!match.getUser().getUserId().equals(userId)) throw new AppException(ErrorCode.MATCH_RESULT_NOT_FOUND);
+            if (!match.getDeparture().getDepartureId().equals(request.getDepartureId())
+                    || match.getAdultCount() != adult || match.getChildCount() != child
+                    || !java.util.Objects.equals(match.getCouponCode(), normalizeCoupon(request.getCouponCode())))
+                throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
+            var prior = registrationRepository.findByMatchResult_Id(match.getId());
+            if (prior.isPresent()) {
+                if (prior.get().getStatus() == RegistrationStatus.CANCELLED) throw new AppException(ErrorCode.MATCH_RESULT_ALREADY_USED);
+                if (!java.util.Objects.equals(prior.get().getPickupLocation(), request.getPickupLocation().strip()))
+                    throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
+                return registrationMapper.toResponse(prior.get());
+            }
+            if (!DateTimeUtils.nowVietnam().isBefore(match.getExpiresAt())) throw new AppException(ErrorCode.MATCH_RESULT_EXPIRED);
+            heldBuddies = buddyMatchingService.validateMatchedBuddies(match, departure, null);
+        }
+        if (activity.getStatus() == ActivityStatus.CANCELLED || activity.getStatus() == ActivityStatus.COMPLETED)
+            throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
         if (!DateTimeUtils.nowVietnam().isBefore(departure.getStartDateTime())) {
             throw new AppException(ErrorCode.DEPARTURE_IN_PAST);
         }
@@ -136,6 +159,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                     .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_APPLICABLE));
         }
         PriceQuoteResponse quote = pricingService.calculatePriceQuote(quoteRequest, user);
+        if (match != null && quote.getTotalAmount().compareTo(match.getQuotedTotal()) != 0)
+            throw new AppException(ErrorCode.MATCH_RESULT_CHANGED, "Price changed; please confirm a new match");
 
         // 3. Kiểm tra tính hợp lệ của Coupon và trừ lượt dùng
         Coupon appliedCouponEntity = null;
@@ -163,6 +188,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         // 6. Tạo đơn đăng ký lưu snapshot giá tiền
         Registration registration = Registration.builder()
                 .departure(departure)
+                .matchResult(match)
                 .user(user)
 
                 .coupon(appliedCouponEntity)
@@ -181,6 +207,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                         : departure.getStartDateTime())
                 .build();
 
+        if (match != null) registration.assignBuddies(heldBuddies);
         registration = registrationRepository.save(registration);
 
         // 7. Tự động ghép Buddy
@@ -473,6 +500,8 @@ public class RegistrationServiceImpl implements RegistrationService {
             );
         }
 
+        if (registration.getMatchResult() != null) throw new AppException(ErrorCode.MATCH_RESULT_CHANGED,
+                "The customer must confirm a replacement for an AI-matched booking");
         buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE);
         Buddy buddy =
                 buddyRepository.findById(buddyId)
@@ -542,22 +571,19 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
 
-        Registration registration = registrationRepository.findById(registrationId)
+        Registration registration = registrationRepository.findByIdWithLock(registrationId)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
-
-        if (registration.getStatus() == RegistrationStatus.CANCELLED
-                || registration.getStatus() == RegistrationStatus.COMPLETED) {
+        if (registration.getPaymentConfirmedAt() != null) return registrationMapper.toResponse(registration);
+        if (registration.getStatus() != RegistrationStatus.PENDING_PAYMENT)
             throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
-        }
-
-        // Chuyển sang chờ ghép Buddy và kích hoạt thuật toán
-        registration.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
-        registrationRepository.save(registration);
-
-        // Kích hoạt ghép Buddy tự động
-        buddyMatchingService.findAndAssignBuddy(registration);
+        if (lifecycle.isExpired(registration)) throw new AppException(ErrorCode.BOOKING_EXPIRED);
+        if (!lifecycle.canFulfill(registration)) throw new AppException(ErrorCode.PAYMENT_REVIEW_REQUIRED);
+        lifecycle.confirm(registration);
 
         return registrationMapper.toResponse(registration);
     }
 
+    private static String normalizeCoupon(String coupon) {
+        return coupon == null || coupon.isBlank() ? null : coupon.strip();
+    }
 }

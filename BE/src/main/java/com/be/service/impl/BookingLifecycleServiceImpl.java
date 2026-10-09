@@ -34,6 +34,16 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
     public boolean canFulfill(Registration registration) {
         ActivityDeparture departure = departures.findByIdWithLock(registration.getDeparture().getDepartureId())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTURE_NOT_FOUND));
+        if (registration.getMatchResult() != null) {
+            try {
+                var selected = matching.validateMatchedBuddies(registration.getMatchResult(), departure, registration.getRegistrationId());
+                var held = registration.getBuddies().stream().map(Buddy::getBuddyId).collect(java.util.stream.Collectors.toSet());
+                if (!held.equals(selected.stream().map(Buddy::getBuddyId).collect(java.util.stream.Collectors.toSet()))) return false;
+            } catch (AppException e) {
+                if (e.getErrorCode() == ErrorCode.MATCH_RESULT_CHANGED || e.getErrorCode() == ErrorCode.BUDDY_SCHEDULE_CONFLICT) return false;
+                throw e;
+            }
+        }
         return (departure.getStatus() == DepartureStatus.AVAILABLE || departure.getStatus() == DepartureStatus.FULL)
                 && departure.getActivity().getStatus() != ActivityStatus.CANCELLED
                 && departure.getActivity().getStatus() != ActivityStatus.COMPLETED
@@ -59,6 +69,7 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
             coupons.findByIdWithLock(registration.getCoupon().getCouponId()).ifPresent(coupon ->
                     coupon.setUsedCount(Math.max(0, coupon.getUsedCount() - 1)));
         }
+        registration.clearBuddies();
         registration.setStatus(RegistrationStatus.CANCELLED);
         registration.setCancelledAt(DateTimeUtils.nowVietnam());
         for (Payment payment : payments.findByRegistrationRegistrationId(registration.getRegistrationId())) {
@@ -68,6 +79,9 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
 
     @Override
     public void confirm(Registration registration) {
+        if (registration.getPaymentConfirmedAt() != null) return;
+        if (registration.getStatus() != RegistrationStatus.PENDING_PAYMENT || isExpired(registration)
+                || !canFulfill(registration)) throw new AppException(ErrorCode.PAYMENT_REVIEW_REQUIRED);
         ActivityDeparture departure = departures.findByIdWithLock(registration.getDeparture().getDepartureId())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTURE_NOT_FOUND));
         Activity activity = departure.getActivity();
