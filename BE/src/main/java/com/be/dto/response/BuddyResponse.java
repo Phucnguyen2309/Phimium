@@ -18,6 +18,10 @@ public class BuddyResponse {
     private UUID userId;
     private String fullName;
     private String bio;
+    private java.util.Set<com.be.enums.MatchingTag> interests;
+    private java.util.Set<String> skills;
+    private java.util.Set<String> languages;
+    private com.be.enums.GuidingStyle guidingStyle;
     private String experience;
     private String introduction;
     private String avatarUrl;

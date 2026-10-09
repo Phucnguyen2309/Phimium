@@ -85,6 +85,11 @@ public class AdminBookingServiceImpl implements AdminBookingService {
             throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
         Set<String> timeSlots = new HashSet<>();
         for (var request : requests) {
+            long duration = java.time.Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
+            if (duration <= 0 || activity.getItineraryStops().stream()
+                    .anyMatch(stop -> stop.getOffsetMinutes() + stop.getDurationMinutes() > duration)) {
+                throw new AppException(ErrorCode.VALIDATION_ERROR, "Departure is shorter than the approved itinerary");
+            }
             if (request.getCapacity() < activity.getMinimumParticipants()) {
                 throw new AppException(ErrorCode.CAPACITY_LESS_THAN_MINIMUM_PARTICIPANTS);
             }

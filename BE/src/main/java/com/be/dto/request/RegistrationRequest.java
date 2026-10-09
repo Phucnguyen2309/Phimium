@@ -11,6 +11,8 @@ public class RegistrationRequest {
     @NotNull(message = "Departure ID không được để trống")
     private UUID departureId;
 
+    private UUID matchResultId;
+
     @NotNull(message = "Số người lớn không được để trống")
     @jakarta.validation.constraints.Min(1)
     @jakarta.validation.constraints.Max(1000)

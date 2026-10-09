@@ -62,6 +62,8 @@ public class ActivityMapper {
         return ActivityResponse.builder()
                 .id(activity.getId())
                 .title(activity.getTitle())
+                .tags(new java.util.LinkedHashSet<>(activity.getTags()))
+                .itineraryStops(new java.util.ArrayList<>(activity.getItineraryStops()))
                 .description(activity.getDescription())
                 .activityType(activity.getActivityType())
                 .thumbnailUrl(activity.getThumbnailUrl())

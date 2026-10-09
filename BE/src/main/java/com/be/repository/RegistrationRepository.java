@@ -42,6 +42,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     List<Registration> findByStatusAndPaymentExpiresAtLessThanEqual(RegistrationStatus status, java.time.LocalDateTime now);
     List<Registration> findByDepartureDepartureId(UUID departureId);
     List<Registration> findByUser(User user);
+    java.util.Optional<Registration> findByMatchResult_Id(UUID matchResultId);
     List<Registration> findByDepartureActivity(Activity activity);
 
     List<Registration> findByGroup(ActivityGroup group);
@@ -80,15 +81,22 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     WHERE (b.buddyId IS NOT NULL OR r.buddy.buddyId IS NOT NULL) 
       AND r.status != :cancelledStatus 
       AND r.departure.departureDate = :departureDate
+      AND (r.status != :pendingStatus OR r.paymentExpiresAt > :now)
       AND r.departure.startTime < :endTime
       AND r.departure.endTime > :startTime
 """)
-    List<UUID> findBusyBuddyIdsInTimeRange(
+    List<UUID> findBusyBuddyIdsInTimeRangeAt(
             @Param("departureDate") LocalDate departureDate,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
-            @Param("cancelledStatus") RegistrationStatus cancelledStatus
-    );
+            @Param("cancelledStatus") RegistrationStatus cancelledStatus,
+            @Param("pendingStatus") RegistrationStatus pendingStatus,
+            @Param("now") java.time.LocalDateTime now);
+
+    default List<UUID> findBusyBuddyIdsInTimeRange(LocalDate date, LocalTime start, LocalTime end, RegistrationStatus cancelled) {
+        return findBusyBuddyIdsInTimeRangeAt(date, start, end, cancelled, RegistrationStatus.PENDING_PAYMENT,
+                com.be.util.DateTimeUtils.nowVietnam());
+    }
 
     @Query("""
     SELECT COUNT(r) > 0 
@@ -97,16 +105,24 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     WHERE (r.buddy = :buddy OR b = :buddy) 
       AND r.status != :cancelledStatus 
       AND r.departure.departureDate = :departureDate
+      AND (r.status != :pendingStatus OR r.paymentExpiresAt > :now)
       AND r.departure.startTime < :endTime
       AND r.departure.endTime > :startTime
 """)
-    boolean existsByBuddyAndDepartureTimeOverlap(
+    boolean existsByBuddyAndDepartureTimeOverlapAt(
             @Param("buddy") Buddy buddy,
             @Param("departureDate") LocalDate departureDate,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
-            @Param("cancelledStatus") RegistrationStatus cancelledStatus
-    );
+            @Param("cancelledStatus") RegistrationStatus cancelledStatus,
+            @Param("pendingStatus") RegistrationStatus pendingStatus,
+            @Param("now") java.time.LocalDateTime now);
+
+    default boolean existsByBuddyAndDepartureTimeOverlap(Buddy buddy, LocalDate date, LocalTime start,
+                                                        LocalTime end, RegistrationStatus cancelled) {
+        return existsByBuddyAndDepartureTimeOverlapAt(buddy, date, start, end, cancelled,
+                RegistrationStatus.PENDING_PAYMENT, com.be.util.DateTimeUtils.nowVietnam());
+    }
 
     // Lấy danh sách các đơn đã gán cho Buddy (bao gồm đang phân công, đang chạy, và đã hoàn thành)
     @Query("SELECT DISTINCT r FROM Registration r " +

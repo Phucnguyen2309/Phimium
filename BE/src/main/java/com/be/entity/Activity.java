@@ -29,6 +29,19 @@ public class Activity {
     @Column(name = "activity_id", updatable = false, nullable = false)
     private UUID id;
 
+    @ElementCollection
+    @CollectionTable(name = "activity_matching_tags", joinColumns = @JoinColumn(name = "activity_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag", nullable = false, length = 40)
+    @Builder.Default
+    private java.util.Set<com.be.enums.MatchingTag> tags = new java.util.LinkedHashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "activity_itinerary_stops", joinColumns = @JoinColumn(name = "activity_id"))
+    @OrderColumn(name = "stop_order")
+    @Builder.Default
+    private List<ItineraryStop> itineraryStops = new ArrayList<>();
+
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 

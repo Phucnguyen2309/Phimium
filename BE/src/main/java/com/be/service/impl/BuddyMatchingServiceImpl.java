@@ -31,6 +31,17 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
     @Transactional
     public Buddy findAndAssignBuddy(Registration registration) {
         ActivityDeparture departure = registration.getDeparture();
+        if (registration.getMatchResult() != null) {
+            List<Buddy> held = validateMatchedBuddies(registration.getMatchResult(), departure, registration.getRegistrationId());
+            java.util.Set<UUID> expected = held.stream().map(Buddy::getBuddyId).collect(Collectors.toSet());
+            java.util.Set<UUID> actual = registration.getBuddies().stream().map(Buddy::getBuddyId).collect(Collectors.toSet());
+            if (!expected.equals(actual)) throw new com.be.exception.AppException(com.be.exception.ErrorCode.MATCH_RESULT_CHANGED);
+            registration.assignBuddies(held);
+            registration.setBuddyAssignedAt(DateTimeUtils.nowVietnam());
+            registration.setStatus(RegistrationStatus.BUDDY_ASSIGNED);
+            registrationRepository.save(registration);
+            return held.get(0);
+        }
 
         LocalDateTime departureStart =
                 departure.getStartDateTime();
@@ -84,6 +95,10 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
             LocalDateTime newEnd
     ) {
 
+        return hasScheduleConflictExcluding(buddyId, newStart, newEnd, null);
+    }
+
+    private boolean hasScheduleConflictExcluding(UUID buddyId, LocalDateTime newStart, LocalDateTime newEnd, UUID excludingId) {
         List<Registration> activeRegistrations =
                 registrationRepository
                         .findByBuddy_BuddyIdAndStatusIn(
@@ -92,11 +107,15 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
                                         RegistrationStatus.BUDDY_ASSIGNED,
                                         RegistrationStatus.CONFIRMED,
                                         RegistrationStatus.IN_PROGRESS,
-                                        RegistrationStatus.PAYMENT_REVIEW
+                                        RegistrationStatus.PAYMENT_REVIEW,
+                                        RegistrationStatus.PENDING_PAYMENT
                                 )
                         );
 
         return activeRegistrations.stream()
+                .filter(r -> excludingId == null || !excludingId.equals(r.getRegistrationId()))
+                .filter(r -> r.getStatus() != RegistrationStatus.PENDING_PAYMENT
+                        || (r.getPaymentExpiresAt() != null && r.getPaymentExpiresAt().isAfter(DateTimeUtils.nowVietnam())))
                 .map(Registration::getDeparture)
                 .anyMatch(departure ->
                         isTimeOverlap(
@@ -106,6 +125,39 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
                                 newEnd
                         )
                 );
+    }
+
+    @Override
+    // Expected validation failures are caught by payment fulfillment checks, which must still
+    // commit their release/review decision. The caller controls rollback when booking fails.
+    @Transactional(dontRollbackOn = com.be.exception.AppException.class)
+    public List<Buddy> validateMatchedBuddies(com.be.entity.AiMatchResult result,
+            ActivityDeparture departure, UUID excludingRegistrationId) {
+        if (!result.getDeparture().getDepartureId().equals(departure.getDepartureId())
+                || !result.getDepartureDate().equals(departure.getDepartureDate())
+                || !result.getStartTime().equals(departure.getStartTime()) || !result.getEndTime().equals(departure.getEndTime())
+                || result.getBuddyIds().size() != result.getAdultCount() + result.getChildCount()
+                || new java.util.HashSet<>(result.getBuddyIds()).size() != result.getBuddyIds().size()
+                || !MatchingRules.tagsMatch(result.getRequestedTags(), departure.getActivity().getTags(), result.isRequireAllTags())) {
+            throw new com.be.exception.AppException(com.be.exception.ErrorCode.MATCH_RESULT_CHANGED);
+        }
+        java.util.Map<UUID, Buddy> active = buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE).stream()
+                .collect(Collectors.toMap(Buddy::getBuddyId, b -> b));
+        List<Buddy> selected = new java.util.ArrayList<>();
+        for (UUID id : result.getBuddyIds()) {
+            Buddy buddy = active.get(id);
+            if (buddy == null || !MatchingRules.buddyMatches(buddy, result.getRequestedTags(), result.isRequireAllTags(),
+                    result.getRequiredLanguage(), result.getGuidingStyle())) {
+                throw new com.be.exception.AppException(com.be.exception.ErrorCode.MATCH_RESULT_CHANGED);
+            }
+            if (hasScheduleConflictExcluding(id, departure.getStartDateTime(), departure.getEndDateTime(), excludingRegistrationId)) {
+                throw new com.be.exception.AppException(com.be.exception.ErrorCode.BUDDY_SCHEDULE_CONFLICT);
+            }
+            selected.add(buddy);
+        }
+        if (!MatchingFingerprint.of(departure.getActivity(), selected).equals(result.getMetadataFingerprint()))
+            throw new com.be.exception.AppException(com.be.exception.ErrorCode.MATCH_RESULT_CHANGED);
+        return selected;
     }
 
     private boolean isTimeOverlap(

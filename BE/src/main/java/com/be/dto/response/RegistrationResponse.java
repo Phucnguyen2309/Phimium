@@ -23,6 +23,8 @@ import java.util.UUID;
 public class RegistrationResponse {
 
     private UUID registrationId;
+    private UUID matchResultId;
+    private LocalDateTime buddyHoldExpiresAt;
     private RegistrationStatus status;
     private DepartureInfo departure;
     private Integer adultCount;

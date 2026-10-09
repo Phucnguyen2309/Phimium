@@ -78,6 +78,7 @@ public class BuddyServiceImpl implements BuddyService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<BuddyResponse> getAllBuddies(BuddyStatus status) {
         List<Buddy> buddies;
         if (status != null) {
@@ -125,8 +126,13 @@ public class BuddyServiceImpl implements BuddyService {
         }
 
         for (Registration reg : assignedRegistrations) {
-            reg.clearBuddies();
-            reg.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
+            if (reg.getMatchResult() != null) {
+                // Preserve the customer's choice for reconciliation; never silently substitute another Buddy.
+                reg.setStatus(RegistrationStatus.PAYMENT_REVIEW);
+            } else {
+                reg.clearBuddies();
+                reg.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
+            }
         }
         registrationRepository.saveAll(assignedRegistrations);
         return assignedRegistrations.size();

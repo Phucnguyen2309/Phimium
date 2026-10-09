@@ -31,6 +31,29 @@ public class Buddy {
     @Column
     private String bio;
 
+    @ElementCollection
+    @CollectionTable(name = "buddy_interests", joinColumns = @JoinColumn(name = "buddy_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag", nullable = false, length = 40)
+    @Builder.Default
+    private java.util.Set<com.be.enums.MatchingTag> interests = new java.util.LinkedHashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "buddy_skills", joinColumns = @JoinColumn(name = "buddy_id"))
+    @Column(name = "skill", nullable = false, length = 100)
+    @Builder.Default
+    private java.util.Set<String> skills = new java.util.LinkedHashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "buddy_languages", joinColumns = @JoinColumn(name = "buddy_id"))
+    @Column(name = "language", nullable = false, length = 3)
+    @Builder.Default
+    private java.util.Set<String> languages = new java.util.LinkedHashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "guiding_style", length = 40)
+    private com.be.enums.GuidingStyle guidingStyle;
+
     @Column
     private BigDecimal wallet;
 

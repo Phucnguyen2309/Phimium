@@ -68,6 +68,10 @@ public class RegistrationMapper {
 
         return RegistrationResponse.builder()
                 .registrationId(registration.getRegistrationId())
+                .matchResultId(registration.getMatchResult() == null ? null : registration.getMatchResult().getId())
+                .buddyHoldExpiresAt(registration.getMatchResult() != null
+                        && registration.getStatus() == com.be.enums.RegistrationStatus.PENDING_PAYMENT
+                        ? registration.getPaymentExpiresAt() : null)
                 .status(registration.getStatus())
                 .departure(departureInfo)
                 .adultCount(registration.getAdultCount())

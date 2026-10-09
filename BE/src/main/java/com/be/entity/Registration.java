@@ -33,6 +33,10 @@ public class Registration {
     )
     private ActivityDeparture departure;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "match_result_id", unique = true)
+    private AiMatchResult matchResult;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "user_id",

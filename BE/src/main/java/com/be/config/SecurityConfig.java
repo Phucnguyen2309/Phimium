@@ -41,6 +41,7 @@ public class SecurityConfig {
                                )
 
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/matching/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/activity/getAll").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/activity/**").permitAll()
                         .requestMatchers("/api/payments/**").authenticated()

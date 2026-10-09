@@ -16,4 +16,8 @@ public interface ActivityDepartureRepository extends JpaRepository<ActivityDepar
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT d FROM ActivityDeparture d WHERE d.departureId = :id")
     Optional<ActivityDeparture> findByIdWithLock(@Param("id") UUID id);
+
+    @Query("select d from ActivityDeparture d where d.departureDate = :date and d.status = :status order by d.startTime, d.departureId")
+    java.util.List<ActivityDeparture> findMatchingDepartures(@Param("date") java.time.LocalDate date,
+            @Param("status") com.be.enums.DepartureStatus status, org.springframework.data.domain.Pageable pageable);
 }
