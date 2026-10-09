@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://phimium.onrender.com/api/:path*"
+      "destination": "https://api.phimiumsaigon.io.vn/api/:path*"
     },
     {
       "source": "/(.*)",
