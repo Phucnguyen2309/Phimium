@@ -1,7 +1,10 @@
-package com.be.config;
+package com.be.service.impl;
 
 import com.be.entity.User;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
 import com.be.repository.BuddyRepository;
+import com.be.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,11 +17,12 @@ import javax.crypto.SecretKey;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
     private final BuddyRepository buddyRepository;
 
     @Value("${TOKEN_SECRET_KEY}")
@@ -34,11 +38,13 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    @Override
     public String generateToken(User user) { return generateAccessToken(user); }
 
+    @Override
     public String generateAccessToken(User user) {
         if (!user.isEnabled() || !user.isEmailVerified() || !user.isProfileCompleted()) {
-            throw new com.be.exception.AppException(com.be.exception.ErrorCode.USER_NOT_AUTHORIZED);
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
         return generate(user, "ACCESS", expireMs);
     }
@@ -46,24 +52,28 @@ public class JwtService {
     @Value("${spring.jwt.refresh-expiration:604800000}")
     private long refreshExpireMs;
 
+    @Override
     public String generateRefreshToken(User user) {
         if (!user.isEnabled() || !user.isEmailVerified() || !user.isProfileCompleted()) {
-            throw new com.be.exception.AppException(com.be.exception.ErrorCode.USER_NOT_AUTHORIZED);
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
         return generate(user, "REFRESH", refreshExpireMs);
     }
 
+    @Override
     public String generateOnboardingToken(User user) {
         if (!user.isEnabled() || !user.isEmailVerified() || user.isProfileCompleted() || user.getGoogleSub() == null) {
-            throw new com.be.exception.AppException(com.be.exception.ErrorCode.INVALID_ONBOARDING_TOKEN);
+            throw new AppException(ErrorCode.INVALID_ONBOARDING_TOKEN);
         }
         return generate(user, "ONBOARDING", 600000);
     }
 
+    @Override
     public String extractTokenType(String token) {
         return extractClaimsJws(token).get("tokenType", String.class);
     }
 
+    @Override
     public boolean isOnboardingToken(String token) {
         return isTokenValid(token) && "ONBOARDING".equals(extractTokenType(token));
     }
@@ -73,7 +83,7 @@ public class JwtService {
         Date exp = new Date(now.getTime() + lifetime);
 
         var builder = Jwts.builder()
-                .setSubject(user.getUserId().toString()).id(java.util.UUID.randomUUID().toString()).claim("tokenType", tokenType)
+                .setSubject(user.getUserId().toString()).id(UUID.randomUUID().toString()).claim("tokenType", tokenType)
                 .claim("username", user.getEmail())
                 .claim("fullName", user.getFullName())
                 .claim("role", user.getRole().name())
@@ -92,6 +102,7 @@ public class JwtService {
                 .compact();
     }
 
+    @Override
     public Claims extractClaimsJws(String token) {
         return Jwts.parser()
                 .verifyWith(getSignKey())
@@ -100,32 +111,39 @@ public class JwtService {
                 .getPayload();
     }
 
+    @Override
     public String extractSubject(String token) {
         return extractClaimsJws(token).getSubject();
     }
+    @Override
     public String extractRole(String token) {
         Object role = extractClaimsJws(token).get("role");
         return role == null ? null : role.toString();
     }
 
+    @Override
     public String extractBuddyId(String token) {
         Object buddyId = extractClaimsJws(token).get("buddyId");
         return buddyId == null ? null : buddyId.toString();
     }
 
+    @Override
     public String extractUsername(String token) {
         Object username = extractClaimsJws(token).get("username");
         return username == null ? null : username.toString();
     }
 
+    @Override
     public Date extractExpiration(String token) {
         return extractClaimsJws(token).getExpiration();
     }
 
+    @Override
     public void blacklistToken(String token) {
         blacklistedTokens.put(token, extractExpiration(token));
     }
 
+    @Override
     public boolean isTokenBlacklisted(String token) {
         Date expiration = blacklistedTokens.get(token);
         if (expiration == null) {
@@ -140,6 +158,7 @@ public class JwtService {
         return true;
     }
 
+    @Override
     public boolean isTokenValid(String token) {
         try{
             extractClaimsJws(token);

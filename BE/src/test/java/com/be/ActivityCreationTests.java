@@ -5,6 +5,7 @@ import com.be.entity.Activity;
 import com.be.entity.User;
 import com.be.enums.TourType;
 import com.be.mapper.ActivityMapper;
+import com.be.mapper.ItineraryStopMapper;
 import com.be.repository.ActivityRepository;
 import com.be.service.impl.ActivityServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,7 @@ class ActivityCreationTests {
             activity.setId(UUID.randomUUID());
             return activity;
         });
-        var service = new ActivityServiceImpl(repository, new ActivityMapper(), null, null, null, null);
+        var service = new ActivityServiceImpl(repository, new ActivityMapper(new ItineraryStopMapper()), null, null, null, null);
         var response = service.createActivity(request, null, null, new User());
         assertNotNull(response.getId());
         assertTrue(response.getDepartures().isEmpty());

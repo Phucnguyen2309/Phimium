@@ -1,6 +1,6 @@
 package com.be.service.impl;
 
-import com.be.config.JwtService;
+import com.be.service.JwtService;
 import com.be.dto.request.*;
 import com.be.dto.response.*;
 import com.be.entity.User;

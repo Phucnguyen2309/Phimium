@@ -1,6 +1,6 @@
 package com.be;
 
-import com.be.config.JwtService;
+import com.be.service.JwtService;
 import com.be.dto.request.*;
 import com.be.entity.*;
 import com.be.enums.*;
@@ -28,7 +28,7 @@ class AuthenticationTests {
     @BeforeEach void setup() {
         users = mock(UserRepository.class);
         otp = mock(EmailOtpService.class);
-        jwt = new JwtService(mock(BuddyRepository.class));
+        jwt = new JwtServiceImpl(mock(BuddyRepository.class));
         ReflectionTestUtils.setField(jwt, "secretkey", Base64.getEncoder().encodeToString(new byte[32]));
         ReflectionTestUtils.setField(jwt, "expireMs", 86400000L);
         ReflectionTestUtils.setField(jwt, "refreshExpireMs", 604800000L);

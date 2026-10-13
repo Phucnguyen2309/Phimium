@@ -1,5 +1,6 @@
-package com.be.config;
+package com.be.service.impl;
 
+import com.be.service.AuthCookieService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,10 +13,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Component
-public class AuthCookieService {
-
-    public static final String ACCESS_COOKIE = "phimium_access";
-    public static final String REFRESH_COOKIE = "phimium_refresh";
+public class AuthCookieServiceImpl implements AuthCookieService {
 
     private static final String ACCESS_PATH = "/api";
     private static final String REFRESH_PATH = "/api/auth";
@@ -26,6 +24,7 @@ public class AuthCookieService {
     @Value("${auth.cookie.same-site:Lax}")
     private String sameSite;
 
+    @Override
     public void writeTokens(HttpServletResponse response, String accessToken, String refreshToken) {
         if (accessToken != null) {
             response.addHeader(HttpHeaders.SET_COOKIE, build(ACCESS_COOKIE, accessToken, ACCESS_PATH, -1).toString());
@@ -35,15 +34,18 @@ public class AuthCookieService {
         }
     }
 
+    @Override
     public void clearTokens(HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE, build(ACCESS_COOKIE, "", ACCESS_PATH, 0).toString());
         response.addHeader(HttpHeaders.SET_COOKIE, build(REFRESH_COOKIE, "", REFRESH_PATH, 0).toString());
     }
 
+    @Override
     public Optional<String> readAccessToken(HttpServletRequest request) {
         return read(request, ACCESS_COOKIE);
     }
 
+    @Override
     public Optional<String> readRefreshToken(HttpServletRequest request) {
         return read(request, REFRESH_COOKIE);
     }

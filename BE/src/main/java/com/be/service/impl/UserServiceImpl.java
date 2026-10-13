@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_ID_NOT_FOUND));
 
         user.setStatus(status);

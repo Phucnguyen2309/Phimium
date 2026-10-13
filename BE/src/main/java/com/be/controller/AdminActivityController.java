@@ -1,5 +1,6 @@
 package com.be.controller;
 
+import com.be.dto.request.ActivityMatchingMetadataRequest;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.request.CreateActivityMultipartRequest;
 import com.be.dto.request.UpdateActivityRequest;
@@ -19,7 +20,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -33,6 +41,14 @@ import java.util.List;
 @Tag(name = "Admin Activity Management", description = "Quản lý tour và ca khởi hành dành cho Admin")
 public class AdminActivityController {
     private final ActivityService activityService;
+
+    @PutMapping("/{activityId}/matching")
+    @Operation(summary = "Cập nhật tag matching của tour",
+            description = "Thay danh sách tag của tour. Dùng API itinerary riêng để quản lý các điểm và ảnh.")
+    public ApiResponse<ActivityMatchingMetadataRequest> updateMatchingMetadata(@PathVariable UUID activityId,
+            @Valid @RequestBody ActivityMatchingMetadataRequest request) {
+        return ApiResponse.success("Success", activityService.updateMatchingMetadata(activityId, request));
+    }
 
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE

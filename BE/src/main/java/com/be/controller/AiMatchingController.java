@@ -1,15 +1,20 @@
 package com.be.controller;
 
 import com.be.dto.request.AiMatchRequest;
-import com.be.dto.response.*;
+import com.be.dto.response.AiMatchResponse;
+import com.be.dto.response.ApiResponse;
 import com.be.entity.User;
-import com.be.service.impl.AiMatchingService;
+import com.be.service.AiMatchingService;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/ai/matches")

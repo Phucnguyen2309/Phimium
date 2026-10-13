@@ -2,20 +2,37 @@ package com.be.service.impl;
 
 import com.be.config.MatchingProperties;
 import com.be.dto.request.AiMatchRequest;
-import com.be.dto.response.*;
+import com.be.dto.response.AiMatchResponse;
+import com.be.dto.response.BuddyResponse;
 import com.be.entity.User;
-import com.be.enums.*;
-import com.be.exception.*;
+import com.be.enums.UserRole;
+import com.be.enums.UserStatus;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
+import com.be.service.AiMatchResultStore;
+import com.be.service.AiMatchingService;
 import com.be.service.MatchingAiClient;
+import com.be.service.MatchingCandidateService;
+import com.be.service.MatchingRequestLimiter;
 import com.be.util.DateTimeUtils;
+
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AiMatchingService {
+public class AiMatchingServiceImpl implements AiMatchingService {
     private final MatchingAiClient ai;
     private final MatchingCandidateService candidates;
     private final AiMatchResultStore store;
@@ -23,6 +40,7 @@ public class AiMatchingService {
     private final MatchingProperties properties;
     private final Validator validator;
 
+    @Override
     public AiMatchResponse match(AiMatchRequest request, User user) {
         if (user == null || user.getRole() != UserRole.USER || user.getStatus() != UserStatus.ACTIVE)
             throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);

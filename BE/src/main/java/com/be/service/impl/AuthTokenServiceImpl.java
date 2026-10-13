@@ -1,6 +1,6 @@
 package com.be.service.impl;
 
-import com.be.config.JwtService;
+import com.be.service.JwtService;
 import com.be.dto.response.LoginResponse;
 import com.be.entity.User;
 import com.be.exception.AppException;

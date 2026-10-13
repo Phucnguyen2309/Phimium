@@ -10,6 +10,7 @@ import com.be.exception.ErrorCode;
 import com.be.mapper.GuidelineMapper;
 import com.be.repository.ActivityGuidelineRepository;
 import com.be.repository.ActivityRepository;
+import com.be.service.GuidelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +19,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class GuidelineServiceImpl {
+public class GuidelineServiceImpl implements GuidelineService {
 
     private final ActivityGuidelineRepository guidelineRepository;
     private final ActivityRepository activityRepository;
     private final GuidelineMapper guidelineMapper;
 
     // ================== GET ==================
+    @Override
     public GlobalGuidelineResponse getGuidelineByActivity(UUID activityId) {
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
@@ -42,6 +44,7 @@ public class GuidelineServiceImpl {
     }
 
     // ================== CREATE ==================
+    @Override
     @Transactional
     public GlobalGuidelineResponse createInstruction(UUID activityId, InstructionRequest request) {
         Activity activity = activityRepository.findById(activityId)
@@ -64,6 +67,7 @@ public class GuidelineServiceImpl {
     }
 
     // ================== UPDATE ==================
+    @Override
     @Transactional
     public GlobalGuidelineResponse updateInstruction(UUID activityId, InstructionRequest request) {
         Activity activity = activityRepository.findById(activityId)

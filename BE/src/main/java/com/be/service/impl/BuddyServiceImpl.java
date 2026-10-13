@@ -1,5 +1,6 @@
 package com.be.service.impl;
 
+import com.be.dto.request.BuddyMatchingProfileRequest;
 import com.be.dto.request.UpgradeBuddyRequest;
 import com.be.dto.response.BuddyResponse;
 import com.be.entity.Buddy;
@@ -17,34 +18,39 @@ import com.be.repository.RegistrationRepository;
 import com.be.repository.UserRepository;
 import com.be.service.BuddyService;
 import com.be.service.CloudinaryService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class BuddyServiceImpl implements BuddyService {
     private final UserRepository userRepository;
     private final BuddyRepository buddyRepository;
-    private final BuddyMapper  buddyMapper;
+    private final BuddyMapper buddyMapper;
     private final CloudinaryService cloudinaryService;
     private final RegistrationRepository registrationRepository;
 
     @Override
-    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(rollbackFor = IOException.class)
     public BuddyResponse upgradeBuddy(
-            UUID currentUserId,
+            UUID userId,
             UpgradeBuddyRequest request,
             MultipartFile image
     ) throws IOException {
 
-        User user = userRepository.findById(currentUserId)
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() ->
                         new AppException(ErrorCode.USER_NOT_FOUND)
                 );
@@ -53,7 +59,11 @@ public class BuddyServiceImpl implements BuddyService {
             throw new AppException(ErrorCode.USER_ALREADY_BUDDY);
         }
 
-        if (buddyRepository.existsByUser_UserId(currentUserId)) {
+        if (user.getRole() != UserRole.USER) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        if (buddyRepository.existsByUser_UserId(userId)) {
             throw new AppException(ErrorCode.BUDDY_ALREADY_EXISTS);
         }
 
@@ -78,7 +88,7 @@ public class BuddyServiceImpl implements BuddyService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<BuddyResponse> getAllBuddies(BuddyStatus status) {
         List<Buddy> buddies;
         if (status != null) {
@@ -89,6 +99,25 @@ public class BuddyServiceImpl implements BuddyService {
         return buddies.stream()
                 .map(buddyMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public BuddyResponse updateMatchingProfile(UUID buddyId, BuddyMatchingProfileRequest request, User currentUser) {
+        Buddy buddy = buddyRepository.findByIdWithLock(buddyId)
+                .orElseThrow(() -> new AppException(ErrorCode.BUDDY_NOT_FOUND));
+        if (currentUser == null || (currentUser.getRole() != UserRole.ADMIN
+                && (currentUser.getRole() != UserRole.BUDDY || buddy.getUser() == null
+                || !buddy.getUser().getUserId().equals(currentUser.getUserId())))) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+
+        buddy.setInterests(new LinkedHashSet<>(request.getInterests()));
+        buddy.setSkills(new LinkedHashSet<>(request.getSkills()));
+        buddy.setLanguages(request.getLanguages().stream().map(language -> language.toUpperCase(Locale.ROOT))
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+        buddy.setGuidingStyle(request.getGuidingStyle());
+        return buddyMapper.toResponse(buddy);
     }
 
     @Override

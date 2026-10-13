@@ -1,28 +1,46 @@
 package com.be.service.impl;
 
 import com.be.dto.request.DepartureRequest;
-import com.be.dto.response.*;
-import com.be.entity.*;
-import com.be.enums.*;
+import com.be.dto.response.AdminDepartureResponse;
+import com.be.dto.response.AdminRegistrationResponse;
+import com.be.entity.ActivityDeparture;
+import com.be.entity.Registration;
+import com.be.entity.User;
+import com.be.enums.ActivityStatus;
+import com.be.enums.DepartureStatus;
+import com.be.enums.RegistrationStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.mapper.RegistrationMapper;
-import com.be.repository.*;
+import com.be.repository.ActivityDepartureRepository;
+import com.be.repository.ActivityRepository;
+import com.be.repository.RegistrationRepository;
 import com.be.service.AdminBookingService;
 import com.be.util.DateTimeUtils;
+
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
+@Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
 public class AdminBookingServiceImpl implements AdminBookingService {
     private final RegistrationRepository registrations;
     private final ActivityDepartureRepository departures;
@@ -80,12 +98,12 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     @Override
     @Transactional
     public List<AdminDepartureResponse> createDepartures(UUID activityId, List<DepartureRequest> requests) {
-        var activity = activities.findById(activityId).orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
+        var activity = activities.findByIdWithLock(activityId).orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
         if (activity.getStatus() == ActivityStatus.CANCELLED || activity.getStatus() == ActivityStatus.COMPLETED)
             throw new AppException(ErrorCode.DEPARTURE_NOT_AVAILABLE);
         Set<String> timeSlots = new HashSet<>();
         for (var request : requests) {
-            long duration = java.time.Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
+            long duration = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
             if (duration <= 0 || activity.getItineraryStops().stream()
                     .anyMatch(stop -> stop.getOffsetMinutes() + stop.getDurationMinutes() > duration)) {
                 throw new AppException(ErrorCode.VALIDATION_ERROR, "Departure is shorter than the approved itinerary");

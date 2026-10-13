@@ -1,5 +1,6 @@
 package com.be.service.impl;
 
+import com.be.dto.request.ActivityMatchingMetadataRequest;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.request.UpdateActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
@@ -17,13 +18,15 @@ import com.be.repository.ActivityRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.ActivityService;
 import com.be.service.CloudinaryService;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,7 +68,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<ActivityResponse> getAllActivities() {
         List<Activity> activities = activityRepository.findAll(
                 Sort.by(Sort.Direction.DESC, "createdAt")
@@ -105,10 +108,35 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    @Transactional(rollbackOn = IOException.class)
+    @Transactional(readOnly = true)
+    public ActivityMatchingMetadataRequest getMatchingMetadata(UUID activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
+        return toMatchingMetadata(activity);
+    }
+
+    @Override
+    @Transactional
+    public ActivityMatchingMetadataRequest updateMatchingMetadata(UUID activityId,
+            ActivityMatchingMetadataRequest request) {
+        Activity activity = activityRepository.findByIdWithLock(activityId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
+        activity.getTags().clear();
+        activity.getTags().addAll(request.getTags());
+        return toMatchingMetadata(activity);
+    }
+
+    private ActivityMatchingMetadataRequest toMatchingMetadata(Activity activity) {
+        ActivityMatchingMetadataRequest metadata = new ActivityMatchingMetadataRequest();
+        metadata.setTags(new LinkedHashSet<>(activity.getTags()));
+        return metadata;
+    }
+
+    @Override
+    @Transactional(rollbackFor = IOException.class)
     public ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request, MultipartFile image,
                                            List<MultipartFile> images) throws IOException {
-        Activity activity = activityRepository.findById(activityId)
+        Activity activity = activityRepository.findByIdWithLock(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
 
         // Kiểm tra logic số lượng khách
@@ -156,7 +184,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public void deleteActivity(UUID activityId) {
-        Activity activity = activityRepository.findById(activityId)
+        Activity activity = activityRepository.findByIdWithLock(activityId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACTIVITY_NOT_FOUND));
         if (activity.getDepartures() != null && !activity.getDepartures().isEmpty()) {
             throw new AppException(ErrorCode.ACTIVITY_CANNOT_BE_DELETED);

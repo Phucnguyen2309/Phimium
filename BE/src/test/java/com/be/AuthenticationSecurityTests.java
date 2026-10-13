@@ -7,7 +7,9 @@ import com.be.enums.*;
 import com.be.repository.*;
 import com.be.service.*;
 import com.be.service.impl.AuthTokenServiceImpl;
+import com.be.service.impl.AuthCookieServiceImpl;
 import com.be.service.impl.GoogleAuthServiceImpl;
+import com.be.service.impl.JwtServiceImpl;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(properties = "TOKEN_SECRET_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", controllers = {AuthController.class, AuthenticationSecurityTests.ProbeController.class})
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, JwtService.class, AuthCookieService.class,
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, JwtServiceImpl.class, AuthCookieServiceImpl.class,
         GoogleAuthServiceImpl.class, AuthTokenServiceImpl.class, AuthenticationSecurityTests.ProbeController.class})
 class AuthenticationSecurityTests {
     @Autowired MockMvc mvc;

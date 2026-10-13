@@ -1,18 +1,44 @@
 package com.be.entity;
 
 import com.be.enums.ActivityStatus;
+import com.be.enums.MatchingTag;
 import com.be.enums.TourType;
 import com.be.util.DateTimeUtils;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,11 +60,10 @@ public class Activity {
     @Enumerated(EnumType.STRING)
     @Column(name = "tag", nullable = false, length = 40)
     @Builder.Default
-    private java.util.Set<com.be.enums.MatchingTag> tags = new java.util.LinkedHashSet<>();
+    private Set<MatchingTag> tags = new LinkedHashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name = "activity_itinerary_stops", joinColumns = @JoinColumn(name = "activity_id"))
-    @OrderColumn(name = "stop_order")
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("stopOrder ASC, stopId ASC")
     @Builder.Default
     private List<ItineraryStop> itineraryStops = new ArrayList<>();
 

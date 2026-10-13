@@ -2,8 +2,20 @@ package com.be.entity;
 
 import com.be.enums.CheckInStatus;
 import com.be.enums.RegistrationStatus;
-import com.be.util.DateTimeUtils;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +23,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -61,7 +76,7 @@ public class Registration {
             inverseJoinColumns = @JoinColumn(name = "buddy_id")
     )
     @Builder.Default
-    private java.util.Set<Buddy> buddies = new java.util.HashSet<>();
+    private Set<Buddy> buddies = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
@@ -124,9 +139,9 @@ public class Registration {
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    public void assignBuddies(java.util.List<Buddy> assignedBuddies) {
+    public void assignBuddies(List<Buddy> assignedBuddies) {
         if (this.buddies == null) {
-            this.buddies = new java.util.HashSet<>();
+            this.buddies = new HashSet<>();
         }
         this.buddies.clear();
         if (assignedBuddies != null && !assignedBuddies.isEmpty()) {

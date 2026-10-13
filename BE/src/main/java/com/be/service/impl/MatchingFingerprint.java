@@ -1,39 +1,62 @@
 package com.be.service.impl;
 
-import com.be.dto.response.*;
-import com.be.entity.*;
-import java.nio.*;
+import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.BuddyResponse;
+import com.be.dto.response.ItineraryStopResponse;
+import com.be.entity.Activity;
+import com.be.entity.Buddy;
+import com.be.entity.ItineraryStop;
+
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.*;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /** Detect changes to the actual experience/profile shown in a proposal. Ratings may evolve independently. */
 public final class MatchingFingerprint {
     private MatchingFingerprint() { }
     public static String of(ActivityResponse activity, List<BuddyResponse> buddies) {
         List<String> values = tour(activity.getTitle(), activity.getDescription(), activity.getLocationName(), activity.getAddress(),
-                activity.getTags(), activity.getItineraryStops());
+                activity.getTags());
+        for (ItineraryStopResponse stop : activity.getItineraryStops()) {
+            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getDescription(),
+                    stop.getOffsetMinutes(), stop.getDurationMinutes(), stop.getImageUrl());
+        }
         for (BuddyResponse b : buddies) buddy(values, b.getBuddyId(), b.getInterests(), b.getSkills(), b.getLanguages(),
                 b.getGuidingStyle(), b.getBio(), b.getExperience(), b.getIntroduction());
         return hash(values);
     }
     public static String of(Activity activity, List<Buddy> buddies) {
         List<String> values = tour(activity.getTitle(), activity.getDescription(), activity.getLocationName(), activity.getAddress(),
-                activity.getTags(), activity.getItineraryStops());
+                activity.getTags());
+        for (ItineraryStop stop : activity.getItineraryStops()) {
+            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getDescription(),
+                    stop.getOffsetMinutes(), stop.getDurationMinutes(), stop.getImageUrl());
+        }
         for (Buddy b : buddies) buddy(values, b.getBuddyId(), b.getInterests(), b.getSkills(), b.getLanguages(),
                 b.getGuidingStyle(), b.getBio(), b.getExperience(), b.getIntroduction());
         return hash(values);
     }
     private static List<String> tour(String title, String description, String location, String address,
-                                     Collection<?> tags, List<ItineraryStop> stops) {
+                                     Collection<?> tags) {
         List<String> values = new ArrayList<>(); values.add(Objects.toString(title, "")); values.add(Objects.toString(description, ""));
         values.add(Objects.toString(location, "")); values.add(Objects.toString(address, ""));
         values.add(sorted(tags));
-        for (ItineraryStop s : stops) {
-            values.add(s.getTitle()); values.add(s.getDescription());
-            values.add(s.getOffsetMinutes().toString()); values.add(s.getDurationMinutes().toString());
-        }
         return values;
+    }
+    private static void stop(List<String> values, UUID id, Integer order, String title, String description,
+            Integer offset, Integer duration, String imageUrl) {
+        values.add(Objects.toString(id, "")); values.add(Objects.toString(order, ""));
+        values.add(title); values.add(description);
+        values.add(offset.toString()); values.add(duration.toString());
+        values.add(Objects.toString(imageUrl, ""));
     }
     private static void buddy(List<String> values, UUID id, Collection<?> tags, Collection<?> skills,
             Collection<?> languages, Object style, String bio, String experience, String introduction) {
@@ -42,7 +65,7 @@ public final class MatchingFingerprint {
         values.add(Objects.toString(experience, "")); values.add(Objects.toString(introduction, ""));
     }
     private static String sorted(Collection<?> values) {
-        return values.stream().map(Object::toString).sorted().collect(java.util.stream.Collectors.joining("\u0000"));
+        return values.stream().map(Object::toString).sorted().collect(Collectors.joining("\u0000"));
     }
     private static String hash(List<String> values) {
         try {
@@ -52,6 +75,6 @@ public final class MatchingFingerprint {
                 digest.update(ByteBuffer.allocate(4).putInt(bytes.length).array()); digest.update(bytes);
             }
             return HexFormat.of().formatHex(digest.digest());
-        } catch (java.security.NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
+        } catch (NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
     }
 }

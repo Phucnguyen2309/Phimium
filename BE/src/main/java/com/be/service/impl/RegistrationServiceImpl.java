@@ -6,20 +6,45 @@ import com.be.dto.response.ActivityGroupResponse;
 import com.be.dto.response.BuddyResponse;
 import com.be.dto.response.PriceQuoteResponse;
 import com.be.dto.response.RegistrationResponse;
-import com.be.entity.*;
-import com.be.enums.*;
+import com.be.entity.Activity;
+import com.be.entity.ActivityDeparture;
+import com.be.entity.ActivityGroup;
+import com.be.entity.AiMatchResult;
+import com.be.entity.Buddy;
+import com.be.entity.Coupon;
+import com.be.entity.InstructionAcknowledgement;
+import com.be.entity.Registration;
+import com.be.entity.User;
+import com.be.enums.ActivityStatus;
+import com.be.enums.BuddyStatus;
+import com.be.enums.CheckInStatus;
+import com.be.enums.DepartureStatus;
+import com.be.enums.PaymentStatus;
+import com.be.enums.RegistrationStatus;
+import com.be.enums.UserRole;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.mapper.ActivityGroupMapper;
 import com.be.mapper.BuddyMapper;
 import com.be.mapper.InstructionAcknowledgementMapper;
 import com.be.mapper.RegistrationMapper;
-import com.be.repository.*;
+import com.be.repository.ActivityDepartureRepository;
+import com.be.repository.ActivityGroupRepository;
+import com.be.repository.AiMatchResultRepository;
+import com.be.repository.BuddyRepository;
+import com.be.repository.CouponRepository;
+import com.be.repository.InstructionAcknowledgementRepository;
+import com.be.repository.PaymentRepository;
+import com.be.repository.RegistrationRepository;
+import com.be.repository.UserRepository;
+import com.be.service.BookingLifecycleService;
 import com.be.service.BuddyMatchingService;
 import com.be.service.PricingService;
 import com.be.service.RegistrationService;
 import com.be.util.DateTimeUtils;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -48,11 +74,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final PricingService pricingService;
     private final BuddyMatchingService buddyMatchingService;
-    private final com.be.service.BookingLifecycleService lifecycle;
+    private final BookingLifecycleService lifecycle;
     private final PaymentRepository paymentRepository;
     private final AiMatchResultRepository matchResultRepository;
 
-    @org.springframework.beans.factory.annotation.Value("${booking.hold-minutes:15}")
+    @Value("${booking.hold-minutes:15}")
     private long holdMinutes;
 
     @Override
@@ -92,12 +118,12 @@ public class RegistrationServiceImpl implements RegistrationService {
             if (!match.getUser().getUserId().equals(userId)) throw new AppException(ErrorCode.MATCH_RESULT_NOT_FOUND);
             if (!match.getDeparture().getDepartureId().equals(request.getDepartureId())
                     || match.getAdultCount() != adult || match.getChildCount() != child
-                    || !java.util.Objects.equals(match.getCouponCode(), normalizeCoupon(request.getCouponCode())))
+                    || !Objects.equals(match.getCouponCode(), normalizeCoupon(request.getCouponCode())))
                 throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
             var prior = registrationRepository.findByMatchResult_Id(match.getId());
             if (prior.isPresent()) {
                 if (prior.get().getStatus() == RegistrationStatus.CANCELLED) throw new AppException(ErrorCode.MATCH_RESULT_ALREADY_USED);
-                if (!java.util.Objects.equals(prior.get().getPickupLocation(), request.getPickupLocation().strip()))
+                if (!Objects.equals(prior.get().getPickupLocation(), request.getPickupLocation().strip()))
                     throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
                 return registrationMapper.toResponse(prior.get());
             }

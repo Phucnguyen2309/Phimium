@@ -6,13 +6,17 @@ import com.be.dto.response.ActivityDepartureResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.entity.Activity;
 import com.be.entity.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ActivityMapper {
+    private final ItineraryStopMapper itineraryStopMapper;
 
     public Activity toEntity(ActivityRequest request, User createdBy) {
         if (request == null) {
@@ -22,6 +26,7 @@ public class ActivityMapper {
         return Activity.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .tags(new LinkedHashSet<>(request.getTags()))
                 .activityType(request.getActivityType())
                 .locationName(request.getLocationName())
                 .address(request.getAddress())
@@ -62,8 +67,8 @@ public class ActivityMapper {
         return ActivityResponse.builder()
                 .id(activity.getId())
                 .title(activity.getTitle())
-                .tags(new java.util.LinkedHashSet<>(activity.getTags()))
-                .itineraryStops(new java.util.ArrayList<>(activity.getItineraryStops()))
+                .tags(new LinkedHashSet<>(activity.getTags()))
+                .itineraryStops(itineraryStopMapper.toResponseList(activity.getItineraryStops()))
                 .description(activity.getDescription())
                 .activityType(activity.getActivityType())
                 .thumbnailUrl(activity.getThumbnailUrl())
@@ -110,6 +115,10 @@ public class ActivityMapper {
         }
         if (request.getDescription() != null) {
             activity.setDescription(request.getDescription());
+        }
+        if (request.getTags() != null) {
+            activity.getTags().clear();
+            activity.getTags().addAll(request.getTags());
         }
         if (request.getActivityType() != null) {
             activity.setActivityType(request.getActivityType());

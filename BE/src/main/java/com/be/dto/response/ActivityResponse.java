@@ -1,6 +1,7 @@
 package com.be.dto.response;
 
 import com.be.enums.ActivityStatus;
+import com.be.enums.MatchingTag;
 import com.be.enums.TourType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -19,8 +21,8 @@ import java.util.UUID;
 public class ActivityResponse {
     private UUID id;
     private String title;
-    private java.util.Set<com.be.enums.MatchingTag> tags;
-    private java.util.List<com.be.entity.ItineraryStop> itineraryStops;
+    private Set<MatchingTag> tags;
+    private List<ItineraryStopResponse> itineraryStops;
     private String description;
     private TourType activityType;
     private String thumbnailUrl;

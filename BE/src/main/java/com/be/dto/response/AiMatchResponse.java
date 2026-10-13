@@ -2,10 +2,12 @@ package com.be.dto.response;
 
 import com.be.dto.request.AiMatchRequest;
 import com.be.enums.MatchingTag;
-import com.be.entity.ItineraryStop;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public record AiMatchResponse(String status, String engine, AiMatchRequest criteria,
                               List<String> missingFields, List<Choice> choices) {
@@ -13,5 +15,5 @@ public record AiMatchResponse(String status, String engine, AiMatchRequest crite
                          ActivityDepartureResponse departure, BigDecimal totalAmount, String currency,
                          List<BuddyResponse> buddies, UUID leadBuddyId,
                          Set<MatchingTag> matchedTags, Set<MatchingTag> missingTags,
-                         List<String> reasons, List<ItineraryStop> itinerary) { }
+                         List<String> reasons, List<ItineraryStopResponse> itinerary) { }
 }

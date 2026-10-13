@@ -1,18 +1,33 @@
 package com.be.service.impl;
 
-import com.be.entity.*;
-import com.be.enums.*;
+import com.be.entity.Activity;
+import com.be.entity.ActivityDeparture;
+import com.be.entity.ActivityGroup;
+import com.be.entity.Buddy;
+import com.be.entity.Payment;
+import com.be.entity.Registration;
+import com.be.enums.ActivityStatus;
+import com.be.enums.DepartureStatus;
+import com.be.enums.GroupStatus;
+import com.be.enums.PaymentStatus;
+import com.be.enums.RegistrationStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
-import com.be.repository.*;
+import com.be.repository.ActivityDepartureRepository;
+import com.be.repository.ActivityGroupRepository;
+import com.be.repository.CouponRepository;
+import com.be.repository.PaymentRepository;
+import com.be.repository.RegistrationRepository;
 import com.be.service.BookingLifecycleService;
 import com.be.service.BuddyMatchingService;
 import com.be.util.DateTimeUtils;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +52,8 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
         if (registration.getMatchResult() != null) {
             try {
                 var selected = matching.validateMatchedBuddies(registration.getMatchResult(), departure, registration.getRegistrationId());
-                var held = registration.getBuddies().stream().map(Buddy::getBuddyId).collect(java.util.stream.Collectors.toSet());
-                if (!held.equals(selected.stream().map(Buddy::getBuddyId).collect(java.util.stream.Collectors.toSet()))) return false;
+                var held = registration.getBuddies().stream().map(Buddy::getBuddyId).collect(Collectors.toSet());
+                if (!held.equals(selected.stream().map(Buddy::getBuddyId).collect(Collectors.toSet()))) return false;
             } catch (AppException e) {
                 if (e.getErrorCode() == ErrorCode.MATCH_RESULT_CHANGED || e.getErrorCode() == ErrorCode.BUDDY_SCHEDULE_CONFLICT) return false;
                 throw e;
