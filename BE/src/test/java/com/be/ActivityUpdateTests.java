@@ -3,6 +3,7 @@ package com.be;
 import com.be.dto.request.UpdateActivityRequest;
 import com.be.entity.Activity;
 import com.be.mapper.ActivityMapper;
+import com.be.mapper.ItineraryStopMapper;
 import com.be.repository.ActivityRepository;
 import com.be.service.impl.ActivityServiceImpl;
 import com.be.service.CloudinaryService;
@@ -64,12 +65,12 @@ class ActivityUpdateTests {
         var repository = mock(ActivityRepository.class);
         var activity = Activity.builder().id(UUID.randomUUID()).thumbnailUrl("old-cover")
                 .imageUrls(new ArrayList<>(List.of("first", "second", "third"))).build();
-        when(repository.findById(activity.getId())).thenReturn(Optional.of(activity));
+        when(repository.findByIdWithLock(activity.getId())).thenReturn(Optional.of(activity));
         when(repository.save(activity)).thenReturn(activity);
         var cloudinary = mock(CloudinaryService.class);
         when(cloudinary.uploadImage(any(MultipartFile.class)))
                 .thenAnswer(call -> ((MultipartFile) call.getArgument(0)).getOriginalFilename());
-        var service = new ActivityServiceImpl(repository, new ActivityMapper(), cloudinary, null, null, null);
+        var service = new ActivityServiceImpl(repository, new ActivityMapper(new ItineraryStopMapper()), cloudinary, null, null, null);
         var request = UpdateActivityRequest.builder().minimumParticipants(2).maximumParticipants(12)
                 .keptImageUrls(keptImageUrls).build();
         service.updateActivity(activity.getId(), request, thumbnail, images);

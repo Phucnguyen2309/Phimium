@@ -1,6 +1,5 @@
 package com.be.controller;
 
-import com.be.config.AuthCookieService;
 import com.be.dto.request.*;
 import com.be.dto.response.ApiResponse;
 import com.be.dto.response.GoogleAuthResponse;
@@ -11,9 +10,10 @@ import com.be.entity.User;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.repository.BuddyRepository;
-import com.be.repository.EmailOtpRepository;
+import com.be.service.AuthCookieService;
 import com.be.service.AuthService;
 import com.be.service.EmailOtpService;
+import com.be.service.GoogleAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/auth")
 public class AuthController {
     @Autowired
-    private com.be.service.GoogleAuthService googleAuthService;
+    private GoogleAuthService googleAuthService;
 
     @Autowired
     private AuthCookieService authCookieService;
@@ -61,7 +61,7 @@ public class AuthController {
 
     @PostMapping("/link/google")
     public ResponseEntity<ApiResponse<Void>> linkGoogle(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal com.be.entity.User user,
+            @AuthenticationPrincipal User user,
             @Valid @RequestBody GoogleAuthRequest request) {
         googleAuthService.link(user.getUserId(), request.getCredential());
         return ResponseEntity.ok(ApiResponse.success("Google account linked", null));

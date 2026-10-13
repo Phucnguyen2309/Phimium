@@ -1,17 +1,16 @@
 package com.be.service;
 
+import com.be.dto.request.ActivityMatchingMetadataRequest;
 import com.be.dto.request.ActivityRequest;
 import com.be.dto.request.UpdateActivityRequest;
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.dto.response.ActivityResponse;
 import com.be.dto.response.MyActivityResponse;
-import com.be.entity.Buddy;
 import com.be.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ActivityService {
@@ -25,6 +24,10 @@ public interface ActivityService {
     List<MyActivityResponse> getJoinedActivities(User currentUser);
 
     ActivityDetailResponse getActivityDetail(UUID activityId);
+
+    ActivityMatchingMetadataRequest getMatchingMetadata(UUID activityId);
+
+    ActivityMatchingMetadataRequest updateMatchingMetadata(UUID activityId, ActivityMatchingMetadataRequest request);
 
     ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request, MultipartFile image,
                                     List<MultipartFile> images) throws IOException;

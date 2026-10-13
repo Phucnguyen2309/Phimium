@@ -1,11 +1,20 @@
 package com.be.dto.request;
 
-import com.be.enums.*;
-import jakarta.validation.constraints.*;
+import com.be.enums.GuidingStyle;
+import com.be.enums.MatchingTag;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+
 import java.math.BigDecimal;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 public class AiMatchRequest {

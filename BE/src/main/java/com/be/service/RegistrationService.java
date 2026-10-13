@@ -8,12 +8,10 @@ import com.be.entity.User;
 import com.be.enums.RegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
-@Service
 public interface RegistrationService {
     RegistrationResponse joinActivity(RegistrationRequest request, UUID userId);
     List<RegistrationResponse> getMyRegistrations(UUID userId);

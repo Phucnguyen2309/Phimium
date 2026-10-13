@@ -1,24 +1,23 @@
 package com.be.service.impl;
 
-import com.be.entity.ActivityGroup;
-import com.be.enums.GroupStatus;
 import com.be.repository.ActivityGroupRepository;
 import com.be.repository.ActivityRepository;
+import com.be.service.StatusSchedulerService;
 import com.be.util.DateTimeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class StatusSchedulerService {
+public class StatusSchedulerServiceImpl implements StatusSchedulerService {
 
     private final ActivityRepository activityRepository;
     private final ActivityGroupRepository activityGroupRepository;
 
+    @Override
     @Transactional
     public void updateActivityAndGroupStatus() {
         LocalDateTime now = DateTimeUtils.nowVietnam();

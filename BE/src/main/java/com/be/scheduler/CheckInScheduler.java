@@ -1,7 +1,7 @@
 package com.be.scheduler;
 
 import com.be.service.RegistrationService;
-import com.be.service.impl.StatusSchedulerService;
+import com.be.service.StatusSchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

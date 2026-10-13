@@ -5,6 +5,8 @@ import com.be.entity.Activity;
 import com.be.entity.ActivityDeparture;
 import com.be.entity.Buddy;
 import com.be.entity.Registration;
+import com.be.enums.RegistrationStatus;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -70,7 +72,7 @@ public class RegistrationMapper {
                 .registrationId(registration.getRegistrationId())
                 .matchResultId(registration.getMatchResult() == null ? null : registration.getMatchResult().getId())
                 .buddyHoldExpiresAt(registration.getMatchResult() != null
-                        && registration.getStatus() == com.be.enums.RegistrationStatus.PENDING_PAYMENT
+                        && registration.getStatus() == RegistrationStatus.PENDING_PAYMENT
                         ? registration.getPaymentExpiresAt() : null)
                 .status(registration.getStatus())
                 .departure(departureInfo)

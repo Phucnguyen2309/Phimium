@@ -1,25 +1,34 @@
 package com.be.controller;
 
-import com.be.dto.request.UpgradeBuddyRequest;
-import com.be.dto.response.*;
-import com.be.enums.BuddyStatus;
-import com.be.service.BuddyScheduleService;
+import com.be.dto.request.BuddyMatchingProfileRequest;
+import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.ApiResponse;
+import com.be.dto.response.BuddyResponse;
+import com.be.dto.response.BuddyScheduleResponse;
+import com.be.dto.response.TourMemberResponse;
 import com.be.entity.User;
+import com.be.enums.BuddyStatus;
 import com.be.exception.AppException;
 import com.be.exception.ErrorCode;
 import com.be.service.ActivityService;
+import com.be.service.BuddyScheduleService;
 import com.be.service.BuddyService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,43 +43,6 @@ public class BuddyController {
 
     private final BuddyScheduleService buddyScheduleService;
 
-    private final ObjectMapper objectMapper;
-    @PatchMapping(
-            value = "/upgrade",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public ResponseEntity<ApiResponse<BuddyResponse>> upgradeBuddy(
-            @AuthenticationPrincipal User currentUser,
-            @RequestParam("bio") String bio,
-            @RequestParam("experience") String experience,
-            @RequestParam("introduction") String introduction,
-            @RequestPart(value = "image", required = false) MultipartFile image
-    ) throws IOException {
-        if (currentUser == null) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        UpgradeBuddyRequest request = UpgradeBuddyRequest.builder()
-                .bio(bio)
-                .experience(experience)
-                .introduction(introduction)
-                .build();
-
-        BuddyResponse response =
-                buddyService.upgradeBuddy(
-                        currentUser.getUserId(),
-                        request,
-                        image
-                );
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Upgrade to Buddy successfully",
-                        response
-                )
-        );
-    }
-
     @GetMapping("/getActivityByBuddy")
     public ResponseEntity<ApiResponse<List<ActivityResponse>>> getActivityByBuddy(UUID buddy) {
         List<ActivityResponse> activityResponses = activityService.getActivitiesByBuddy(buddy);
@@ -78,6 +50,17 @@ public class BuddyController {
         return ResponseEntity.ok(ApiResponse.success("success", activityResponses));
 
     }
+
+    @PutMapping("/{id}/matching")
+    @PreAuthorize("hasAnyRole('BUDDY','ADMIN')")
+    @Operation(summary = "Cập nhật hồ sơ matching của Buddy")
+    public ApiResponse<BuddyResponse> updateMatchingProfile(
+            @PathVariable UUID id,
+            @Valid @RequestBody BuddyMatchingProfileRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        return ApiResponse.success("Success", buddyService.updateMatchingProfile(id, request, currentUser));
+    }
+
 // BUDDY SCHEDULE & MEMBER MANAGEMENT
     @GetMapping("/me/schedules")
     @PreAuthorize("hasRole('BUDDY')")

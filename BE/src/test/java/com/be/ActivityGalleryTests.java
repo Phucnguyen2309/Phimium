@@ -5,6 +5,7 @@ import com.be.entity.Activity;
 import com.be.entity.User;
 import com.be.mapper.ActivityDetailMapper;
 import com.be.mapper.ActivityMapper;
+import com.be.mapper.ItineraryStopMapper;
 import com.be.repository.ActivityRepository;
 import com.be.service.CloudinaryService;
 import com.be.service.impl.ActivityServiceImpl;
@@ -25,8 +26,8 @@ class ActivityGalleryTests {
     @Test void uploadsGalleryToCloudinaryAndReturnsUrlsInOrder() throws Exception {
         var repository = mock(ActivityRepository.class);
         var cloudinary = mock(CloudinaryService.class);
-        var service = new ActivityServiceImpl(repository, new ActivityMapper(), cloudinary,
-                null, new ActivityDetailMapper(), null);
+        var service = new ActivityServiceImpl(repository, new ActivityMapper(new ItineraryStopMapper()), cloudinary,
+                null, new ActivityDetailMapper(new ItineraryStopMapper()), null);
         var request = new ActivityRequest();
         var thumbnail = new MockMultipartFile("image", "cover.jpg", "image/jpeg", new byte[]{1});
         var first = new MockMultipartFile("images", "first.jpg", "image/jpeg", new byte[]{2});
@@ -52,8 +53,8 @@ class ActivityGalleryTests {
     }
 
     @Test void missingGalleryReturnsEmptyArray() throws Exception {
-        var activity = new ActivityMapper().toEntity(new ActivityRequest(), new User());
-        var detail = new ActivityDetailMapper().toResponse(activity);
+        var activity = new ActivityMapper(new ItineraryStopMapper()).toEntity(new ActivityRequest(), new User());
+        var detail = new ActivityDetailMapper(new ItineraryStopMapper()).toResponse(activity);
         assertTrue(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(detail).get("imageUrls").isArray());
         assertEquals(List.of(), detail.getImageUrls());
     }
@@ -61,7 +62,7 @@ class ActivityGalleryTests {
     @Test void failedUploadDoesNotSaveActivity() throws Exception {
         var repository = mock(ActivityRepository.class);
         var cloudinary = mock(CloudinaryService.class);
-        var service = new ActivityServiceImpl(repository, new ActivityMapper(), cloudinary, null, null, null);
+        var service = new ActivityServiceImpl(repository, new ActivityMapper(new ItineraryStopMapper()), cloudinary, null, null, null);
         var file = new MockMultipartFile("images", "photo.jpg", "image/jpeg", new byte[]{1});
         when(cloudinary.uploadImage(file)).thenThrow(new IOException("Upload failed"));
         assertThrows(IOException.class, () -> service.createActivity(new ActivityRequest(), null, List.of(file), new User()));

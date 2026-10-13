@@ -1,8 +1,15 @@
 package com.be.service.impl;
 
 import com.be.entity.Buddy;
-import com.be.enums.*;
-import java.util.*;
+import com.be.enums.BuddyStatus;
+import com.be.enums.GuidingStyle;
+import com.be.enums.MatchingTag;
+import com.be.enums.UserRole;
+import com.be.enums.UserStatus;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public final class MatchingRules {
     private MatchingRules() { }

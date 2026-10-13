@@ -1,6 +1,7 @@
 package com.be.dto.request;
 
 import com.be.enums.ActivityStatus;
+import com.be.enums.MatchingTag;
 import com.be.enums.TourType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -28,6 +31,11 @@ public class UpdateActivityRequest {
 
     @Schema(example = "Mô tả chi tiết nội dung tour...")
     private String description;
+
+    @Size(max = 16, message = "A tour can have at most 16 matching tags")
+    @Schema(description = "Shared matching tags; omit or null to keep current tags, [] to clear them",
+            example = "[\"PHOTOGRAPHY\", \"RETRO\"]")
+    private Set<@NotNull MatchingTag> tags;
 
     @NotNull(message = "Loại tour không được để trống")
     @Schema(example = "FOODTOUR")

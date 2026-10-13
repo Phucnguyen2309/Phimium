@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
+    ITINERARY_STOP_NOT_FOUND(6101, HttpStatus.NOT_FOUND, "Itinerary stop not found for this activity"),
     AI_NOT_CONFIGURED(6001, HttpStatus.SERVICE_UNAVAILABLE, "Gemini API key/model are not configured"),
     AI_UNAVAILABLE(6002, HttpStatus.SERVICE_UNAVAILABLE, "AI matching is temporarily unavailable"),
     AI_INVALID_RESPONSE(6003, HttpStatus.BAD_GATEWAY, "AI returned an invalid matching response"),

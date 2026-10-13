@@ -4,8 +4,8 @@ Khách nhập nhu cầu hoặc chọn tag. Backend lọc ca tour còn chỗ và 
 
 ## Thiết lập
 
-1. Áp dụng `database/ai-smart-matchmaker.sql` sau các migration authentication/booking hiện có. Đây là script PostgreSQL bổ sung, chưa được chạy trên database của bạn. Cấu hình hiện tại vẫn có `ddl-auto=update`; script cũng cung cấp index phục vụ truy vấn.
-2. Admin bổ sung tag và chương trình thật cho tour; Buddy/Admin bổ sung sở thích, kỹ năng, ngôn ngữ, phong cách. Dữ liệu cũ thiếu tag không xuất hiện trong matching nhưng vẫn đặt tour thông thường được.
+1. Áp dụng `database/ai-smart-matchmaker.sql` sau các migration authentication/booking hiện có, trước khi chạy BE với entity `ItineraryStop` mới. Nếu đã áp dụng Smart Matchmaker trước đây, chạy `database/itinerary-stops.sql` để chuyển lịch trình cũ. Hai script dùng chung ledger và chỉ sao chép một lần; không xóa bảng cũ và không khôi phục điểm dừng đã xóa khi chạy lại. FK legacy được đổi sang cascade để xóa tour cũng xóa snapshot legacy của tour đó, tránh FK chặn thao tác. `ddl-auto=update` chỉ tạo schema, không chuyển dữ liệu lịch trình. Chưa chạy các script này trên database của bạn.
+2. Admin bổ sung tag cho tour và chương trình thật qua API điểm dừng riêng; Buddy/Admin bổ sung sở thích, kỹ năng, ngôn ngữ, phong cách. Dữ liệu cũ thiếu tag không xuất hiện trong matching nhưng vẫn đặt tour thông thường được.
 3. Đặt `GEMINI_API_KEY` và `GEMINI_MODEL` trong biến môi trường hoặc `.env` đang dùng của BE. Model cần hỗ trợ structured output. Không đưa key vào FE/Git. Restart BE sau khi cấu hình.
 
 | Biến | Mặc định | Ý nghĩa |
@@ -23,6 +23,8 @@ Khách nhập nhu cầu hoặc chọn tag. Backend lọc ca tour còn chỗ và 
 
 Không có Gemini: request chỉ dùng trường có cấu trúc vẫn chạy, trả `engine=TAG_MATCHING`. Request có `message` cần Gemini và trả lỗi cấu hình nếu thiếu. Provider lỗi không âm thầm bỏ câu nhập để trả kết quả khác.
 
+Khi API trả `6002`, xem console BE ở thời điểm gọi matching. Log `Gemini matching HTTP status ...` ghi HTTP status và thông báo lỗi của provider; log `Gemini matching timeout` ghi timeout thực tế; log `Gemini matching connection error` ghi loại lỗi kết nối. `stage=extract` là bước hiểu câu nhập, `stage=rank` là bước xếp hạng tour/Buddy. Log không ghi request/header hoặc nội dung response thành công; API key trong thông báo lỗi provider được che. Không tăng timeout hay đổi model trước khi xác định dòng lỗi tương ứng.
+
 ## API dữ liệu
 
 Mọi response dùng wrapper hiện có `ApiResponse`: dữ liệu nằm trong `data`. Access token/cookie đăng nhập theo hệ thống hiện có.
@@ -30,24 +32,51 @@ Mọi response dùng wrapper hiện có `ApiResponse`: dữ liệu nằm trong `
 | Method / URL | Quyền | Chức năng |
 | --- | --- | --- |
 | `GET /api/matching/tags` | Public | Danh mục mã, nhóm, nhãn Việt/Anh và `guidingStyles`. |
-| `GET /api/activity/{activityId}/matching` | Public | Tag và chương trình tour. |
-| `PUT /api/v1/admin/activities/{activityId}/matching` | ADMIN | Thay toàn bộ metadata tour. |
+| `GET /api/activity/{activityId}/matching` | Public | Tag tour. |
+| `PUT /api/v1/admin/activities/{activityId}/matching` | ADMIN | Thay toàn bộ tag tour. |
+| `GET /api/activity/{activityId}/itinerary-stops` | Public | Các điểm dừng và ảnh, theo thứ tự thời gian. |
+| `GET /api/activity/{activityId}/itinerary-stops/{stopId}` | Public | Chi tiết một điểm dừng thuộc tour. |
+| `POST /api/v1/admin/activities/{activityId}/itinerary-stops` | ADMIN | Thêm điểm dừng bằng multipart, có thể kèm ảnh. |
+| `PUT /api/v1/admin/activities/{activityId}/itinerary-stops/{stopId}` | ADMIN | Sửa nội dung/thời gian/ảnh của một điểm dừng. |
+| `DELETE /api/v1/admin/activities/{activityId}/itinerary-stops/{stopId}` | ADMIN | Xóa điểm dừng. |
+| `DELETE /api/v1/admin/activities/{activityId}/itinerary-stops/{stopId}/image` | ADMIN | Bỏ ảnh của điểm dừng. |
+| `PATCH /api/v1/admin/buddies/users/{userId}/upgrade` | ADMIN | Tạo hồ sơ Buddy và đổi role của tài khoản nhân viên từ USER sang BUDDY. |
 | `PUT /api/buddies/{buddyId}/matching` | ADMIN hoặc BUDDY sở hữu hồ sơ | Thay toàn bộ metadata Buddy. |
 | `POST /api/ai/matches` | USER đang hoạt động | Hiểu yêu cầu và tìm tour/đội Buddy. |
 
-Ví dụ metadata tour:
+Tag có thể gửi ngay khi tạo tour bằng `POST /api/v1/admin/activities`: thêm `tags` vào JSON part `request` của multipart hiện có. Bỏ trường khi tạo tương đương tập rỗng; `null` hoặc phần tử `null` không hợp lệ.
+
+`PUT /api/v1/admin/activities/{activityId}` cũng nhận `tags` trong JSON part `request`: bỏ trường/null giữ tag cũ; gửi `[]` xóa tag; gửi danh sách thay toàn bộ tag. Create/update tour và API matching metadata không còn nhận `itineraryStops`; tạo tour trước rồi quản lý từng điểm dừng qua API riêng. Response tour/matching vẫn có lịch trình lấy từ các điểm dừng đã lưu. Xem request multipart và quy tắc ảnh trong [ITINERARY-STOPS.md](ITINERARY-STOPS.md).
+
+Admin lấy tài khoản nhân viên bằng `GET /api/v1/admin/users?role=USER`, chọn `userId` của nhân viên rồi gọi `PATCH /api/v1/admin/buddies/users/{userId}/upgrade`. Dùng access token/cookie của Admin để xác thực; `userId` trên URL là ID tài khoản nhân viên có role USER, không phải ID tài khoản Admin đang đăng nhập. API tự nâng cấp `PATCH /api/buddies/upgrade` cũ đã được bỏ.
+
+Request dùng `multipart/form-data` gồm part `request` chứa JSON hồ sơ với `Content-Type: application/json` và file `image` tùy chọn. Backend đọc JSON bằng `@RequestPart("request")`. Trong Swagger, dán JSON vào ô `request` rồi chọn ảnh nếu cần; Swagger đã được khai báo encoding JSON. Trong Postman form-data, đặt key `request` kiểu Text và Content-Type của part này là `application/json`, key `image` kiểu File. Ví dụ JSON trong part `request`:
 
 ```json
 {
-  "tags": ["PHOTOGRAPHY", "RETRO", "CHINESE_CUISINE"],
-  "itineraryStops": [
-    {"title": "Chụp ảnh kiến trúc", "description": "Nội dung đã xác nhận của tour", "offsetMinutes": 0, "durationMinutes": 60},
-    {"title": "Trải nghiệm món Hoa", "description": "Điểm dừng đã có trong chương trình", "offsetMinutes": 75, "durationMinutes": 45}
-  ]
+  "interests": ["PHOTOGRAPHY", "RETRO"],
+  "skills": ["Hỗ trợ chụp ảnh bằng điện thoại"],
+  "languages": ["VI", "EN"],
+  "guidingStyle": "PHOTOGRAPHY_FOCUSED",
+  "bio": "Thích khám phá kiến trúc địa phương",
+  "experience": "Kinh nghiệm dẫn tour thực tế",
+  "introduction": "Giới thiệu bản thân"
 }
 ```
 
-Các điểm dừng theo thứ tự, không chồng lấn; offset tính từ giờ khởi hành. Tổng chương trình phải nằm trong khung giờ các ca tương lai. Có thể để itinerary rỗng khi tour chưa có chương trình chi tiết; AI không tự tạo điểm dừng. Tối đa 20 điểm dừng.
+Ba trường text phải có, tối đa 1000 ký tự. Các collection mới có thể bỏ qua để dùng tập rỗng. Ngôn ngữ lưu uppercase; kỹ năng bỏ khoảng trắng ở hai đầu. Wallet, rating, số review, ID và trạng thái được backend quản lý. Khi database cũ có ba cột text Buddy dài 255, áp dụng các lệnh mở rộng cột trong SQL migration trước khi gửi nội dung dài.
+
+Backend tạo entity Buddy và đổi role tài khoản nhân viên sang BUDDY trong cùng transaction. Response trả hồ sơ Buddy: `data.userId` là ID nhân viên đã chọn, `data.buddyId` là UUID hồ sơ Buddy vừa tạo. Dùng `buddyId` này cho các API cập nhật hồ sơ/metadata Buddy sau đó.
+
+Ví dụ metadata tag tour:
+
+```json
+{
+  "tags": ["PHOTOGRAPHY", "RETRO", "CHINESE_CUISINE"]
+}
+```
+
+Lịch trình được quản lý độc lập với tag, tối đa 20 điểm dừng/tour. Backend sắp xếp theo `offsetMinutes`, kiểm tra không chồng lấn và không vượt thời lượng các ca tương lai. Mỗi điểm dừng có `stopId` ổn định và `imageUrl` tùy chọn. Tour chưa có điểm dừng trả lịch trình rỗng; AI không tự tạo điểm dừng.
 
 Ví dụ metadata Buddy:
 

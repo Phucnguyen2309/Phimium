@@ -2,11 +2,17 @@ package com.be.controller;
 
 import com.be.dto.request.InstructionRequest;
 import com.be.dto.response.GlobalGuidelineResponse;
-import com.be.service.impl.GuidelineServiceImpl;
+import com.be.service.GuidelineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -15,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GuidelineController {
 
-    private final GuidelineServiceImpl guidelineService;
+    private final GuidelineService guidelineService;
 
     // Lấy ra để User đọc
     @GetMapping

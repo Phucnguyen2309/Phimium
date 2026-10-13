@@ -1,16 +1,23 @@
 package com.be.service.impl;
 
 import com.be.config.MatchingProperties;
-import com.be.exception.*;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
+import com.be.service.MatchingRequestLimiter;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class MatchingRequestLimiter {
+public class MatchingRequestLimiterImpl implements MatchingRequestLimiter {
     private final MatchingProperties properties;
     private final Map<UUID, Window> windows = new HashMap<>();
+    @Override
     public synchronized void acquire(UUID userId) {
         long now = System.nanoTime();
         windows.entrySet().removeIf(e -> now - e.getValue().start >= 60_000_000_000L);

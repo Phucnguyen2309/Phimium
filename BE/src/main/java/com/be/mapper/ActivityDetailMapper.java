@@ -2,11 +2,17 @@ package com.be.mapper;
 
 import com.be.dto.response.ActivityDetailResponse;
 import com.be.entity.Activity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ActivityDetailMapper {
+    private final ItineraryStopMapper itineraryStopMapper;
+
     public ActivityDetailResponse toResponse(Activity activity) {
         if (activity == null) {
             return null;
@@ -15,6 +21,8 @@ public class ActivityDetailMapper {
         return ActivityDetailResponse.builder()
                 .title(activity.getTitle())
                 .description(activity.getDescription())
+                .tags(new LinkedHashSet<>(activity.getTags()))
+                .itineraryStops(itineraryStopMapper.toResponseList(activity.getItineraryStops()))
                 .thumbnailUrl(activity.getThumbnailUrl())
                 .imageUrls(activity.getImageUrls() == null ? List.of() : List.copyOf(activity.getImageUrls()))
                 .locationName(activity.getLocationName())

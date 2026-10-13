@@ -2,27 +2,42 @@ package com.be.service.impl;
 
 import com.be.config.MatchingProperties;
 import com.be.dto.request.AiMatchRequest;
-import com.be.dto.response.*;
+import com.be.dto.response.AiMatchResponse;
+import com.be.dto.response.BuddyResponse;
 import com.be.entity.AiMatchResult;
 import com.be.enums.MatchingTag;
-import com.be.exception.*;
-import com.be.repository.*;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
+import com.be.repository.ActivityDepartureRepository;
+import com.be.repository.AiMatchResultRepository;
+import com.be.repository.UserRepository;
+import com.be.service.AiMatchResultStore;
+import com.be.service.MatchingCandidateService;
 import com.be.util.DateTimeUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AiMatchResultStore {
+public class AiMatchResultStoreImpl implements AiMatchResultStore {
     private final AiMatchResultRepository matches;
     private final ActivityDepartureRepository departures;
     private final UserRepository users;
     private final MatchingProperties properties;
     private final ObjectMapper mapper;
 
+    @Override
     @Transactional
     public AiMatchResponse.Choice save(UUID userId, AiMatchRequest criteria, MatchingCandidateService.Candidate candidate,
                                        List<BuddyResponse> selected, String engine) {
@@ -59,6 +74,6 @@ public class AiMatchResultStore {
     }
 
     private String labels(Set<MatchingTag> tags, boolean en) {
-        return tags.stream().map(t -> en ? t.getLabelEn() : t.getLabelVi()).collect(java.util.stream.Collectors.joining(", "));
+        return tags.stream().map(t -> en ? t.getLabelEn() : t.getLabelVi()).collect(Collectors.joining(", "));
     }
 }

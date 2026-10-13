@@ -1,26 +1,52 @@
 package com.be.service.impl;
 
 import com.be.config.MatchingProperties;
-import com.be.dto.request.*;
-import com.be.dto.response.*;
-import com.be.entity.*;
-import com.be.enums.*;
-import com.be.exception.*;
-import com.be.mapper.*;
-import com.be.repository.*;
+import com.be.dto.request.AiMatchRequest;
+import com.be.dto.request.PriceQuoteRequest;
+import com.be.dto.response.ActivityDepartureResponse;
+import com.be.dto.response.ActivityResponse;
+import com.be.dto.response.PriceQuoteResponse;
+import com.be.entity.Activity;
+import com.be.entity.ActivityDeparture;
+import com.be.entity.Buddy;
+import com.be.entity.User;
+import com.be.enums.ActivityStatus;
+import com.be.enums.BuddyStatus;
+import com.be.enums.DepartureStatus;
+import com.be.enums.RegistrationStatus;
+import com.be.enums.UserRole;
+import com.be.enums.UserStatus;
+import com.be.exception.AppException;
+import com.be.exception.ErrorCode;
+import com.be.mapper.ActivityMapper;
+import com.be.mapper.BuddyMapper;
+import com.be.repository.ActivityDepartureRepository;
+import com.be.repository.BuddyRepository;
+import com.be.repository.RegistrationRepository;
+import com.be.repository.UserRepository;
+import com.be.service.MatchingCandidateService;
 import com.be.service.PricingService;
 import com.be.util.DateTimeUtils;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class MatchingCandidateService {
+public class MatchingCandidateServiceImpl implements MatchingCandidateService {
     private final ActivityDepartureRepository departures;
     private final BuddyRepository buddies;
     private final RegistrationRepository registrations;
@@ -30,30 +56,7 @@ public class MatchingCandidateService {
     private final BuddyMapper buddyMapper;
     private final MatchingProperties properties;
 
-    public record Candidate(ActivityResponse activity, ActivityDepartureResponse departure,
-                            java.math.BigDecimal totalAmount, List<BuddyResponse> buddies,
-                            List<ItineraryStop> itinerary, int score) {
-        public Map<String, Object> context() {
-            Map<String, Object> context = new LinkedHashMap<>();
-            context.put("departureId", departure.getDepartureId()); context.put("date", departure.getDepartureDate());
-            context.put("startTime", departure.getStartTime()); context.put("endTime", departure.getEndTime());
-            context.put("title", activity.getTitle()); context.put("description", Objects.toString(activity.getDescription(), ""));
-            context.put("tags", activity.getTags()); context.put("location", activity.getLocationName());
-            context.put("itinerary", itinerary); context.put("totalAmountVnd", totalAmount);
-            context.put("buddies", buddies.stream().map(b -> {
-                        Map<String, Object> data = new LinkedHashMap<>();
-                        data.put("buddyId", b.getBuddyId());
-                        data.put("interests", b.getInterests()); data.put("skills", b.getSkills());
-                        data.put("languages", b.getLanguages()); data.put("guidingStyle", b.getGuidingStyle());
-                        data.put("experience", b.getExperience()); data.put("introduction", b.getIntroduction());
-                        data.put("bio", b.getBio()); data.put("averageRating", b.getAverageRating());
-                        data.put("totalReviews", b.getTotalReviews());
-                        return data;
-                    }).toList());
-            return context;
-        }
-    }
-
+    @Override
     @Transactional(readOnly = true)
     public List<Candidate> find(AiMatchRequest criteria, UUID userId) {
         User user = users.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -66,7 +69,7 @@ public class MatchingCandidateService {
                 .filter(b -> MatchingRules.buddyMatches(b, criteria.getTags(), criteria.getRequireAllTags(),
                         criteria.getRequiredLanguage(), criteria.getGuidingStyle()))
                 .sorted(Comparator.<Buddy>comparingInt(b -> MatchingRules.shared(criteria.getTags(), b.getInterests()).size())
-                        .reversed().thenComparing(b -> b.getAverageRating() == null ? java.math.BigDecimal.ZERO
+                        .reversed().thenComparing(b -> b.getAverageRating() == null ? BigDecimal.ZERO
                                 : b.getAverageRating(), Comparator.reverseOrder()).thenComparing(Buddy::getBuddyId))
                 .toList();
         if (available.size() < guests) return List.of();
@@ -99,8 +102,9 @@ public class MatchingCandidateService {
                     .capacity(departure.getCapacity()).status(departure.getStatus()).build();
             int score = MatchingRules.shared(criteria.getTags(), a.getTags()).size() * 10
                     + eligible.stream().limit(guests).mapToInt(b -> MatchingRules.shared(criteria.getTags(), b.getInterests()).size()).sum();
-            result.add(new Candidate(activityMapper.toResponse(a), response, quote.getTotalAmount(),
-                    eligible.stream().map(buddyMapper::toResponse).toList(), List.copyOf(a.getItineraryStops()), score));
+            ActivityResponse activityResponse = activityMapper.toResponse(a);
+            result.add(new Candidate(activityResponse, response, quote.getTotalAmount(),
+                    eligible.stream().map(buddyMapper::toResponse).toList(), List.copyOf(activityResponse.getItineraryStops()), score));
         }
         return result.stream().sorted(Comparator.comparingInt(Candidate::score).reversed()
                 .thenComparing(c -> c.departure().getStartTime()).thenComparing(c -> c.departure().getDepartureId()))
