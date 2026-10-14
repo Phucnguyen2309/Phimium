@@ -8,6 +8,7 @@ import { useLanguage } from '@/context/languageContext.js'
 import { ROUTES } from '@/routes/paths.js'
 import { formatDateTime } from '@/utils/format.js'
 
+import { BuddyMatchingTab } from './components/BuddyMatchingTab.jsx'
 import { BuddySidebar } from './components/BuddySidebar.jsx'
 import { BuddyTourMembersModal } from './components/BuddyTourMembersModal.jsx'
 import { StarRating } from './components/StarRating.jsx'
@@ -62,6 +63,8 @@ export function BuddyView({
   const pageTitle =
     activeTab === 'SCHEDULES'
       ? isVi ? 'Lịch dẫn tour' : 'Tour Schedules'
+      : activeTab === 'MATCHING'
+      ? isVi ? 'Hồ sơ Matching' : 'Matching Profile'
       : isVi ? 'Đánh giá từ khách' : 'Guest Reviews'
 
   return (
@@ -279,6 +282,8 @@ export function BuddyView({
                 <h2 className="text-sm font-bold text-slate-900">
                   {activeTab === 'SCHEDULES'
                     ? isVi ? 'Danh sách ca tour được giao' : 'Assigned Tour Departures'
+                    : activeTab === 'MATCHING'
+                    ? isVi ? 'Hồ sơ Matching & Định vị phong cách' : 'Matching Profile & Guiding Style'
                     : isVi ? 'Đánh giá & Nhận xét từ khách' : 'Guest Reviews & Feedback'}
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -286,6 +291,10 @@ export function BuddyView({
                     ? isVi
                       ? `Hiển thị ${schedules.length} ca tour theo bộ lọc hiện tại`
                       : `Showing ${schedules.length} departures for current filter`
+                    : activeTab === 'MATCHING'
+                    ? isVi
+                      ? 'Dữ liệu được AI Smart Matchmaker sử dụng để ghép cặp bạn với tour và du khách phù hợp nhất'
+                      : 'Used by AI Smart Matchmaker to pair you with best-matching tours and guests'
                     : isVi
                       ? `Tổng cộng ${feedbacks.length} lượt nhận xét sau chuyến đi`
                       : `Total of ${feedbacks.length} reviews after tours`}
@@ -537,6 +546,11 @@ export function BuddyView({
                     </div>
                   )}
                 </>
+              )}
+
+              {/* TAB 3: MATCHING PROFILE */}
+              {activeTab === 'MATCHING' && (
+                <BuddyMatchingTab buddyId={user?.buddyId} />
               )}
             </div>
           </div>

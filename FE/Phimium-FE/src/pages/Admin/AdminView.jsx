@@ -282,6 +282,8 @@ export function AdminView({
               onSizeChange={handleUserSizeChange}
               onFiltersChange={handleUserFiltersChange}
               onToggleStatus={handleToggleUserStatus}
+              onRefresh={refreshCurrentTab}
+              showToast={showToast}
             />
           )}
 
@@ -369,6 +371,9 @@ export function AdminView({
         onAssign={handleDoAssignBuddy}
         onClose={handleCloseAssignBuddy}
       />
+
+      {/* Thông báo Toast toàn hệ thống Admin */}
+      <AdminToastNotification toast={toast} onClose={hideToast} />
     </div>
   )
 }
