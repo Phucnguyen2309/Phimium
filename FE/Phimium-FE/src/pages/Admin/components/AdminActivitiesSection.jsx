@@ -7,6 +7,8 @@ import { AdminAddDepartureModal, AdminEditCapacityModal } from './AdminDeparture
 import { AdminEditActivityModal } from './AdminEditActivityModal.jsx'
 import { AdminDeleteActivityModal } from './AdminDeleteActivityModal.jsx'
 import { AdminPagination } from './AdminPagination.jsx'
+import { AdminItineraryTab } from './AdminItineraryTab.jsx'
+import { AdminMatchingTagsTab } from './AdminMatchingTagsTab.jsx'
 
 // ActivityStatus: PUBLISHED, UPCOMING, ONGOING, COMPLETED, CANCELLED
 const ACTIVITY_STATUS_MAP = {
@@ -189,6 +191,33 @@ function ActivityExpandPanel({ activity, onRefresh }) {
             </span>
           )}
         </button>
+        <button
+          type="button"
+          onClick={() => handleTabClick('itinerary')}
+          className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition ${activeInnerTab === 'itinerary'
+            ? 'border-blue-950 text-blue-950'
+            : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+          </svg>
+          {isVi ? 'Lịch trình điểm dừng' : 'Itinerary'}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabClick('matching')}
+          className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs font-semibold transition ${activeInnerTab === 'matching'
+            ? 'border-blue-950 text-blue-950'
+            : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+          {isVi ? 'Thẻ AI Matching' : 'AI Tags'}
+        </button>
       </div>
 
       {/* Tab content */}
@@ -369,6 +398,16 @@ function ActivityExpandPanel({ activity, onRefresh }) {
               </table>
             </div>
           )
+        )}
+
+        {/* Tab: Lịch trình điểm dừng */}
+        {activeInnerTab === 'itinerary' && (
+          <AdminItineraryTab activity={activity} onRefreshParent={onRefresh} />
+        )}
+
+        {/* Tab: Thẻ AI Matching */}
+        {activeInnerTab === 'matching' && (
+          <AdminMatchingTagsTab activity={activity} onRefreshParent={onRefresh} />
         )}
       </div>
     </div>

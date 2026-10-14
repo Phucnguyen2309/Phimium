@@ -1,8 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Container, Icon, Reveal } from '@/components/common'
 import { SiteFooter } from '@/components/layout/SiteFooter.jsx'
 import { useLanguage } from '@/context/languageContext.js'
+import { AiMatchmakerBanner } from '@/features/aiMatchmaker/AiMatchmakerBanner.jsx'
+import { AiMatchmakerFloatingButton } from '@/features/aiMatchmaker/AiMatchmakerFloatingButton.jsx'
+import { AiMatchmakerModal } from '@/features/aiMatchmaker/AiMatchmakerModal.jsx'
 import { ROUTES } from '@/routes/paths.js'
 
 import { TourCard } from './components/TourCard.jsx'
@@ -102,6 +106,7 @@ export function ActivitiesView({
   typeOptions,
 }) {
   const { t } = useLanguage()
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false)
 
   return (
     <div className="relative isolate overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -165,6 +170,9 @@ export function ActivitiesView({
             </span>
           </div>
         </header>
+
+        {/* AI Smart Matchmaker Banner */}
+        <AiMatchmakerBanner onOpenModal={() => setIsAiModalOpen(true)} />
 
         <div style={{ animationDelay: '300ms' }} className="mt-8 animate-fade-up">
           <TourFilters
@@ -234,6 +242,15 @@ export function ActivitiesView({
           )}
         </section>
       </Container>
+
+      {/* Nút nổi AI Matchmaker cố định góc phải */}
+      <AiMatchmakerFloatingButton onClick={() => setIsAiModalOpen(true)} />
+
+      {/* Modal AI Matchmaker */}
+      <AiMatchmakerModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+      />
 
       <SiteFooter />
     </div>

@@ -78,7 +78,43 @@ const adminService = {
 
   getFeedbackById: (feedbackId) => http.get(`/v1/admin/feedbacks/${feedbackId}`),
 
-  deleteFeedback: (feedbackId) => http.delete(`/v1/admin/feedbacks/${feedbackId}`),
+  // 9. Itinerary Stops
+  getItineraryStops: (activityId) =>
+    http.get(`/activity/${activityId}/itinerary-stops`),
+
+  getItineraryStopById: (activityId, stopId) =>
+    http.get(`/activity/${activityId}/itinerary-stops/${stopId}`),
+
+  createItineraryStop: (activityId, formData) =>
+    http.post(`/v1/admin/activities/${activityId}/itinerary-stops`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  updateItineraryStop: (activityId, stopId, formData) =>
+    http.put(`/v1/admin/activities/${activityId}/itinerary-stops/${stopId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  deleteItineraryStop: (activityId, stopId) =>
+    http.delete(`/v1/admin/activities/${activityId}/itinerary-stops/${stopId}`),
+
+  deleteItineraryStopImage: (activityId, stopId) =>
+    http.delete(`/v1/admin/activities/${activityId}/itinerary-stops/${stopId}/image`),
+
+  // 10. Matching Metadata & Tags
+  getMatchingCatalog: () => http.get('/matching/tags'),
+
+  getActivityMatchingTags: (activityId) =>
+    http.get(`/activity/${activityId}/matching`),
+
+  updateActivityMatchingTags: (activityId, tags) =>
+    http.put(`/v1/admin/activities/${activityId}/matching`, { tags }),
+
+  // 11. Upgrade User to Buddy
+  upgradeUserToBuddy: (userId, formData) =>
+    http.patch(`/v1/admin/buddies/users/${userId}/upgrade`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 }
 
 export default adminService

@@ -3,10 +3,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { UserAvatar } from '@/components/common'
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
-import { formatDateTime, matchSearchText } from '@/utils/format.js'
+import { formatDateTime, formatDDMMYYYY, matchSearchText } from '@/utils/format.js'
 import { AdminPagination } from './AdminPagination.jsx'
 import { AdminUserDetailModal } from './AdminUserDetailModal.jsx'
 import { AdminConfirmModal } from './AdminConfirmModal.jsx'
+import { AdminUpgradeBuddyModal } from './AdminUpgradeBuddyModal.jsx'
 
 export function AdminUsersSection({
   users = [],
@@ -18,6 +19,8 @@ export function AdminUsersSection({
   onSizeChange,
   onFiltersChange,
   onToggleStatus,
+  onRefresh,
+  showToast,
 }) {
   const { t, language } = useLanguage()
   const isVi = language === 'vi'
@@ -33,6 +36,8 @@ export function AdminUsersSection({
     isOpen: false,
     user: null,
   })
+  const [upgradingUser, setUpgradingUser] = useState(null)
+  const [localRoleOverrides, setLocalRoleOverrides] = useState({})
 
   // Sync searchTerm when filters change externally
   useEffect(() => {
@@ -49,17 +54,25 @@ export function AdminUsersSection({
     return () => clearTimeout(timer)
   }, [searchTerm])
 
+  // Áp dụng vai trò mới tức thì (optimistic) cho UI
+  const displayUsers = useMemo(() => {
+    return users.map((u) => {
+      const overrideRole = localRoleOverrides[u.id]
+      return overrideRole ? { ...u, role: overrideRole } : u
+    })
+  }, [users, localRoleOverrides])
+
   // Lọc tức thì (instant) ở client hỗ trợ cả tiếng Việt có dấu và không dấu
   const filteredUsers = useMemo(() => {
-    if (!searchTerm.trim()) return users
+    if (!searchTerm.trim()) return displayUsers
     const term = searchTerm.trim()
-    return users.filter(
+    return displayUsers.filter(
       (u) =>
         matchSearchText(u.fullName, term) ||
         matchSearchText(u.email, term) ||
         matchSearchText(u.phone, term)
     )
-  }, [users, searchTerm])
+  }, [displayUsers, searchTerm])
 
   // Đóng modal cảnh báo khi bấm phím ESC
   useEffect(() => {
@@ -211,17 +224,17 @@ export function AdminUsersSection({
           <p className="mt-1 text-xs text-slate-500">{t('admin.users.emptyDesc')}</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm text-slate-600">
+            <table className="w-full text-left text-sm text-slate-600">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-blue-950">
                 <tr>
-                  <th className="px-5 py-3.5">{isVi ? 'Thành viên' : 'User'}</th>
-                  <th className="px-5 py-3.5">{isVi ? 'Email / SĐT' : 'Contact'}</th>
-                  <th className="px-5 py-3.5">{isVi ? 'Vai trò' : 'Role'}</th>
-                  <th className="px-5 py-3.5">{isVi ? 'Trạng thái' : 'Status'}</th>
-                  <th className="px-5 py-3.5">{isVi ? 'Ngày tạo' : 'Created At'}</th>
-                  <th className="px-5 py-3.5 text-right">{isVi ? 'Thao tác' : 'Actions'}</th>
+                  <th className="px-3.5 py-3">{isVi ? 'Thành viên' : 'User'}</th>
+                  <th className="px-3.5 py-3">{isVi ? 'Email / SĐT' : 'Contact'}</th>
+                  <th className="px-3 py-3 text-center">{isVi ? 'Vai trò' : 'Role'}</th>
+                  <th className="px-3 py-3 text-center">{isVi ? 'Trạng thái' : 'Status'}</th>
+                  <th className="px-3 py-3 hidden md:table-cell">{isVi ? 'Ngày tạo' : 'Created'}</th>
+                  <th className="px-3.5 py-3 text-right">{isVi ? 'Thao tác' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -237,19 +250,19 @@ export function AdminUsersSection({
                       className="cursor-pointer transition hover:bg-slate-50/80"
                     >
                       {/* Cột Người dùng: Avatar + Tên */}
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
+                      <td className="px-3 py-2.5 sm:px-3.5 sm:py-3">
+                        <div className="flex items-center gap-2.5">
                           <UserAvatar
                             name={u.fullName || u.email}
                             src={u.avatarUrl}
-                            size="md"
+                            size="sm"
                             className="shrink-0"
                           />
                           <div className="min-w-0">
-                            <p className="font-semibold text-slate-900 truncate">
+                            <p className="font-semibold text-slate-900 truncate text-xs sm:text-sm">
                               {u.fullName || '—'}
                             </p>
-                            <p className="text-xs text-slate-400 font-mono truncate">
+                            <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono truncate">
                               ID: {u.id?.slice(0, 8)}...
                             </p>
                           </div>
@@ -257,17 +270,19 @@ export function AdminUsersSection({
                       </td>
 
                       {/* Cột Liên hệ: Email & Phone */}
-                      <td className="px-5 py-4">
-                        <p className="font-medium text-slate-800">{u.email}</p>
+                      <td className="px-3 py-2.5 sm:px-3.5 sm:py-3">
+                        <p className="font-medium text-slate-800 text-xs truncate max-w-[190px]" title={u.email}>
+                          {u.email}
+                        </p>
                         {u.phone && (
-                          <p className="text-xs text-slate-500 font-mono">{u.phone}</p>
+                          <p className="text-[11px] text-slate-500 font-mono">{u.phone}</p>
                         )}
                       </td>
 
-                      {/* Cột Vai trò (LUÔN LUÔN TIẾNG ANH: USER, BUDDY, ADMIN) */}
-                      <td className="px-5 py-4">
+                      {/* Cột Vai trò */}
+                      <td className="px-3 py-2.5 text-center">
                         <span
-                          className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                          className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
                             u.role === 'ADMIN'
                               ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
                               : u.role === 'BUDDY'
@@ -280,9 +295,9 @@ export function AdminUsersSection({
                       </td>
 
                       {/* Cột Trạng thái */}
-                      <td className="px-5 py-4">
+                      <td className="px-3 py-2.5 text-center">
                         <span
-                          className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                          className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
                             u.status === 'ACTIVE'
                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                               : 'border-slate-200 bg-slate-100 text-slate-600'
@@ -292,21 +307,32 @@ export function AdminUsersSection({
                         </span>
                       </td>
 
-                      {/* Cột Ngày tạo */}
-                      <td className="px-5 py-4 text-xs text-slate-500">
-                        {formatDateTime(u.createdAt)}
+                      {/* Cột Ngày tạo (Dạng ngắn DD/MM/YYYY) */}
+                      <td className="px-3 py-2.5 text-xs text-slate-500 hidden md:table-cell whitespace-nowrap">
+                        {formatDDMMYYYY(u.createdAt) || '—'}
                       </td>
 
                       {/* Cột Thao tác */}
                       <td
-                        className="px-5 py-4 text-right"
+                        className="px-3 py-2.5 sm:px-3.5 sm:py-3 text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {u.role === 'USER' && (
+                            <button
+                              type="button"
+                              onClick={() => setUpgradingUser(u)}
+                              className="rounded-lg bg-yellow-400 border border-yellow-500/40 px-2 py-1 text-xs font-bold text-blue-950 transition hover:bg-yellow-300 shadow-2xs shrink-0"
+                              title={isVi ? 'Nâng cấp nhân viên này thành Buddy' : 'Upgrade this user to Buddy'}
+                            >
+                              {isVi ? 'Lên Buddy' : 'To Buddy'}
+                            </button>
+                          )}
+
                           <button
                             type="button"
                             onClick={() => setSelectedUserId(u.id)}
-                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
+                            className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 shrink-0"
                           >
                             {isVi ? 'Xem' : 'View'}
                           </button>
@@ -315,7 +341,7 @@ export function AdminUsersSection({
                             type="button"
                             disabled={actionLoading}
                             onClick={() => handleToggleClick(u)}
-                            className={`rounded-lg border px-2.5 py-1 text-xs font-bold transition disabled:opacity-50 ${
+                            className={`rounded-lg border px-2 py-1 text-xs font-bold transition shrink-0 disabled:opacity-50 ${
                               u.status === 'ACTIVE'
                                 ? isCurrentAdmin || isAdminRole
                                   ? 'border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300'
@@ -335,7 +361,7 @@ export function AdminUsersSection({
                             }
                           >
                             {u.status === 'ACTIVE'
-                              ? isVi ? 'Ngưng hoạt động' : 'Deactivate'
+                              ? isVi ? 'Khóa' : 'Deactivate'
                               : isVi ? 'Kích hoạt' : 'Activate'}
                           </button>
                         </div>
@@ -448,6 +474,49 @@ export function AdminUsersSection({
           }
         }}
         onClose={() => setConfirmModal({ isOpen: false, user: null })}
+      />
+
+      {/* Modal Nâng cấp nhân viên USER thành BUDDY */}
+      <AdminUpgradeBuddyModal
+        isOpen={Boolean(upgradingUser)}
+        user={upgradingUser}
+        onClose={() => setUpgradingUser(null)}
+        onSuccess={(data, targetUser) => {
+          const userObj = targetUser || upgradingUser
+          const upgradedName = userObj?.fullName || userObj?.email || ''
+          const upgradedId = userObj?.id
+
+          // Cập nhật ngay vai trò trên giao diện không cần chờ F5
+          if (upgradedId) {
+            setLocalRoleOverrides((prev) => ({ ...prev, [upgradedId]: 'BUDDY' }))
+          }
+          setUpgradingUser(null)
+
+          // Thông báo thành công
+          showToast?.({
+            type: 'success',
+            title: isVi ? 'Nâng cấp Buddy thành công' : 'Buddy Upgraded Successfully',
+            message: isVi
+              ? `Tài khoản ${upgradedName ? `"${upgradedName}"` : ''} đã trở thành Hướng dẫn viên (Buddy)!`
+              : `User ${upgradedName ? `"${upgradedName}"` : ''} is now a Buddy!`,
+            duration: 4500,
+          })
+
+          // Đồng bộ tải lại danh sách từ server
+          if (onRefresh) {
+            onRefresh()
+          } else {
+            onFiltersChange?.({ ...filters })
+          }
+        }}
+        onError={(err, msg) => {
+          showToast?.({
+            type: 'error',
+            title: isVi ? 'Nâng cấp Buddy thất bại' : 'Failed to Upgrade Buddy',
+            message: msg || (isVi ? 'Không thể nâng cấp tài khoản thành Buddy.' : 'Could not upgrade account to Buddy.'),
+            duration: 5000,
+          })
+        }}
       />
     </div>
   )

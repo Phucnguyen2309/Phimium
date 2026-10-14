@@ -6,7 +6,6 @@ import { useLanguage } from '@/context/languageContext.js'
 import { ROUTES } from '@/routes/paths.js'
 
 import { JourneyCard } from './components/JourneyCard.jsx'
-import { MyGroupsCard } from './components/MyGroupsCard.jsx'
 import { PaymentsCard } from './components/PaymentsCard.jsx'
 import { PendingReviewBanner } from './components/PendingReviewBanner.jsx'
 import { ProfileCard } from './components/ProfileCard.jsx'
@@ -173,10 +172,7 @@ export function UserDashboardView({
               )}
             </section>
 
-            <div className="grid gap-6 lg:grid-cols-[1fr_24rem] 2xl:grid-cols-[1fr_28rem]">
-              <MyGroupsCard groups={groups} />
-              <PaymentsCard payments={payments} />
-            </div>
+            <PaymentsCard payments={payments} />
           </>
         )}
       </Container>
