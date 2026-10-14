@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class ItineraryStopMultipartRequest {
     @Schema(description = "Itinerary stop information as an application/json part")
-    private ItineraryStopRequest request;
+    private java.util.List<ItineraryStopRequest> request;
 
     @Schema(description = "Optional representative image; omit on update to retain the current image",
             type = "string", format = "binary")

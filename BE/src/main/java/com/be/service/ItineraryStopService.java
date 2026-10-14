@@ -13,6 +13,9 @@ public interface ItineraryStopService {
 
     ItineraryStopResponse getStop(UUID activityId, UUID stopId);
 
+    List<ItineraryStopResponse> createStops(UUID activityId, List<ItineraryStopRequest> requests,
+                                            List<MultipartFile> images) throws IOException;
+
     ItineraryStopResponse createStop(UUID activityId, ItineraryStopRequest request, MultipartFile image)
             throws IOException;
 

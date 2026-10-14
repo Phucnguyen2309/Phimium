@@ -76,7 +76,7 @@ matching:
   requests-per-minute: ${MATCHING_REQUESTS_PER_MINUTE:6}
   gemini:
     api-key: ${GEMINI_API_KEY:}
-    model: ${GEMINI_MODEL:}
+    model: ${GEMINI_MODEL:gemini-3-flash-preview}
     base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
     timeout-millis: ${GEMINI_TIMEOUT_MILLIS:20000}
     max-concurrent: ${GEMINI_MAX_CONCURRENT:4}

@@ -61,6 +61,15 @@ public class BuddyController {
         return ApiResponse.success("Success", buddyService.updateMatchingProfile(id, request, currentUser));
     }
 
+    @GetMapping("/{id}/matching")
+    @PreAuthorize("hasAnyRole('BUDDY','ADMIN')")
+    @Operation(summary = "Xem hồ sơ matching của Buddy")
+    public ApiResponse<BuddyResponse> getMatchingProfile(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User currentUser) {
+        return ApiResponse.success("Success", buddyService.getMatchingProfile(id, currentUser));
+    }
+
 // BUDDY SCHEDULE & MEMBER MANAGEMENT
     @GetMapping("/me/schedules")
     @PreAuthorize("hasRole('BUDDY')")
