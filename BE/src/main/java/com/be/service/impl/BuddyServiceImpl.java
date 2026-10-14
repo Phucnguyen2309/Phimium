@@ -121,6 +121,19 @@ public class BuddyServiceImpl implements BuddyService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public BuddyResponse getMatchingProfile(UUID buddyId, User currentUser) {
+        Buddy buddy = buddyRepository.findById(buddyId)
+                .orElseThrow(() -> new AppException(ErrorCode.BUDDY_NOT_FOUND));
+        if (currentUser == null || (currentUser.getRole() != UserRole.ADMIN
+                && (currentUser.getRole() != UserRole.BUDDY || buddy.getUser() == null
+                || !buddy.getUser().getUserId().equals(currentUser.getUserId())))) {
+            throw new AppException(ErrorCode.USER_NOT_AUTHORIZED);
+        }
+        return buddyMapper.toResponse(buddy);
+    }
+
+    @Override
     @Transactional
     public BuddyResponse updateBuddyStatus(UUID buddyId, BuddyStatus status) {
         Buddy buddy = buddyRepository.findById(buddyId)

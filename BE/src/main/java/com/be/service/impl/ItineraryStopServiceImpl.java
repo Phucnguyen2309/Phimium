@@ -60,22 +60,41 @@ public class ItineraryStopServiceImpl implements ItineraryStopService {
 
     @Override
     @Transactional(rollbackFor = IOException.class)
+    public List<ItineraryStopResponse> createStops(UUID activityId, List<ItineraryStopRequest> requests,
+                                                  List<MultipartFile> images) throws IOException {
+        if (requests == null || requests.isEmpty()) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR, "Itinerary stop list cannot be empty");
+        }
+        Activity activity = lockActivity(activityId);
+        List<ItineraryStop> draft = new ArrayList<>(activity.getItineraryStops());
+        List<ItineraryStop> createdStops = new ArrayList<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            ItineraryStopRequest req = requests.get(i);
+            MultipartFile img = (images != null && i < images.size()) ? images.get(i) : null;
+            validateRequest(req, img);
+            ItineraryStop stop = mapper.toEntity(req);
+            if (hasImage(img)) {
+                stop.setImageUrl(uploadImage(img));
+            }
+            stop.setActivity(activity);
+            createdStops.add(stop);
+            draft.add(stop);
+        }
+
+        validateDraft(draft, activity);
+        activity.getItineraryStops().addAll(createdStops);
+        save(activity);
+        return mapper.toResponseList(createdStops);
+    }
+
+    @Override
+    @Transactional(rollbackFor = IOException.class)
     public ItineraryStopResponse createStop(UUID activityId, ItineraryStopRequest request, MultipartFile image)
             throws IOException {
-        Activity activity = lockActivity(activityId);
-        validateRequest(request, image);
-        ItineraryStop created = mapper.toEntity(request);
-        List<ItineraryStop> draft = new ArrayList<>(activity.getItineraryStops());
-        draft.add(created);
-        validateDraft(draft, activity);
-
-        if (hasImage(image)) {
-            created.setImageUrl(uploadImage(image));
-        }
-        created.setActivity(activity);
-        activity.getItineraryStops().add(created);
-        save(activity);
-        return mapper.toResponse(created);
+        List<MultipartFile> fileList = image != null ? List.of(image) : List.of();
+        List<ItineraryStopResponse> list = createStops(activityId, List.of(request), fileList);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

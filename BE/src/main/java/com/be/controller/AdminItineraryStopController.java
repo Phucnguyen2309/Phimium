@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,19 +38,30 @@ public class AdminItineraryStopController {
     private final ItineraryStopService itineraryStopService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Create an itinerary stop",
+    @Operation(summary = "Create itinerary stops",
             requestBody = @RequestBody(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                     schema = @Schema(implementation = ItineraryStopMultipartRequest.class),
                     encoding = {
                             @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE),
                             @Encoding(name = "image", contentType = "image/*")
                     })))
-    public ResponseEntity<ApiResponse<ItineraryStopResponse>> createStop(
+    public ResponseEntity<ApiResponse<List<ItineraryStopResponse>>> createStops(
             @PathVariable UUID activityId,
-            @Valid @RequestPart("request") ItineraryStopRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
-        return ResponseEntity.ok(ApiResponse.success("Itinerary stop created",
-                itineraryStopService.createStop(activityId, request, image)));
+            @Valid @RequestPart("request") List<ItineraryStopRequest> request,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+        List<MultipartFile> fileList = images != null && !images.isEmpty() ? images : (image != null ? List.of(image) : List.of());
+        return ResponseEntity.ok(ApiResponse.success("Itinerary stops created",
+                itineraryStopService.createStops(activityId, request, fileList)));
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create itinerary stops via JSON list")
+    public ResponseEntity<ApiResponse<List<ItineraryStopResponse>>> createStopsJson(
+            @PathVariable UUID activityId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody List<ItineraryStopRequest> request) throws IOException {
+        return ResponseEntity.ok(ApiResponse.success("Itinerary stops created",
+                itineraryStopService.createStops(activityId, request, List.of())));
     }
 
     @PutMapping(value = "/{stopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

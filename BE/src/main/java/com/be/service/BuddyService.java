@@ -23,6 +23,8 @@ public interface BuddyService {
 
     BuddyResponse updateMatchingProfile(UUID buddyId, BuddyMatchingProfileRequest request, User currentUser);
 
+    BuddyResponse getMatchingProfile(UUID buddyId, User currentUser);
+
     BuddyResponse updateBuddyStatus(UUID buddyId, BuddyStatus status);
 
     BuddyResponse updateMyStatus(User currentUser, BuddyStatus status);
