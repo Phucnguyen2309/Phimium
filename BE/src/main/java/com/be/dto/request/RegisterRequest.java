@@ -1,5 +1,6 @@
 package com.be.dto.request;
 
+import com.be.validator.MinimumAge;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class RegisterRequest {
     @JsonAlias("fullname")
     private String fullName;
     @NotNull @Past
+    @MinimumAge(16)
     @JsonAlias("birthdate")
     private LocalDate birthday;
     @NotBlank @Pattern(regexp = "^0[35789]\\d{8}$")

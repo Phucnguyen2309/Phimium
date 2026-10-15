@@ -56,6 +56,8 @@ Tất cả request dùng Content-Type: application/json.
 | /api/auth/refresh | Không | refreshToken |
 | /api/auth/logout | Bearer ACCESS | Không |
 
+Register và complete-profile yêu cầu đủ 16 tuổi trở lên, tính theo ngày hiện tại ở múi giờ Asia/Ho_Chi_Minh. Đúng ngày sinh nhật 16 tuổi được chấp nhận; chưa đủ tuổi trả HTTP 400 với thông báo trong data.birthday: "Bạn phải đủ 16 tuổi trở lên để đăng ký."
+
 Register:
 ```json
 {"email":"abc@gmail.com","password":"Password123!","fullName":"Nguyen Van A","birthday":"2002-05-10","phone":"0912345678"}
