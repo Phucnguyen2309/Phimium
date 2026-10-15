@@ -1,8 +1,7 @@
 import { useLanguage } from '@/context/languageContext.js'
 
 export function AiMatchmakerFloatingButton({ onClick }) {
-  const { language } = useLanguage()
-  const isVi = language === 'vi'
+  const { t } = useLanguage()
 
   return (
     <button
@@ -12,7 +11,7 @@ export function AiMatchmakerFloatingButton({ onClick }) {
       style={{
         boxShadow: '0 10px 25px -5px rgba(253, 199, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
       }}
-      title={isVi ? 'Ghép tour và Hướng dẫn viên bằng AI' : 'Match tour and buddy with AI'}
+      title={t('aiMatch.matchTourAndBuddyWith')}
     >
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-blue-950 font-black shrink-0 animate-pulse">
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -23,12 +22,12 @@ export function AiMatchmakerFloatingButton({ onClick }) {
       <div className="text-left pr-1">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-black text-yellow-300">
-            {isVi ? 'AI Matchmaker' : 'AI Matchmaker'}
+            {t('aiMatch.aiMatchmaker')}
           </span>
           <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-ping" />
         </div>
         <p className="text-[10px] text-blue-200/80 font-medium hidden sm:block">
-          {isVi ? 'Ghép tour & Buddy hợp gu' : 'Find ideal tour & buddy'}
+          {t('aiMatch.findIdealTourBuddy')}
         </p>
       </div>
     </button>

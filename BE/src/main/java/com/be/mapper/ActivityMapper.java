@@ -70,6 +70,7 @@ public class ActivityMapper {
                 .tags(new LinkedHashSet<>(activity.getTags()))
                 .itineraryStops(itineraryStopMapper.toResponseList(activity.getItineraryStops()))
                 .description(activity.getDescription())
+                .descriptionEn(activity.getDescriptionEn())
                 .activityType(activity.getActivityType())
                 .thumbnailUrl(activity.getThumbnailUrl())
                 // Đã bỏ các trường time và hostBuddy

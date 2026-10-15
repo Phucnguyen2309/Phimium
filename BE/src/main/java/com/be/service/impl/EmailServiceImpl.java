@@ -22,6 +22,21 @@ public class EmailServiceImpl implements EmailService {
     private String from;
 
     @Override
+    public void sendHtmlEmail(String email, String subject, String html) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(from);
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Failed to compose email", e);
+        }
+    }
+
+    @Override
     public void sendOtpEmail(String email, String otp) {
            try{
                MimeMessage message = mailSender.createMimeMessage();

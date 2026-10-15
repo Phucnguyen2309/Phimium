@@ -19,6 +19,7 @@ import java.util.Set;
 public class ActivityDetailResponse {
     private String title;
     private String description;
+    private String descriptionEn;
     private Set<MatchingTag> tags;
     private List<ItineraryStopResponse> itineraryStops;
     private String thumbnailUrl;

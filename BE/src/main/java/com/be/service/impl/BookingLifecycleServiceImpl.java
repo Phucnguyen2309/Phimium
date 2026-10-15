@@ -19,6 +19,7 @@ import com.be.repository.CouponRepository;
 import com.be.repository.PaymentRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.BookingLifecycleService;
+import com.be.service.BookingEmailService;
 import com.be.service.BuddyMatchingService;
 import com.be.util.DateTimeUtils;
 
@@ -38,6 +39,7 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
     private final PaymentRepository payments;
     private final ActivityGroupRepository groups;
     private final BuddyMatchingService matching;
+    private final BookingEmailService bookingEmails;
 
     @Override
     public boolean isExpired(Registration registration) {
@@ -124,5 +126,6 @@ public class BookingLifecycleServiceImpl implements BookingLifecycleService {
         registration.setPaymentConfirmedAt(DateTimeUtils.nowVietnam());
         registration.setStatus(RegistrationStatus.WAITING_FOR_BUDDY);
         matching.findAndAssignBuddy(registration);
+        bookingEmails.queueConfirmation(registration);
     }
 }

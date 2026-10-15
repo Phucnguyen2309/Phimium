@@ -117,6 +117,12 @@ public class AdminActivityController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật tour thành công", response));
     }
 
+    @PostMapping("/translate-descriptions")
+    @Operation(summary = "Dịch sang tiếng Anh mô tả của các tour chưa có bản dịch (Gemini)")
+    public ResponseEntity<ApiResponse<Integer>> translateMissingDescriptions() {
+        return ResponseEntity.ok(ApiResponse.success("Đã dịch mô tả tour", activityService.translateMissingDescriptions()));
+    }
+
     @DeleteMapping("/{activityId}")
     @Operation(summary = "Xóa Tour (chỉ xóa được khi chưa có lịch khởi hành/booking)")
     public ResponseEntity<ApiResponse<Void>> deleteActivity(@PathVariable UUID activityId) {

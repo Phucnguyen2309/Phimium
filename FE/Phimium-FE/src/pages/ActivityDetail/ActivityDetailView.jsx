@@ -4,7 +4,7 @@ import { SafetyTermsModal } from '@/components/activity/SafetyTermsModal.jsx'
 import { Container, Icon, Reveal } from '@/components/common'
 import { SiteFooter } from '@/components/layout/SiteFooter.jsx'
 import { useLanguage } from '@/context/languageContext.js'
-import { formatPrice } from '@/features/activity/activityMapper.js'
+import { formatPrice, getLocalizedDescription } from '@/features/activity/activityMapper.js'
 import { buildActivityGuidelinesPath, ROUTES } from '@/routes/paths.js'
 
 import { getGroupLimit } from './activityDetailMapper.js'
@@ -12,6 +12,7 @@ import { BookingCard } from './components/BookingCard.jsx'
 import { DetailHeader } from './components/DetailHeader.jsx'
 import { DetailHero } from './components/DetailHero.jsx'
 import { HostSection } from './components/HostSection.jsx'
+import { ItinerarySection } from './components/ItinerarySection.jsx'
 import { MeetingPointSection } from './components/MeetingPointSection.jsx'
 
 const COMMITMENTS = [
@@ -45,10 +46,11 @@ export function ActivityDetailView(props) {
     loading,
     retry,
     safetyTermsAccepted,
+    selectedDeparture,
     setSafetyTermsAccepted,
     showSafetyTerms,
   } = props
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
 
   const upcomingCount = dateGroups.reduce((sum, group) => sum + group.departures.length, 0)
 
@@ -95,7 +97,7 @@ export function ActivityDetailView(props) {
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-blue-950">{t('activityDetail.about')}</h2>
                   <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-slate-700">
-                    {activity.description || t('activityDetail.noDescription')}
+                    {getLocalizedDescription(activity, language) || t('activityDetail.noDescription')}
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -109,6 +111,10 @@ export function ActivityDetailView(props) {
                       </div>
                     ))}
                   </div>
+                </Reveal>
+
+                <Reveal>
+                  <ItinerarySection stops={activity.stops} departureStart={selectedDeparture?.start ?? null} />
                 </Reveal>
 
                 <Reveal>

@@ -31,6 +31,9 @@ public class ActivityRequest {
 
     private String description;
 
+    @Schema(description = "Mô tả tiếng Anh (tùy chọn). Bỏ trống thì Backend tự dịch từ mô tả tiếng Việt bằng AI")
+    private String descriptionEn;
+
     @NotNull(message = "Tags must not be null")
     @Size(max = 16, message = "A tour can have at most 16 matching tags")
     @Schema(description = "Shared matching tags; omit to create a tour without tags",

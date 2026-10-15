@@ -7,6 +7,7 @@ import {
   formatActivityType,
   formatDuration,
   formatPrice,
+  getLocalizedDescription,
   getDurationMinutes,
   getValidImage,
 } from '@/features/activity/activityMapper.js'
@@ -73,7 +74,8 @@ function Fact({ icon, children }) {
 }
 
 export function TourCard({ activity }) {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
+  const description = getLocalizedDescription(activity, language)
 
   const maxGroupSize = getMaxGroupSize(activity)
   const minGroupSize = Number(activity.groupMinSize) || 0
@@ -154,9 +156,9 @@ export function TourCard({ activity }) {
           </div>
         </div>
 
-        {activity.description && (
+        {description && (
           <p className="mt-3 line-clamp-4 text-[15px] leading-7 text-slate-600">
-            {activity.description}
+            {description}
           </p>
         )}
 

@@ -21,6 +21,7 @@ public class ActivityDetailMapper {
         return ActivityDetailResponse.builder()
                 .title(activity.getTitle())
                 .description(activity.getDescription())
+                .descriptionEn(activity.getDescriptionEn())
                 .tags(new LinkedHashSet<>(activity.getTags()))
                 .itineraryStops(itineraryStopMapper.toResponseList(activity.getItineraryStops()))
                 .thumbnailUrl(activity.getThumbnailUrl())

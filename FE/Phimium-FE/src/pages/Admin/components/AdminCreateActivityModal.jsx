@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useLanguage } from '@/context/languageContext.js'
+import { AddressGeocodeStatus } from '@/features/map/AddressGeocodeStatus.jsx'
+import { useAddressGeocode } from '@/features/map/useAddressGeocode.js'
 import { getErrorMessage } from '@/utils/response.js'
 
 const DEFAULT_FORM = {
@@ -37,6 +39,17 @@ export function AdminCreateActivityModal({
   const [errorMsg, setErrorMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // Rời ô địa chỉ / bấm nút -> lấy toạ độ từ OpenStreetMap rồi tự điền kinh độ, vĩ độ
+  const handleGeocodeFound = useCallback(({ latitude, longitude }) => {
+    setFormData((prev) => ({ ...prev, latitude, longitude }))
+  }, [])
+  const {
+    displayName: geocodeName,
+    geocode,
+    resetLastQuery,
+    status: geocodeStatus,
+  } = useAddressGeocode({ onFound: handleGeocodeFound })
+
   // Reset form khi mở modal
   useEffect(() => {
     if (isOpen) {
@@ -47,6 +60,7 @@ export function AdminCreateActivityModal({
       setGalleryFiles([])
       setGalleryPreviews([])
       setErrorMsg('')
+      resetLastQuery('')
     }
   }, [isOpen])
 
@@ -465,9 +479,19 @@ export function AdminCreateActivityModal({
                     required
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
+                    onBlur={() => geocode(formData.address, formData.locationName)}
                     placeholder={isVi ? 'VD: Đường Hải Thượng Lãn Ông, Quận 5, TP.HCM' : 'e.g. Hai Thuong Lan Ong, District 5, HCMC'}
                     className={inputClass}
                     maxLength={500}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <AddressGeocodeStatus
+                    status={geocodeStatus}
+                    displayName={geocodeName}
+                    disabled={!formData.address.trim() && !formData.locationName.trim()}
+                    onRetry={() => geocode(formData.address, formData.locationName, { force: true })}
                   />
                 </div>
 

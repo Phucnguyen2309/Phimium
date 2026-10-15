@@ -32,6 +32,9 @@ public class UpdateActivityRequest {
     @Schema(example = "Mô tả chi tiết nội dung tour...")
     private String description;
 
+    @Schema(description = "Mô tả tiếng Anh. Bỏ trống: giữ bản cũ, hoặc AI dịch lại nếu mô tả tiếng Việt thay đổi / chưa có bản dịch")
+    private String descriptionEn;
+
     @Size(max = 16, message = "A tour can have at most 16 matching tags")
     @Schema(description = "Shared matching tags; omit or null to keep current tags, [] to clear them",
             example = "[\"PHOTOGRAPHY\", \"RETRO\"]")

@@ -85,7 +85,7 @@ export const getTypeOptions = (activities) => [
 const matchKeyword = (activity, keyword) => {
   if (!keyword) return true
 
-  return [activity.title, activity.description, activity.locationName, activity.address]
+  return [activity.title, activity.description, activity.descriptionEn, activity.locationName, activity.address]
     .filter(Boolean)
     .some((text) => text.toLowerCase().includes(keyword))
 }

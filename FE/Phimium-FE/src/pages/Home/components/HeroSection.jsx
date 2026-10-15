@@ -40,8 +40,7 @@ export function HeroSection({
   onOpenAiMatchmaker,
 }) {
   const navigate = useNavigate()
-  const { t, language } = useLanguage()
-  const isVi = language === 'vi'
+  const { t } = useLanguage()
   const [keyword, setKeyword] = useState('')
   const [type, setType] = useState(ALL_TYPES)
   const backgroundRef = useParallax(0.3)
@@ -157,7 +156,7 @@ export function HeroSection({
             {/* AI Matchmaker CTA ngay trung tâm Hero (Above the fold) */}
             <div style={fadeUp(420)} className="mt-5 flex flex-wrap items-center justify-center gap-2.5 animate-fade-up">
               <span className="text-xs text-blue-200/90 font-medium">
-                {isVi ? 'Bạn chưa biết chọn tour nào?' : 'Unsure which tour to pick?'}
+                {t('home.hero.ai.unsureWhichTourToPick')}
               </span>
               <button
                 type="button"
@@ -171,7 +170,7 @@ export function HeroSection({
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
-                <span>{isVi ? 'Ghép tour & Buddy bằng AI Matchmaker' : 'Match Tour & Buddy with AI'}</span>
+                <span>{t('home.hero.ai.matchTourBuddyWithAi')}</span>
                 <span className="transition-transform group-hover:translate-x-0.5">→</span>
               </button>
             </div>

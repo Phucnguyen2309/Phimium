@@ -24,6 +24,7 @@ public class ActivityResponse {
     private Set<MatchingTag> tags;
     private List<ItineraryStopResponse> itineraryStops;
     private String description;
+    private String descriptionEn;
     private TourType activityType;
     private String thumbnailUrl;
     private String locationName;

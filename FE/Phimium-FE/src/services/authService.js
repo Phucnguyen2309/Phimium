@@ -1,13 +1,14 @@
 import http from '@/services/http.js'
 import { t } from '@/utils/i18n.js'
+import { getErrorMessage } from '@/utils/response.js'
 
 /**
  * Chuẩn hoá lỗi từ API về dạng Error có message dễ hiển thị.
  */
 const toApiError = (error, defaultMessage) => {
   const data = error?.response?.data
-  const message =
-    (typeof data === 'string' && data) || data?.message || defaultMessage
+  // Dịch theo mã lỗi Backend (apiErrors.*) để đúng ngôn ngữ đang chọn
+  const message = getErrorMessage(error, defaultMessage)
 
   const apiError = new Error(message)
   apiError.status = error?.response?.status

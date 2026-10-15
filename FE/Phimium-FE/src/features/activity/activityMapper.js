@@ -129,10 +129,18 @@ export const formatDuration = (minutes) => {
   return t('activity.duration.hoursMinutes', { hours, minutes: rest })
 }
 
+/**
+ * Mô tả tour theo ngôn ngữ đang chọn: tiếng Anh dùng descriptionEn (admin nhập / AI dịch),
+ * chưa có bản dịch thì dùng bản tiếng Việt.
+ */
+export const getLocalizedDescription = (activity, language) =>
+  (language === 'en' && activity?.descriptionEn) || activity?.description || ''
+
 export const mapActivity = (activity) => ({
   id: activity?.id ?? '',
   title: activity?.title ?? t('activity.untitled'),
   description: activity?.description ?? '',
+  descriptionEn: activity?.descriptionEn ?? '',
   activityType: activity?.activityType ?? 'ACTIVITY',
   status: activity?.status ?? null,
   thumbnailUrl: activity?.thumbnailUrl ?? '',

@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getErrorMessage, getResponseData } from '@/utils/response.js'
 import { useLanguage } from '@/context/languageContext.js'
+import { AddressGeocodeStatus } from '@/features/map/AddressGeocodeStatus.jsx'
+import { useAddressGeocode } from '@/features/map/useAddressGeocode.js'
 import activityService from '@/services/activityService.js'
 
 const GET_TOUR_TYPE_OPTIONS = (isVi) => [
@@ -29,6 +31,7 @@ export function AdminEditActivityModal({
     title: '',
     activityType: 'FOODTOUR',
     description: '',
+    descriptionEn: '',
     thumbnailUrl: '',
     locationName: '',
     address: '',
@@ -44,6 +47,17 @@ export function AdminEditActivityModal({
   })
   const [errorMsg, setErrorMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Đổi địa chỉ rồi rời ô / bấm nút -> lấy toạ độ mới từ OpenStreetMap
+  const handleGeocodeFound = useCallback(({ latitude, longitude }) => {
+    setFormData((prev) => ({ ...prev, latitude, longitude }))
+  }, [])
+  const {
+    displayName: geocodeName,
+    geocode,
+    resetLastQuery,
+    status: geocodeStatus,
+  } = useAddressGeocode({ onFound: handleGeocodeFound })
 
   // Ảnh đại diện mới (để trống = giữ ảnh cũ)
   const [thumbnailFile, setThumbnailFile] = useState(null)
@@ -81,6 +95,7 @@ export function AdminEditActivityModal({
         title: activity.title || '',
         activityType: activity.activityType || 'FOODTOUR',
         description: activity.description || '',
+        descriptionEn: activity.descriptionEn || '',
         thumbnailUrl: activity.thumbnailUrl || '',
         locationName: activity.locationName || '',
         address: activity.address || '',
@@ -95,8 +110,10 @@ export function AdminEditActivityModal({
         status: activity.status || 'PUBLISHED',
       })
       setErrorMsg('')
+      // Địa chỉ cũ coi như đã có toạ độ: chỉ tự lấy lại khi admin đổi địa chỉ
+      resetLastQuery(activity.address || '', activity.locationName || '')
     }
-  }, [isOpen, activity])
+  }, [isOpen, activity, resetLastQuery])
 
   // Danh sách getAll không có imageUrls -> lấy từ API chi tiết GET /activity/{id}
   useEffect(() => {
@@ -276,6 +293,14 @@ export function AdminEditActivityModal({
     const payload = {
       title: formData.title.trim(),
       description: formData.description?.trim() || null,
+      // Mô tả VI đổi mà bản EN vẫn là bản cũ -> gửi null để Backend dịch lại bằng AI.
+      // Để trống EN -> Backend cũng tự dịch.
+      descriptionEn: (() => {
+        const viChanged = (formData.description || '').trim() !== (activity.description || '').trim()
+        const en = (formData.descriptionEn || '').trim()
+        const enUnchanged = en === (activity.descriptionEn || '').trim()
+        return viChanged && enUnchanged ? null : en || null
+      })(),
       activityType: formData.activityType,
       locationName: formData.locationName.trim(),
       address: formData.address.trim(),
@@ -435,6 +460,25 @@ export function AdminEditActivityModal({
                     placeholder={isVi ? 'Giới thiệu hành trình, điểm đặc sắc, trải nghiệm ẩm thực...' : 'Introduce the itinerary, highlights, culinary experiences...'}
                     className={inputClass}
                   />
+                </div>
+
+                <div>
+                  <label className="mb-1 flex items-center gap-2 text-xs font-bold text-slate-700">
+                    {isVi ? 'Mô tả tiếng Anh (English)' : 'English description'}
+                    <span className="rounded-md bg-yellow-100 px-1.5 py-0.5 text-[10px] font-bold text-yellow-800">AI</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formData.descriptionEn}
+                    onChange={(e) => handleChange('descriptionEn', e.target.value)}
+                    placeholder={isVi ? 'Để trống để AI tự dịch từ mô tả tiếng Việt khi lưu' : 'Leave empty to let AI translate the Vietnamese description on save'}
+                    className={inputClass}
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    {isVi
+                      ? 'Hiển thị cho khách đang dùng tiếng Anh. Nếu bạn sửa mô tả tiếng Việt mà không sửa ô này, AI sẽ dịch lại khi lưu.'
+                      : 'Shown to guests using English. If you edit the Vietnamese description but not this field, AI re-translates it on save.'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -631,9 +675,19 @@ export function AdminEditActivityModal({
                     required
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
+                    onBlur={() => geocode(formData.address, formData.locationName)}
                     placeholder={isVi ? 'VD: 1105 Trần Hưng Đạo, P.5, Q.5, TP.HCM' : 'e.g. 1105 Tran Hung Dao, Ward 5, District 5, HCMC'}
                     className={inputClass}
                     maxLength={500}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <AddressGeocodeStatus
+                    status={geocodeStatus}
+                    displayName={geocodeName}
+                    disabled={!formData.address.trim() && !formData.locationName.trim()}
+                    onRetry={() => geocode(formData.address, formData.locationName, { force: true })}
                   />
                 </div>
 
