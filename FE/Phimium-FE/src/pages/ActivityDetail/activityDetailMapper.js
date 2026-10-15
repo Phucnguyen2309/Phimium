@@ -10,6 +10,28 @@ const toNumber = (value) => {
 }
 
 /**
+ * Các điểm dừng chân (itineraryStops của GET /activity/{id}), sắp theo stopOrder.
+ * offsetMinutes: số phút tính từ lúc bắt đầu tour, durationMinutes: thời gian dừng.
+ */
+export const mapItineraryStops = (detail) =>
+  (Array.isArray(detail?.itineraryStops) ? detail.itineraryStops : [])
+    .map((stop, index) => ({
+      id: stop?.stopId ?? `stop-${index}`,
+      order: toNumber(stop?.stopOrder) || index + 1,
+      title: getValidText(stop?.title),
+      description: getValidText(stop?.description),
+      offsetMinutes: Number.isFinite(Number(stop?.offsetMinutes)) ? Number(stop.offsetMinutes) : null,
+      durationMinutes: toNumber(stop?.durationMinutes),
+      image: getValidImage(stop?.imageUrl),
+    }))
+    .filter((stop) => stop.title)
+    .sort((a, b) => a.order - b.order)
+
+/** Tổng thời gian lịch trình (phút) = điểm kết thúc muộn nhất */
+export const getItineraryTotalMinutes = (stops) =>
+  stops.reduce((max, stop) => Math.max(max, (stop.offsetMinutes ?? 0) + stop.durationMinutes), 0)
+
+/**
  * Ghép chi tiết tour (GET /activity/{id}: Buddy, đánh giá, giới thiệu)
  * với bản ghi trong danh sách (GET /activity/getAll: lịch khởi hành, loại tour, giá trẻ em, cỡ nhóm).
  */
@@ -28,6 +50,7 @@ export const buildActivityDetail = (id, detailResponse, listResponse, fromState)
     childParticipationFee: listItem?.childParticipationFee ?? null,
     // Ảnh tour lấy từ imageUrls của API chi tiết (không dùng thumbnail ở trang này)
     images: [...new Set((Array.isArray(detail?.imageUrls) ? detail.imageUrls : []).map(getValidImage).filter(Boolean))],
+    stops: mapItineraryStops(detail),
   }
 }
 

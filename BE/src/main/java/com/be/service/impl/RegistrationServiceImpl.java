@@ -38,6 +38,7 @@ import com.be.repository.PaymentRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.repository.UserRepository;
 import com.be.service.BookingLifecycleService;
+import com.be.service.BookingEmailService;
 import com.be.service.BuddyMatchingService;
 import com.be.service.PricingService;
 import com.be.service.RegistrationService;
@@ -77,6 +78,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final BookingLifecycleService lifecycle;
     private final PaymentRepository paymentRepository;
     private final AiMatchResultRepository matchResultRepository;
+    private final BookingEmailService bookingEmails;
 
     @Value("${booking.hold-minutes:15}")
     private long holdMinutes;
@@ -566,6 +568,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         Registration savedRegistration =
                 registrationRepository.save(registration);
+
+        bookingEmails.queueBuddyUpdate(savedRegistration);
 
         return registrationMapper.toResponse(savedRegistration);
     }

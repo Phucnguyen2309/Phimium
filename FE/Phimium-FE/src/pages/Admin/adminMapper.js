@@ -63,6 +63,7 @@ export const mapAdminActivity = (item) => {
     id: item?.id ?? item?.activityId ?? '',
     title,
     description: item?.description ?? '',
+    descriptionEn: item?.descriptionEn ?? '',
     activityType,
     locationName,
     address: item?.address ?? '',

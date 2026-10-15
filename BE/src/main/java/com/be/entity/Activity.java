@@ -73,6 +73,10 @@ public class Activity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    // Bản tiếng Anh của mô tả (admin nhập hoặc AI dịch). null -> FE dùng bản tiếng Việt
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    private String descriptionEn;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_type", nullable = false, length = 30)
     private TourType activityType;

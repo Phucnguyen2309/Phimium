@@ -10,7 +10,7 @@ import groupService from '@/services/groupService.js'
 import paymentService from '@/services/paymentService.js'
 import registrationService from '@/services/registrationService.js'
 import { submitCheckoutForm } from '@/utils/checkout.js'
-import { getResponseData, getResponseList } from '@/utils/response.js'
+import { getErrorMessage, getResponseData, getResponseList } from '@/utils/response.js'
 
 import {
   buildJourneys,
@@ -25,7 +25,7 @@ import {
 } from './userDashboardMapper.js'
 
 // Lấy message lỗi Backend (ApiResponse.message) nếu có
-const getApiMessage = (error, fallback) => error?.response?.data?.message || fallback
+const getApiMessage = (error, fallback) => getErrorMessage(error, fallback)
 
 // Gọi API phụ: lỗi thì trả về rỗng để phần chính vẫn hiển thị
 const optional = (request) => request.catch(() => null)

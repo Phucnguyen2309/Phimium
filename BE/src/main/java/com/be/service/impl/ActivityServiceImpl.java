@@ -20,6 +20,7 @@ import com.be.service.ActivityService;
 import com.be.service.CloudinaryService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -41,12 +43,17 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityDetailMapper activityDetailMapper;
     private final MyActivityMapper myActivityMapper;
 
+    // Không bắt buộc: test dựng service bằng tay sẽ không có translator -> bỏ qua việc dịch
+    @Autowired(required = false)
+    private ActivityDescriptionTranslator descriptionTranslator;
+
 
     @Override
     @Transactional
     public ActivityResponse createActivity(ActivityRequest request, MultipartFile image, List<MultipartFile> images, User currentUser) throws IOException {
 
         Activity activity = activityMapper.toEntity(request, currentUser);
+        applyEnglishDescription(activity, request.getDescriptionEn(), true);
 
         if (image != null && !image.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(image);
@@ -144,7 +151,10 @@ public class ActivityServiceImpl implements ActivityService {
             throw new AppException(ErrorCode.VALIDATION_ERROR);
         }
 
+        String previousDescription = activity.getDescription();
         activityMapper.updateEntity(request, activity);
+        applyEnglishDescription(activity, request.getDescriptionEn(),
+                !Objects.equals(previousDescription, activity.getDescription()));
 
         if (image != null && !image.isEmpty()) {
             activity.setThumbnailUrl(cloudinaryService.uploadImage(image));
@@ -191,5 +201,36 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         activityRepository.delete(activity);
+    }
+
+    @Override
+    @Transactional
+    public int translateMissingDescriptions() {
+        int translated = 0;
+        for (Activity activity : activityRepository.findAll()) {
+            boolean missing = activity.getDescriptionEn() == null || activity.getDescriptionEn().isBlank();
+            if (!missing || activity.getDescription() == null || activity.getDescription().isBlank()) continue;
+            applyEnglishDescription(activity, null, false);
+            if (activity.getDescriptionEn() != null) translated++;
+        }
+        return translated;
+    }
+
+    /**
+     * Mô tả tiếng Anh: admin tự nhập thì dùng luôn. Bỏ trống thì AI dịch từ mô tả tiếng Việt,
+     * chỉ khi mô tả tiếng Việt vừa đổi hoặc chưa có bản dịch (tránh gọi AI mỗi lần lưu).
+     */
+    private void applyEnglishDescription(Activity activity, String providedEn, boolean vietnameseChanged) {
+        if (providedEn != null && !providedEn.isBlank()) {
+            activity.setDescriptionEn(providedEn.trim());
+            return;
+        }
+        if (activity.getDescription() == null || activity.getDescription().isBlank()) {
+            activity.setDescriptionEn(null);
+            return;
+        }
+        boolean missing = activity.getDescriptionEn() == null || activity.getDescriptionEn().isBlank();
+        if (!vietnameseChanged && !missing) return;
+        activity.setDescriptionEn(descriptionTranslator == null ? null : descriptionTranslator.toEnglish(activity.getDescription()));
     }
 }

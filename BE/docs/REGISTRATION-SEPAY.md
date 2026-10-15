@@ -12,6 +12,7 @@
 8. ORDER_PAID hợp lệ: đối chiếu invoice, số tiền/tiền tệ ở cả order và transaction, trạng thái CAPTURED/APPROVED và loại PAYMENT. Payment trở thành PAID; registration được đánh dấu paymentConfirmedAt, ghép nhóm theo ca và tổng khách, chuyển WAITING_FOR_BUDDY hoặc BUDDY_ASSIGNED.
 9. Frontend gọi GET /api/payment/{paymentId} hoặc GET /api/v1/registrations/me để đọc trạng thái. Không tự xác nhận đã trả tiền từ URL success.
 10. Hết hạn chưa thanh toán: job mỗi 30 giây hủy đơn, trả chỗ/coupon đúng một lần và đổi payment pending thành EXPIRED.
+11. Booking xác nhận thành công: lưu mail chờ gửi trong cùng transaction; job gửi email thông tin chuyến đi và các Buddy tới người đặt. SMTP lỗi sẽ tự thử lại. Chi tiết: [BOOKING-EMAILS.md](BOOKING-EMAILS.md).
 
 Không thêm giỏ hàng, gói tastings, phụ phí dịch vụ hay form thông tin liên hệ. Khách sạn/địa chỉ đón lưu tại pickupLocation.
 

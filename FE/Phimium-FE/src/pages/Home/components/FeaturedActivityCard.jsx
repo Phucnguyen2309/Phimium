@@ -6,6 +6,7 @@ import { useLanguage } from '@/context/languageContext.js'
 import {
   formatActivityType,
   formatPrice,
+  getLocalizedDescription,
   getValidImage,
 } from '@/features/activity/activityMapper.js'
 import { buildActivityDetailPath } from '@/routes/paths.js'
@@ -34,7 +35,8 @@ const getGroupSizeText = (activity, t) => {
 }
 
 export function FeaturedActivityCard({ activity }) {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
+  const description = getLocalizedDescription(activity, language)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
 
@@ -95,9 +97,9 @@ export function FeaturedActivityCard({ activity }) {
           </Link>
         </h3>
 
-        {activity.description && (
+        {description && (
           <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-600">
-            {activity.description}
+            {description}
           </p>
         )}
 
