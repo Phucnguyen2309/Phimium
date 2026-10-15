@@ -1,5 +1,6 @@
 package com.be.dto.request;
 
+import com.be.validator.MinimumAge;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ public class CompleteProfileRequest {
     @NotBlank @Size(max = 100)
     private String fullName;
     @NotNull @Past
+    @MinimumAge(16)
     private LocalDate birthday;
     @NotBlank @Pattern(regexp = "^0[35789]\\d{8}$")
     private String phone;
