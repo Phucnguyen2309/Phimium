@@ -2,6 +2,7 @@ package com.be.exception;
 
 import com.be.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<?>> handleConflict(org.springframework.dao.DataIntegrityViolationException exception) {
@@ -115,12 +117,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TransactionSystemException.class)
     public ResponseEntity<ApiResponse<?>> handleTransactionSystemException(
-            TransactionSystemException exception
+            TransactionSystemException exception,
+            HttpServletRequest request
     ) {
         Throwable cause = exception.getRootCause();
         if (cause instanceof ConstraintViolationException constraintViolationException) {
             return handleConstraintViolationException(constraintViolationException);
         }
+
+        log.error("Transaction failed for {} {}", request.getMethod(), request.getRequestURI(), exception);
 
         return ResponseEntity
                 .internalServerError()
@@ -138,6 +143,8 @@ public class GlobalExceptionHandler {
             Exception exception,
             HttpServletRequest request
     ) {
+        log.error("Unhandled exception for {} {}", request.getMethod(), request.getRequestURI(), exception);
+
         ApiResponse<?> response = ApiResponse.builder()
                 .success(false)
                 .code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
