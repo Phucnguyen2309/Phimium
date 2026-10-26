@@ -1,5 +1,6 @@
 package com.be.service.impl;
 
+import com.be.constant.EmailBranding;
 import com.be.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,6 +32,10 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(email);
             helper.setSubject(subject);
             helper.setText(html, true);
+            if (html.contains("cid:" + EmailBranding.BANNER_CONTENT_ID)) {
+                helper.addInline(EmailBranding.BANNER_CONTENT_ID,
+                        new ClassPathResource(EmailBranding.BANNER_RESOURCE), "image/png");
+            }
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new IllegalStateException("Failed to compose email", e);

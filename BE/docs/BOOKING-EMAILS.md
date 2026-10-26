@@ -13,6 +13,13 @@ Danh sách gồm toàn bộ Buddy được gán, tên/số điện thoại và p
 Nếu tour có itinerary stops, mail có lịch trình, thời gian từng điểm và mô tả.
 Dữ liệu người dùng được escape trước khi đưa vào HTML.
 
+Giao diện dùng màu xanh–vàng PHIMIUM, banner thương hiệu, thẻ giờ khởi hành/kết thúc,
+điểm đón mở được trên Google Maps, thông tin thanh toán và thẻ liên hệ từng Buddy.
+Bố cục dùng bảng và CSS nội tuyến, có điều chỉnh cho màn hình điện thoại.
+Mẫu HTML nằm tại `src/main/resources/mail/booking-confirmation.html`.
+Banner `src/main/resources/mail/phimium-banner.png` được đính kèm nội tuyến bằng Content-ID;
+không cần upload ảnh lên dịch vụ bên ngoài. Áp dụng cho cả mail xác nhận và cập nhật Buddy.
+
 ## Gửi nền và thử lại
 
 `booking_emails` là bảng mail chờ gửi. Nội dung được chụp tại thời điểm xác nhận/gán Buddy
