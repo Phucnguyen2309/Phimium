@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { useLanguage } from '@/context/languageContext.js'
+import { buildAddressDirectionsUrl } from '@/utils/geo.js'
 
 // Helper format ngày thành DD-MM-YYYY
 const formatDateDMY = (dateStr) => {
@@ -232,9 +233,7 @@ export function BuddyTourMembersModal({
                         {/* Actions: Google Maps & Copy */}
                         <div className="mt-2.5 pt-2 border-t border-amber-200/60 flex flex-wrap items-center gap-2 sm:gap-3">
                           <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                              m.pickupLocation + (departure.location ? ` ${departure.location}` : ' Hồ Chí Minh'),
-                            )}`}
+                            href={buildAddressDirectionsUrl(m.pickupLocation)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 font-bold text-blue-700 hover:text-blue-900 hover:underline bg-white px-2.5 py-1.5 rounded-md border border-blue-200/80 shadow-2xs transition text-xs"
