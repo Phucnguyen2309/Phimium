@@ -31,6 +31,18 @@ export const buildGoogleMapsUrl = (item) => {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
+/**
+ * Link chỉ đường Google Maps tới một địa chỉ dạng chữ (VD điểm đón khách).
+ * Chỉ dùng đúng địa chỉ đó; thiếu tên thành phố thì thêm "Hồ Chí Minh" để Google không tìm nhầm tỉnh khác.
+ */
+export const buildAddressDirectionsUrl = (address) => {
+  const text = String(address ?? '').trim()
+  if (!text) return ''
+
+  const destination = /(hồ chí minh|hcm|sài gòn|saigon)/i.test(text) ? text : `${text}, Hồ Chí Minh`
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
+}
+
 /** Link chỉ đường Google Maps tới điểm này. */
 export const buildDirectionsUrl = (item) => {
   const coordinates = getCoordinates(item)
