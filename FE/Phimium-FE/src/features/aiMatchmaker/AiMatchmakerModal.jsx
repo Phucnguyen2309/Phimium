@@ -645,9 +645,11 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
                   <span className="text-xs font-black text-blue-950">
                     {t('aiMatch.aiMatchResults')}
                   </span>
-                  <span className="rounded-full bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 text-[10px]">
-                    {matchResult.choices?.length || 0} {t('aiMatch.choices')}
-                  </span>
+                  {matchResult.status === 'MATCHED' && (
+                    <span className="rounded-full bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 text-[10px]">
+                      {matchResult.choices?.length || 0} {t('aiMatch.choices')}
+                    </span>
+                  )}
                   {matchResult.engine && (
                     <span className="text-[10px] text-slate-400">
                       (Engine: {matchResult.engine})
@@ -676,8 +678,16 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
                     {t('aiMatch.noMatchesFound')}
                   </h3>
                   <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    {t('aiMatch.allTourSlotsMayBe')}
+                    {matchResult.summary || t('aiMatch.allTourSlotsMayBe')}
                   </p>
+
+                  {Array.isArray(matchResult.reasons) && matchResult.reasons.some((reason) => reason.message && reason.message !== matchResult.summary) && (
+                    <ul className="mx-auto max-w-md space-y-1 text-left text-xs text-slate-600">
+                      {matchResult.reasons.filter((reason) => reason.message && reason.message !== matchResult.summary).map((reason) => (
+                        <li key={`${reason.code}:${reason.field}`}>{reason.message}</li>
+                      ))}
+                    </ul>
+                  )}
 
                   {matchResult.criteria && (
                     <div className="mt-4 pt-3 border-t border-slate-200/60 max-w-md mx-auto text-left text-xs bg-white rounded-2xl p-3 border border-slate-100 shadow-2xs space-y-1.5">
@@ -693,6 +703,12 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
                             </span>
                           ))}
                         </div>
+                      )}
+                      {Array.isArray(matchResult.criteria.requiredExperiences) && matchResult.criteria.requiredExperiences.length > 0 && (
+                        <p className="text-[11px] text-slate-600">
+                          <span className="font-semibold text-slate-400">{t('aiMatch.requiredExperiences')}</span>{' '}
+                          {matchResult.criteria.requiredExperiences.map((experience) => experience.description).filter(Boolean).join(', ')}
+                        </p>
                       )}
                       {matchResult.criteria.region && (
                         <p className="text-[11px] text-slate-600">
@@ -717,9 +733,11 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
                     {t('aiMatch.needsMoreDetails')}
                   </p>
                   <p className="text-amber-800">
-                    {t('aiMatch.pleaseProvide', {
-                      fields: matchResult.missingFields?.join(', ') || t('aiMatch.dateOrPreferences'),
-                    })}
+                    {Array.isArray(matchResult.reasons) && matchResult.reasons.length > 0
+                      ? matchResult.reasons.map((reason) => reason.message).filter(Boolean).join(' ')
+                      : t('aiMatch.pleaseProvide', {
+                          fields: matchResult.missingFields?.join(', ') || t('aiMatch.dateOrPreferences'),
+                        })}
                   </p>
                 </div>
               )}

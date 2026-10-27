@@ -2,6 +2,7 @@ package com.be.service.impl;
 
 import com.be.config.MatchingProperties;
 import com.be.dto.request.AiMatchRequest;
+import com.be.dto.request.AiMatchRequest.RequiredExperience;
 import com.be.dto.response.AiMatchResponse;
 import com.be.dto.response.BuddyResponse;
 import com.be.entity.AiMatchResult;
@@ -57,7 +58,7 @@ public class AiMatchResultStoreImpl implements AiMatchResultStore {
         result.setMetadataFingerprint(MatchingFingerprint.of(candidate.activity(), selected));
         result.setEngine(engine); result.setCreatedAt(DateTimeUtils.nowVietnam());
         result.setModelName("GEMINI".equals(engine) ? properties.getGemini().getModel() : null);
-        result.setPromptVersion("smart-match-v1");
+        result.setPromptVersion("smart-match-v2-experiences");
         result.setExpiresAt(result.getCreatedAt().plusMinutes(properties.getResultMinutes()));
         matches.saveAndFlush(result);
         Set<MatchingTag> shared = MatchingRules.shared(criteria.getTags(), candidate.activity().getTags());
@@ -65,6 +66,11 @@ public class AiMatchResultStoreImpl implements AiMatchResultStore {
         List<String> reasons = new ArrayList<>();
         boolean en = "en".equals(criteria.getLocale());
         reasons.add((en ? "Tour interests: " : "Chủ đề tour phù hợp: ") + labels(shared, en));
+        if (!criteria.getRequiredExperiences().isEmpty()) {
+            reasons.add((en ? "Supported tour experiences: " : "Trải nghiệm tour đáp ứng: ")
+                    + criteria.getRequiredExperiences().stream().map(RequiredExperience::description)
+                            .collect(Collectors.joining(", ")));
+        }
         for (BuddyResponse b : selected) {
             reasons.add(Objects.toString(b.getFullName(), b.getBuddyId().toString()) + ": "
                     + labels(MatchingRules.shared(criteria.getTags(), b.getInterests()), en));
