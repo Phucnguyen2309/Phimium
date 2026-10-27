@@ -110,7 +110,9 @@ Kỹ năng là thông tin thực tế do Buddy/Admin khai báo. Ngôn ngữ dùn
 }
 ```
 
-Trường có cấu trúc được ưu tiên hơn thông tin Gemini tách từ `message`. Có thể bỏ `message` và gửi `tags`. Bắt buộc có ngày, số người lớn và ít nhất một tag sau khi hiểu yêu cầu; giờ/khu vực/ngân sách/ngôn ngữ/phong cách là điều kiện tùy chọn. `maxTotalBudget` là **tổng VND cả đơn**, không phải giá mỗi người. `couponCode` có thể truyền và phải được áp dụng hợp lệ. `earliestStartTime` là giờ khởi hành sớm nhất, `latestEndTime` là giờ kết thúc muộn nhất. Tất cả theo múi giờ Việt Nam.
+Các trường ngày/giờ/số khách/khu vực/ngân sách/ngôn ngữ/phong cách gửi riêng được ưu tiên hơn thông tin Gemini tách từ `message`. Tag gửi riêng được hợp với tag đã hiểu, không ghi đè yêu cầu trong câu nhập. Có thể bỏ `message` và gửi `tags`. Bắt buộc có ngày, số người lớn và ít nhất một tag sau khi hiểu yêu cầu; giờ/khu vực/ngân sách/ngôn ngữ/phong cách là điều kiện tùy chọn. `maxTotalBudget` là **tổng VND cả đơn**, không phải giá mỗi người. `couponCode` có thể truyền và phải được áp dụng hợp lệ. `earliestStartTime` là giờ khởi hành sớm nhất, `latestEndTime` là giờ kết thúc muộn nhất. Tất cả theo múi giờ Việt Nam.
+
+Từ bản sửa 26/10/2026, trải nghiệm cụ thể trong câu nhập được giữ trong `criteria.requiredExperiences`, gồm `description` và `evidencePhrases`. Tag chỉ dùng lọc sơ bộ; trùng `FOOD` không chứng minh tour có món Hàn hoặc gà rán. Bước xếp hạng phải đưa bằng chứng từ nội dung thật của từng tour; BE kiểm tra nguồn, trích dẫn và cụm từ tương đương trước khi lưu. Nếu không có lựa chọn xác minh được, trả `NO_MATCHES` với `choices=[]`, `summary` và `reasons`. Xem danh sách file sửa, schema mới, ví dụ response và kết quả kiểm tra trong [AI-MATCHING-CHANGES-2026-10-26.md](AI-MATCHING-CHANGES-2026-10-26.md).
 
 `requireAllTags=false` mặc định: tour và từng Buddy phải chung ít nhất một tag với khách; những tag tour chưa có được trả trong `missingTags`. `true`: tour và mọi Buddy phải có đủ tất cả tag yêu cầu. Ngôn ngữ/phong cách được gửi luôn là điều kiện bắt buộc, không tự nới khi thiếu kết quả.
 
@@ -121,6 +123,7 @@ Response `data`:
 - `criteria`: tiêu chí đã hiểu để FE hiển thị cho khách kiểm tra/chỉnh.
 - `missingFields`: tên trường cần bổ sung khi thiếu tiêu chí.
 - `choices`: mỗi lựa chọn chứa `matchResultId`, `expiresAt`, `activity`, `departure`, `totalAmount`, `currency=VND`, `buddies`, `leadBuddyId`, `matchedTags`, `missingTags`, `reasons`, `itinerary`.
+- `summary`, `reasons`: giải thích vì sao thiếu thông tin/không có kết quả. Bộ lọc trả lý do cụ thể về ngày chưa có ca, ca hết chỗ/đóng/hủy, khung giờ, tag/khu vực, sức chứa, giới hạn nhóm, lịch trình, hồ sơ/lịch Buddy, coupon và ngân sách. Một kết quả có thể có nhiều nguyên nhân cho các ca bị loại khác nhau. Ngày gợi ý và mức giá trong `details` phải lấy từ dữ liệu thật, không do Gemini bịa; ngày gợi ý chưa giữ chỗ/Buddy. Danh sách code và giới hạn truy vấn nằm trong báo cáo thay đổi 26/10/2026.
 
 Giá/rating/lịch trình/hồ sơ trả về từ database và PricingService. Gemini chỉ trả thứ tự ca và ID Buddy trong danh sách đủ điều kiện. Lý do được BE dựng từ các tag thực tế; không hiển thị phần trăm hợp gu thiếu cơ sở. BE kiểm tra toàn bộ kết quả model trước khi lưu. Model/prompt version và tiêu chí được lưu với đề xuất để truy vết.
 
