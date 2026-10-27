@@ -9,7 +9,7 @@ import registrationService from '@/services/registrationService.js'
 import { submitCheckoutForm } from '@/utils/checkout.js'
 import { formatDDMMYYYY, formatMoney } from '@/utils/format.js'
 import { getErrorMessage, getResponseData } from '@/utils/response.js'
-import { ROUTES } from '@/routes/paths.js'
+import { buildActivityDetailPath, ROUTES } from '@/routes/paths.js'
 
 // Gợi ý nhanh: chữ hiển thị và câu gửi cho AI đều theo ngôn ngữ (locales: aiMatch.quickPrompts.*)
 const QUICK_PROMPTS = ['retroFood', 'history', 'chillCafe', 'streetFood']
@@ -198,85 +198,32 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
   }
 
   const handleStartBooking = (choice) => {
-    setSelectedChoice(choice)
-    setBookingError('')
-    setPickupLocation('')
-    setIsSafetyAccepted(false)
-  }
+    if (!choice) return
+    const activityId = choice.activity?.activityId || choice.activity?.id
+    if (!activityId) return
 
-  const handleConfirmBooking = async (e) => {
-    e.preventDefault()
-    if (!selectedChoice) return
+    const departureId = choice.departure?.departureId || choice.departure?.id
+    const departureDate = choice.departure?.departureDate || date
 
-    if (!pickupLocation.trim()) {
-      setBookingError(t('aiMatch.pickupLocationIsRequired'))
-      return
-    }
-
-    if (!isSafetyAccepted) {
-      setBookingError(t('aiMatch.pleaseAcceptSafetyTerms'))
-      return
-    }
-
-    setIsBooking(true)
-    setBookingError('')
-
-    try {
-      const payload = {
-        matchResultId: selectedChoice.matchResultId,
-        departureId: selectedChoice.departure.departureId,
+    onClose?.()
+    navigate(buildActivityDetailPath(activityId), {
+      state: {
+        departureId,
+        selectedDate: departureDate,
+        departureDate,
         adultCount: Number(adultCount) || 1,
         childCount: Number(childCount) || 0,
-        pickupLocation: pickupLocation.trim(),
-        isSafetyTermsAccepted: true,
-      }
+        pickupLocation: pickupLocation?.trim() || '',
+        matchResultId: choice.matchResultId,
+        aiMatch: choice,
+      },
+    })
+  }
 
-      const res = await registrationService.create(payload)
-      const regData = getResponseData(res)
-
-      // Nếu tour miễn phí hoặc tổng tiền 0 VND
-      if (!Number(regData?.totalAmount)) {
-        onClose()
-        navigate(ROUTES.userDashboard, {
-          state: { messageKey: 'activityDetail.booking.bookedFree' },
-        })
-        return
-      }
-
-      // Tạo cổng thanh toán trực tuyến
-      try {
-        const paymentRes = await paymentService.createPayment(regData.registrationId)
-        const payment = getResponseData(paymentRes)
-        if (payment?.checkoutUrl) {
-          onClose()
-          submitCheckoutForm(payment)
-          return
-        }
-      } catch {
-        // Chỗ vẫn được giữ an toàn, chuyển về trang cá nhân để thanh toán sau
-      }
-
-      onClose()
-      navigate(ROUTES.userDashboard, {
-        state: { messageKey: 'activityDetail.booking.bookedPayLater' },
-      })
-    } catch (err) {
-      console.error('Lỗi đặt tour từ AI match:', err)
-      const code = err?.response?.data?.code
-      if (code === 6006) {
-        setBookingError(
-          t('aiMatch.matchResultExpiredPleaseSearch')
-        )
-      } else if (code === 6007) {
-        setBookingError(
-          t('aiMatch.tourOrBuddyDetailsChanged')
-        )
-      } else {
-        setBookingError(getErrorMessage(err, t('aiMatch.bookingFailed')))
-      }
-    } finally {
-      setIsBooking(false)
-    }
+  const handleConfirmBooking = (e) => {
+    e?.preventDefault()
+    if (!selectedChoice) return
+    handleStartBooking(selectedChoice)
   }
 
   return createPortal(

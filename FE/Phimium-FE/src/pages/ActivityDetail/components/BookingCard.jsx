@@ -58,6 +58,7 @@ export function BookingCard({
   activeDate,
   activity,
   adultCount,
+  aiMatch,
   applyCoupon,
   booking,
   bookingError,
@@ -83,13 +84,34 @@ export function BookingCard({
   startBooking,
   totalGuests,
 }) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const isVi = language === 'vi'
   const childFee = activity.childParticipationFee
   const atLimit = maxGuests > 0 && totalGuests >= maxGuests
   const hasDepartures = dateGroups.length > 0
 
   return (
     <aside className="rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-[0_30px_70px_-40px_rgba(22,36,86,0.55)] sm:p-6">
+      {aiMatch && (
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50/70 p-3.5 text-xs text-amber-950">
+          <div className="flex items-center gap-1.5 font-bold text-amber-900">
+            <span className="text-amber-500">✨</span>
+            <span>
+              {isVi
+                ? 'Được đề xuất bởi AI Smart Matchmaker'
+                : 'Recommended by AI Smart Matchmaker'}
+            </span>
+          </div>
+          {Array.isArray(aiMatch.buddies) && aiMatch.buddies.length > 0 && (
+            <p className="mt-1 text-[11px] text-amber-800">
+              {isVi ? 'Đội Buddy ghép cặp: ' : 'Matched Buddy: '}
+              <span className="font-semibold text-slate-900">
+                {aiMatch.buddies.map((b) => b.fullName).join(', ')}
+              </span>
+            </p>
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="whitespace-nowrap">
           <span className="text-2xl font-extrabold tracking-tight text-blue-950 xl:text-[1.75rem]">
