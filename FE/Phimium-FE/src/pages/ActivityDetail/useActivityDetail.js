@@ -38,11 +38,13 @@ export function useActivityDetail() {
   const [reloadKey, setReloadKey] = useState(0)
 
   // Đặt tour
-  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedDate, setSelectedDate] = useState(
+    location.state?.selectedDate || location.state?.departureDate || ''
+  )
   const [departureId, setDepartureId] = useState(location.state?.departureId ?? '')
-  const [adultCount, setAdultCount] = useState(1)
-  const [childCount, setChildCount] = useState(0)
-  const [pickupLocation, setPickupLocation] = useState('')
+  const [adultCount, setAdultCount] = useState(Number(location.state?.adultCount) || 1)
+  const [childCount, setChildCount] = useState(Number(location.state?.childCount) || 0)
+  const [pickupLocation, setPickupLocation] = useState(location.state?.pickupLocation || '')
   const [couponInput, setCouponInput] = useState('')
   const [couponCode, setCouponCode] = useState('')
   const [quote, setQuote] = useState(null)
@@ -51,6 +53,25 @@ export function useActivityDetail() {
   const [showSafetyTerms, setShowSafetyTerms] = useState(false)
   const [safetyTermsAccepted, setSafetyTermsAccepted] = useState(false)
   const [booking, setBooking] = useState(false)
+
+  // Cập nhật khi chuyển từ AI Matchmaker sang
+  useEffect(() => {
+    if (location.state?.departureId) {
+      setDepartureId(location.state.departureId)
+    }
+    if (location.state?.selectedDate || location.state?.departureDate) {
+      setSelectedDate(location.state.selectedDate || location.state.departureDate)
+    }
+    if (location.state?.adultCount) {
+      setAdultCount(Number(location.state.adultCount) || 1)
+    }
+    if (location.state?.childCount !== undefined) {
+      setChildCount(Number(location.state.childCount) || 0)
+    }
+    if (location.state?.pickupLocation) {
+      setPickupLocation(location.state.pickupLocation)
+    }
+  }, [location.state])
 
   useDocumentTitle(activity?.title || t('activityDetail.pageTitle'))
 
@@ -89,9 +110,9 @@ export function useActivityDetail() {
   const dateGroups = useMemo(() => (activity ? groupDeparturesByDate(activity) : []), [activity])
   const groupLimit = activity ? getGroupLimit(activity) : 0
 
-  // Ngày đang chọn: theo lịch được truyền sang từ trang danh sách, không có thì ngày gần nhất
+  // Ngày đang chọn: theo lịch được truyền sang từ trang danh sách / AI Matchmaker, không có thì ngày gần nhất
   const activeDate =
-    selectedDate ||
+    (selectedDate && dateGroups.some((group) => group.date === selectedDate) ? selectedDate : '') ||
     dateGroups.find((group) => group.departures.some((item) => item.id === departureId))?.date ||
     dateGroups[0]?.date ||
     ''
@@ -211,6 +232,7 @@ export function useActivityDetail() {
 
     try {
       const response = await registrationService.create({
+        matchResultId: location.state?.matchResultId || undefined,
         departureId: selectedDeparture.id,
         adultCount,
         childCount,
@@ -251,6 +273,8 @@ export function useActivityDetail() {
     activeDate,
     activity,
     adultCount,
+    aiMatch: location.state?.aiMatch || null,
+    matchResultId: location.state?.matchResultId || null,
     applyCoupon,
     booking,
     bookingError,
