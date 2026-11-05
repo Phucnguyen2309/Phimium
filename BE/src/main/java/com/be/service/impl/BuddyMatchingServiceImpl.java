@@ -1,5 +1,6 @@
 package com.be.service.impl;
 
+import com.be.dto.request.AiMatchRequest;
 import com.be.entity.ActivityDeparture;
 import com.be.entity.AiMatchResult;
 import com.be.entity.Buddy;
@@ -12,6 +13,8 @@ import com.be.repository.BuddyRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.BuddyMatchingService;
 import com.be.util.DateTimeUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
 
     private final BuddyRepository buddyRepository;
     private final RegistrationRepository registrationRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -146,7 +150,7 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
                 || !result.getStartTime().equals(departure.getStartTime()) || !result.getEndTime().equals(departure.getEndTime())
                 || result.getBuddyIds().size() != result.getAdultCount() + result.getChildCount()
                 || new HashSet<>(result.getBuddyIds()).size() != result.getBuddyIds().size()
-                || !MatchingRules.tagsMatch(result.getRequestedTags(), departure.getActivity().getTags(), result.isRequireAllTags())) {
+                || !tourTagsMatch(result, departure)) {
             throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
         }
         Map<UUID, Buddy> active = buddyRepository.findActiveWithLock(BuddyStatus.ACTIVE).stream()
@@ -166,6 +170,20 @@ public class BuddyMatchingServiceImpl implements BuddyMatchingService {
         if (!MatchingFingerprint.of(departure.getActivity(), selected).equals(result.getMetadataFingerprint()))
             throw new AppException(ErrorCode.MATCH_RESULT_CHANGED);
         return selected;
+    }
+
+    private boolean tourTagsMatch(AiMatchResult result, ActivityDeparture departure) {
+        if (MatchingRules.tagsMatch(result.getRequestedTags(), departure.getActivity().getTags(), result.isRequireAllTags())) {
+            return true;
+        }
+        if (!"GEMINI".equals(result.getEngine()) || result.isRequireAllTags()) return false;
+        try {
+            AiMatchRequest criteria = objectMapper.readValue(result.getCriteriaJson(), AiMatchRequest.class);
+            return MatchingRules.usesSemanticTourMatching(criteria)
+                    && result.getRequestedTags().equals(criteria.getTags());
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private boolean isTimeOverlap(

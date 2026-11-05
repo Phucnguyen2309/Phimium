@@ -117,10 +117,12 @@ public class AdminActivityController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật tour thành công", response));
     }
 
-    @PostMapping("/translate-descriptions")
-    @Operation(summary = "Dịch sang tiếng Anh mô tả của các tour chưa có bản dịch (Gemini)")
+    @PostMapping({"/translate-content", "/translate-descriptions"})
+    @Operation(summary = "Xếp lịch dịch nội dung tour và lịch trình còn thiếu sang tiếng Anh (Gemini)",
+            description = "Runs in the background. Returns the number of candidate tours, not completed translations. "
+                    + "Existing English content is preserved; GET requests and language switching never call AI.")
     public ResponseEntity<ApiResponse<Integer>> translateMissingDescriptions() {
-        return ResponseEntity.ok(ApiResponse.success("Đã dịch mô tả tour", activityService.translateMissingDescriptions()));
+        return ResponseEntity.accepted().body(ApiResponse.success("Đã xếp lịch dịch nội dung tour", activityService.translateMissingDescriptions()));
     }
 
     @DeleteMapping("/{activityId}")

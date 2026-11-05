@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/authContext.js'
 import { useLanguage } from '@/context/languageContext.js'
+import { getLocalizedActivity } from '@/features/activity/activityMapper.js'
 import aiService from '@/services/aiService.js'
 import paymentService from '@/services/paymentService.js'
 import registrationService from '@/services/registrationService.js'
@@ -693,7 +694,7 @@ export function AiMatchmakerModal({ isOpen, onClose }) {
               {Array.isArray(matchResult.choices) && matchResult.choices.length > 0 && (
                 <div className="space-y-4">
                   {matchResult.choices.map((choice, idx) => {
-                    const act = choice.activity || {}
+                    const act = getLocalizedActivity(choice.activity || {}, language)
                     const dep = choice.departure || {}
                     const buddies = choice.buddies || []
 

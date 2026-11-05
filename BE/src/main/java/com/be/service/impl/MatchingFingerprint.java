@@ -23,10 +23,11 @@ import java.util.stream.Collectors;
 public final class MatchingFingerprint {
     private MatchingFingerprint() { }
     public static String of(ActivityResponse activity, List<BuddyResponse> buddies) {
-        List<String> values = tour(activity.getTitle(), activity.getDescription(), activity.getLocationName(), activity.getAddress(),
+        List<String> values = tour(activity.getTitle(), activity.getTitleEn(), activity.getDescription(), activity.getDescriptionEn(),
+                activity.getLocationName(), activity.getLocationNameEn(), activity.getAddress(), activity.getAddressEn(),
                 activity.getTags());
         for (ItineraryStopResponse stop : activity.getItineraryStops()) {
-            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getDescription(),
+            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getTitleEn(), stop.getDescription(), stop.getDescriptionEn(),
                     stop.getOffsetMinutes(), stop.getDurationMinutes(), stop.getImageUrl());
         }
         for (BuddyResponse b : buddies) buddy(values, b.getBuddyId(), b.getInterests(), b.getSkills(), b.getLanguages(),
@@ -34,27 +35,34 @@ public final class MatchingFingerprint {
         return hash(values);
     }
     public static String of(Activity activity, List<Buddy> buddies) {
-        List<String> values = tour(activity.getTitle(), activity.getDescription(), activity.getLocationName(), activity.getAddress(),
+        List<String> values = tour(activity.getTitle(), activity.getTitleEn(), activity.getDescription(), activity.getDescriptionEn(),
+                activity.getLocationName(), activity.getLocationNameEn(), activity.getAddress(), activity.getAddressEn(),
                 activity.getTags());
         for (ItineraryStop stop : activity.getItineraryStops()) {
-            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getDescription(),
+            stop(values, stop.getStopId(), stop.getStopOrder(), stop.getTitle(), stop.getTitleEn(), stop.getDescription(), stop.getDescriptionEn(),
                     stop.getOffsetMinutes(), stop.getDurationMinutes(), stop.getImageUrl());
         }
         for (Buddy b : buddies) buddy(values, b.getBuddyId(), b.getInterests(), b.getSkills(), b.getLanguages(),
                 b.getGuidingStyle(), b.getBio(), b.getExperience(), b.getIntroduction());
         return hash(values);
     }
-    private static List<String> tour(String title, String description, String location, String address,
+    private static List<String> tour(String title, String titleEn, String description, String descriptionEn,
+                                     String location, String locationEn, String address, String addressEn,
                                      Collection<?> tags) {
         List<String> values = new ArrayList<>(); values.add(Objects.toString(title, "")); values.add(Objects.toString(description, ""));
+        values.add(Objects.toString(descriptionEn, ""));
+        values.add(Objects.toString(titleEn, ""));
+        values.add(Objects.toString(locationEn, ""));
+        values.add(Objects.toString(addressEn, ""));
         values.add(Objects.toString(location, "")); values.add(Objects.toString(address, ""));
         values.add(sorted(tags));
         return values;
     }
-    private static void stop(List<String> values, UUID id, Integer order, String title, String description,
+    private static void stop(List<String> values, UUID id, Integer order, String title, String titleEn, String description, String descriptionEn,
             Integer offset, Integer duration, String imageUrl) {
         values.add(Objects.toString(id, "")); values.add(Objects.toString(order, ""));
         values.add(title); values.add(description);
+        values.add(Objects.toString(titleEn, "")); values.add(Objects.toString(descriptionEn, ""));
         values.add(offset.toString()); values.add(duration.toString());
         values.add(Objects.toString(imageUrl, ""));
     }

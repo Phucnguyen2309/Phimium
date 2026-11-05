@@ -29,10 +29,14 @@ public class UpdateActivityRequest {
     @Schema(example = "Food Tour Đêm Khám Phá Ẩm Thực Chợ Lớn (Nâng Cấp)")
     private String title;
 
+    @Size(max = 400)
+    @Schema(description = "English title; omitted translations are refreshed when the source changes")
+    private String titleEn;
+
     @Schema(example = "Mô tả chi tiết nội dung tour...")
     private String description;
 
-    @Schema(description = "Mô tả tiếng Anh. Bỏ trống: giữ bản cũ, hoặc AI dịch lại nếu mô tả tiếng Việt thay đổi / chưa có bản dịch")
+    @Schema(description = "English description; omit to preserve it, or refresh in the background when the source changes")
     private String descriptionEn;
 
     @Size(max = 16, message = "A tour can have at most 16 matching tags")
@@ -48,9 +52,15 @@ public class UpdateActivityRequest {
     @Schema(example = "Khu phố cổ Chợ Lớn")
     private String locationName;
 
+    @Size(max = 500)
+    private String locationNameEn;
+
     @NotBlank(message = "Địa chỉ không được để trống")
     @Schema(example = "1105 Trần Hưng Đạo, Phường 5, Quận 5, TP. Hồ Chí Minh")
     private String address;
+
+    @Size(max = 1000)
+    private String addressEn;
 
     @DecimalMin(value = "-180.0")
     @DecimalMax(value = "180.0")

@@ -1,5 +1,7 @@
 # Các thay đổi AI matching — 26/10/2026
 
+**Cập nhật 28/10/2026:** phần “Bổ sung 28/10/2026” cuối file mô tả sửa lỗi đồng nghĩa ẩm thực và chẩn đoán theo từng trải nghiệm. Các mục phía trên ghi lại hành vi của bản 26/10.
+
 ## Vấn đề đã xử lý
 
 Khách nhập “muốn ăn món Hàn, gà rán” nhưng chọn thêm tag `PHOTOGRAPHY`, `FOOD` vẫn nhận tour món Hoa. Trước đây tag FE gửi ghi đè tag AI hiểu; bộ lọc chỉ cần chung một tag; bước xếp hạng bị buộc chọn ít nhất một ca. Các trải nghiệm cụ thể ngoài danh mục tag không được giữ thành điều kiện độc lập.
@@ -167,3 +169,77 @@ Gợi ý ngày chỉ lấy từ các ca thật trong tối đa 30 ngày kể t�
 Cần chạy/deploy lại cả BE và FE từ source mới để website nhận thay đổi. Chưa deploy trong phiên này, chưa nghiệm thu với Gemini thật hoặc database production. Bộ kiểm tra bảo đảm nguồn và cụm từ của bằng chứng; việc hiểu ý, nhận diện phủ định và sinh cụm từ tương đương vẫn có phần dựa vào model. Cần bổ sung mô tả/lịch trình chính xác, rõ ràng để tránh loại tour hợp lệ do thiếu thông tin hoặc cách diễn đạt chưa được nhận diện.
 
 Các thay đổi này xử lý kết quả sai nhu cầu. Không đổi model, API key, quota, retry hoặc cách ánh xạ lỗi `6002/503` trong phiên này.
+
+## Bổ sung 28/10/2026 — Đồng nghĩa ẩm thực và lý do loại theo trải nghiệm
+
+### Nguyên nhân
+
+Câu “tui muốn ăn đồ hoa và khám phá khu chợ lớn” được tách thành `Thưởng thức ẩm thực Trung Hoa` với các cụm `ăn đồ hoa`, `Chinese food`, `ẩm thực Trung Hoa`. Tour thật có `hương vị người Hoa` và `ẩm thực Chợ Lớn`, nhưng bộ kiểm chứng cũ buộc trích dẫn chứa cụm đã tách nên không nhận ra sự tương đương. Response cũ còn liệt kê toàn bộ trải nghiệm thay vì chỉ ra phần chưa xác minh.
+
+### Các file thay đổi trong lần bổ sung
+
+| File | Nội dung |
+| --- | --- |
+| `src/main/java/com/be/service/impl/MatchingExperienceEvidence.java` | Helper kiểm chứng bằng chứng, chuẩn hóa tên gọi món Hoa/Hàn/Việt, giữ nguyên yêu cầu cụ thể ngoài các nhóm này và kiểm tra phủ định gần cụm từ trong nguồn. Đây là helper thuần Java, không phải Spring service/bean. |
+| `src/main/java/com/be/service/MatchingCandidateService.java` | Bổ sung `descriptionEn`, `location`, `address` và dữ kiện từ tag ẩm thực chuyên biệt hiện có vào `tourFacts`. |
+| `src/main/java/com/be/service/impl/GeminiMatchingClient.java` | Hướng dẫn giữ đúng loại ẩm thực dù chưa có tag riêng; gửi `experienceVocabulary` một lần trong context xếp hạng để AI dùng cùng bộ đồng nghĩa với BE. |
+| `src/main/java/com/be/service/impl/AiMatchingServiceImpl.java` | Kiểm chứng và theo dõi từng yêu cầu; trả phần đã xác minh/còn thiếu theo từng ca; phân biệt AI không chọn ca nào với BE bác bằng chứng. |
+| `src/main/java/com/be/service/impl/MatchingFingerprint.java` | Đưa `descriptionEn` vào fingerprint vì bản dịch nay cũng có thể là nguồn bằng chứng. |
+| `src/main/java/com/be/service/impl/AiMatchResultStoreImpl.java` | Phiên bản prompt mới: `smart-match-v3-cuisine-evidence`. |
+| `docs/AI-SMART-MATCHMAKER.md` | Đồng bộ quy tắc bằng chứng và các field lý do. |
+
+### Quy tắc matching
+
+- Các cách gọi thông dụng của món Hoa, Hàn Quốc, Việt Nam được chuẩn hóa theo nhóm riêng. Nhóm được nhận diện bằng toàn bộ mô tả trải nghiệm sau khi bỏ các động từ mở đầu thông thường; không bỏ các điều kiện như ăn chay, halal hoặc tên món cụ thể để biến chúng thành yêu cầu ẩm thực chung.
+- Yêu cầu món Hoa thuần túy có thể được xác minh bằng tag `CHINESE_CUISINE` thật của tour hoặc cụm từ tương đương trong nội dung. Không dùng tag này chứng minh món Hàn, món Việt, gà rán hoặc yêu cầu ăn chay. `FOOD` và hồ sơ Buddy vẫn không phải bằng chứng cho món ăn cụ thể.
+- Chưa thêm `KOREAN_CUISINE` hoặc `VIETNAMESE_CUISINE` vào enum/database. Tour Hàn/Việt được kiểm chứng bằng mô tả/lịch trình thật. Các nền ẩm thực khác như Thái/Peru vẫn dùng `requiredExperiences.evidencePhrases` do AI tách; không bị bỏ vì không có tag tương ứng. Bộ đồng nghĩa dựng sẵn hiện chỉ dành cho ba nhóm Hoa/Hàn/Việt, không khẳng định bao phủ mọi nền ẩm thực hay cách diễn đạt.
+- AI và BE dùng cùng `experienceVocabulary` cho từng yêu cầu. Bằng chứng phải trích nguyên văn từ đúng tour. Khác hoa/thường/dấu tiếng Việt được hỗ trợ khi đối chiếu cụm từ; không chấp nhận cụm chỉ gồm dấu câu hoặc khớp một phần từ.
+- Địa điểm/địa chỉ được dùng để kiểm chứng nơi khách muốn đến. Với các yêu cầu ẩm thực đã chuẩn hóa, chỉ xuất hiện tên ẩm thực ở địa điểm/địa chỉ chưa chứng minh tour phục vụ ẩm thực đó. Prompt áp dụng giới hạn này cho cả các trải nghiệm cụ thể còn lại.
+- Nếu trích dẫn cắt mất từ phủ định ngay trước cụm từ, BE vẫn kiểm tra phần nguồn xung quanh. Đây là kiểm tra bảo thủ bằng cụm từ, chưa phải bộ hiểu ngôn ngữ đầy đủ; AI vẫn chịu trách nhiệm đánh giá ngữ nghĩa, phủ định phức tạp, điều kiện bổ sung và yêu cầu trong câu gốc.
+- Tất cả trải nghiệm phải được đáp ứng trong cùng một ca tour. Không gộp bằng chứng từ các tour khác nhau để tạo một kết quả phù hợp.
+- Không thêm lần gọi Gemini, không thay API request, model, timeout, retry hoặc schema database. FE hiện có đọc `summary`/`reasons` nên nhận được lời giải thích mới sau khi deploy BE.
+
+### Response khi chưa xác minh được
+
+Code `UNVERIFIED_REQUIRED_EXPERIENCES` giữ nguyên. `details` bổ sung:
+
+- `verificationStage`: `AI_RANKING` khi model trả danh sách rỗng; `EVIDENCE_VALIDATION` khi model đã chọn nhưng BE không chấp nhận đầy đủ bằng chứng.
+- `unverifiedExperiences`: những yêu cầu chưa xác minh được của ca gần phù hợp nhất trong các ca đã kiểm tra.
+- `verifiedExperiences`: những yêu cầu có trích dẫn hợp lệ khi đang ở bước `EVIDENCE_VALIDATION`.
+- `documentedExperiences`: những yêu cầu có cụm từ liên quan trong dữ liệu thật khi `AI_RANKING` không trả lựa chọn. Đây chỉ là chẩn đoán dữ liệu, không được coi là một kết quả đã được AI xác minh.
+- `candidateChecks`: ID tour, ID ca và các danh sách tương ứng cho tối đa số kết quả cấu hình, sắp theo số yêu cầu chưa xác minh tăng dần. Không công bố dữ liệu riêng của Buddy/khách khác.
+
+Ví dụ khách muốn món Hàn và gà rán, ca được AI chọn có bằng chứng món Hàn nhưng chưa có bằng chứng gà rán:
+
+```json
+{
+  "status": "NO_MATCHES",
+  "summary": "Với ca tour gần phù hợp nhất, chưa xác minh được: Gà rán.",
+  "reasons": [{
+    "code": "UNVERIFIED_REQUIRED_EXPERIENCES",
+    "field": "requiredExperiences",
+    "message": "Với ca tour gần phù hợp nhất, chưa xác minh được: Gà rán.",
+    "details": {
+      "verificationStage": "EVIDENCE_VALIDATION",
+      "verifiedExperiences": ["Thưởng thức ẩm thực Hàn Quốc"],
+      "unverifiedExperiences": ["Gà rán"]
+    }
+  }],
+  "choices": []
+}
+```
+
+Nếu dữ liệu có nội dung liên quan đến toàn bộ yêu cầu nhưng AI vẫn trả rỗng, summary nói rõ AI chưa xác minh được lựa chọn phù hợp với toàn bộ câu mô tả. BE không tự tạo đề xuất từ việc dò cụm từ và không tuyên bố tất cả trải nghiệm đều thiếu trong database.
+
+### Triển khai
+
+Cần build/deploy lại BE. Kết quả matching cũ có fingerprint trước khi thêm `descriptionEn` có thể bị từ chối khi đặt; khách cần tìm lại để tạo đề xuất mới. Ngày/giờ, chỗ, Buddy, coupon và giá vẫn được kiểm tra theo luồng hiện có. Chưa thay dữ liệu tour hoặc triển khai lên VPS trong lần bổ sung này.
+
+### Kiểm chứng lần bổ sung 28/10
+
+- Maven compile offline thành công với source cuối cùng. Các cảnh báo Lombok/deprecation có sẵn vẫn giữ nguyên.
+- Đạt 44 tình huống kiểm tra bằng Java tạm: câu nhập thật và nội dung tour Chợ Lớn, đồng nghĩa Hoa/Hàn/Việt Việt–Anh–không dấu, tag chuyên biệt, sai loại ẩm thực, món cụ thể, ăn chay, tên quốc tịch không phải món ăn, địa điểm/địa chỉ, cụm từ ranh giới từ, bằng chứng bịa/từ tour khác, phủ định trong nguồn dù trích dẫn bị cắt ngắn, thiếu/trùng bằng chứng, kết quả rỗng, chẩn đoán đúng yêu cầu thiếu, không gộp trải nghiệm giữa nhiều tour, giữ đúng đội Buddy, ID sai và giải thích tiếng Anh.
+- Kiểm tra fingerprint giữa entity và response khớp nhau; thay mô tả tiếng Anh làm fingerprint thay đổi.
+- Chạy parser và dựng HTTP request của `GeminiMatchingClient` thật với HTTP client giả lập; kiểm tra context có vocabulary và các nguồn dữ liệu mới. Chạy cả `AiMatchingServiceImpl` thật qua hai bước extract/rank và lưu giả lập cho câu nhập của khách. Không gọi Gemini hoặc database thật; kết quả chưa phải nghiệm thu dịch vụ production.
+- Source Java kiểm tra và file classpath nằm trong thư mục tạm đã được xóa, xác nhận thư mục không còn tồn tại. Không thêm test vào source project.
+- FE không cần thay đổi trong lần này: component hiện có đọc `summary` và `reasons[].message` từ BE. Phải deploy BE mới để website nhận hành vi mới.

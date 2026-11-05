@@ -21,10 +21,18 @@ public class ItineraryStopRequest {
     @Schema(example = "Chụp ảnh tại phố cổ")
     private String title;
 
+    @Size(max = 400)
+    @Schema(description = "English stop title; omit to translate automatically in the background")
+    private String titleEn;
+
     @NotBlank
     @Size(max = 1000)
     @Schema(example = "Buddy hướng dẫn chọn góc chụp và giới thiệu kiến trúc địa phương.")
     private String description;
+
+    @Size(max = 2000)
+    @Schema(description = "English stop description; omit to translate automatically in the background")
+    private String descriptionEn;
 
     @NotNull
     @Min(0)

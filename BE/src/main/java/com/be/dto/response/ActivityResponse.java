@@ -21,6 +21,7 @@ import java.util.UUID;
 public class ActivityResponse {
     private UUID id;
     private String title;
+    private String titleEn;
     private Set<MatchingTag> tags;
     private List<ItineraryStopResponse> itineraryStops;
     private String description;
@@ -28,7 +29,9 @@ public class ActivityResponse {
     private TourType activityType;
     private String thumbnailUrl;
     private String locationName;
+    private String locationNameEn;
     private String address;
+    private String addressEn;
     private BigDecimal participationFee;
     private BigDecimal childParticipationFee;
     private Integer minimumParticipants;

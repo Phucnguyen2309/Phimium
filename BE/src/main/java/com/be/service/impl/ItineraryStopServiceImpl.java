@@ -11,7 +11,9 @@ import com.be.repository.ActivityRepository;
 import com.be.repository.ItineraryStopRepository;
 import com.be.service.CloudinaryService;
 import com.be.service.ItineraryStopService;
+import com.be.service.ActivityTranslationService;
 import com.be.util.DateTimeUtils;
+import com.be.util.EnglishTranslation;
 import com.be.validator.ItineraryValidator;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -41,6 +43,7 @@ public class ItineraryStopServiceImpl implements ItineraryStopService {
     private final ItineraryStopMapper mapper;
     private final CloudinaryService cloudinaryService;
     private final Validator validator;
+    private final ActivityTranslationService translations;
 
     @Override
     @Transactional(readOnly = true)
@@ -85,6 +88,7 @@ public class ItineraryStopServiceImpl implements ItineraryStopService {
         validateDraft(draft, activity);
         activity.getItineraryStops().addAll(createdStops);
         save(activity);
+        translations.schedule(activityId);
         return mapper.toResponseList(createdStops);
     }
 
@@ -117,12 +121,15 @@ public class ItineraryStopServiceImpl implements ItineraryStopService {
         } else if (Boolean.TRUE.equals(request.getRemoveImage())) {
             imageUrl = null;
         }
+        current.setTitleEn(EnglishTranslation.resolve(current.getTitle(), replacement.getTitle(), current.getTitleEn(), request.getTitleEn()));
+        current.setDescriptionEn(EnglishTranslation.resolve(current.getDescription(), replacement.getDescription(), current.getDescriptionEn(), request.getDescriptionEn()));
         current.setTitle(replacement.getTitle());
         current.setDescription(replacement.getDescription());
         current.setOffsetMinutes(replacement.getOffsetMinutes());
         current.setDurationMinutes(replacement.getDurationMinutes());
         current.setImageUrl(imageUrl);
         save(activity);
+        translations.schedule(activityId);
         return mapper.toResponse(current);
     }
 

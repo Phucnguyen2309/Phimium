@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -187,10 +186,9 @@ public class MatchingCandidateServiceImpl implements MatchingCandidateService {
         if (departure.getStatus() != DepartureStatus.AVAILABLE || activity.getStatus() == ActivityStatus.CANCELLED
                 || activity.getStatus() == ActivityStatus.COMPLETED) return Rejection.TOUR_NOT_AVAILABLE;
         if (!departure.getStartDateTime().isAfter(now)) return Rejection.DEPARTURE_ALREADY_STARTED;
-        if (!MatchingRules.tagsMatch(criteria.getTags(), activity.getTags(), Boolean.TRUE.equals(criteria.getRequireAllTags())))
+        if (!MatchingRules.tourTagsMatch(criteria, activity.getTags()))
             return Rejection.TOUR_TAG_MISMATCH;
-        if (criteria.getRegion() != null && !normalize(activity.getLocationName() + " " + activity.getAddress())
-                .contains(normalize(criteria.getRegion()))) return Rejection.REGION_MISMATCH;
+        if (!MatchingLocation.matches(activity, criteria.getRegion())) return Rejection.REGION_MISMATCH;
         if ((criteria.getEarliestStartTime() != null && departure.getStartTime().isBefore(criteria.getEarliestStartTime()))
                 || (criteria.getLatestEndTime() != null && departure.getEndTime().isAfter(criteria.getLatestEndTime())))
             return Rejection.TIME_WINDOW_MISMATCH;
@@ -230,8 +228,8 @@ public class MatchingCandidateServiceImpl implements MatchingCandidateService {
                 }
                 case REGION_MISMATCH -> {
                     details.put("requestedRegion", criteria.getRegion());
-                    message = text(criteria, count + " ca tour không có địa điểm/địa chỉ thuộc khu vực bạn nhập: " + criteria.getRegion() + ".",
-                            "Tour departures outside your requested location (" + criteria.getRegion() + "): " + count + ".");
+                    message = text(criteria, count + " ca tour chưa có dữ kiện địa điểm khớp khu vực yêu cầu: " + criteria.getRegion() + ".",
+                            "Tour departures without location information matching your requested area (" + criteria.getRegion() + "): " + count + ".");
                 }
                 case TIME_WINDOW_MISMATCH -> {
                     if (criteria.getEarliestStartTime() != null) details.put("earliestStartTime", criteria.getEarliestStartTime());
@@ -312,8 +310,4 @@ public class MatchingCandidateServiceImpl implements MatchingCandidateService {
         }
     }
 
-    private static String normalize(String value) {
-        return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
-                .replace('đ', 'd').replace('Đ', 'D').toLowerCase(Locale.ROOT).strip();
-    }
 }

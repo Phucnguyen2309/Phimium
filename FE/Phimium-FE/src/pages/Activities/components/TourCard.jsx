@@ -8,6 +8,7 @@ import {
   formatDuration,
   formatPrice,
   getLocalizedDescription,
+  getLocalizedText,
   getDurationMinutes,
   getValidImage,
 } from '@/features/activity/activityMapper.js'
@@ -17,7 +18,8 @@ import { buildGoogleMapsUrl } from '@/utils/geo.js'
 import { getInitials } from '@/utils/text.js'
 
 function TourImage({ activity, maxGroupSize, duration }) {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
+  const title = getLocalizedText(activity, 'title', language)
   const [hasError, setHasError] = useState(false)
   const imageUrl = getValidImage(activity.thumbnailUrl)
 
@@ -30,14 +32,14 @@ function TourImage({ activity, maxGroupSize, duration }) {
       {imageUrl && !hasError ? (
         <img
           src={imageUrl}
-          alt={activity.title}
+          alt={title}
           loading="lazy"
           onError={() => setHasError(true)}
           className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 font-display text-5xl font-bold text-yellow-400/90">
-          {getInitials(activity.title, 'P')}
+          {getInitials(title, 'P')}
         </span>
       )}
 
@@ -76,13 +78,16 @@ function Fact({ icon, children }) {
 export function TourCard({ activity }) {
   const { language, t } = useLanguage()
   const description = getLocalizedDescription(activity, language)
+  const title = getLocalizedText(activity, 'title', language)
+  const locationName = getLocalizedText(activity, 'locationName', language)
+  const address = getLocalizedText(activity, 'address', language)
 
   const maxGroupSize = getMaxGroupSize(activity)
   const minGroupSize = Number(activity.groupMinSize) || 0
   const duration = formatDuration(getDurationMinutes(activity))
   const childFee = Number(activity.childParticipationFee)
   const detailPath = buildActivityDetailPath(activity.id)
-  const eyebrow = [activity.locationName, formatActivityType(activity.activityType)]
+  const eyebrow = [locationName, formatActivityType(activity.activityType)]
     .filter(Boolean)
     .join(' · ')
 
@@ -91,17 +96,17 @@ export function TourCard({ activity }) {
       <div className="space-y-3">
         <TourImage activity={activity} maxGroupSize={maxGroupSize} duration={duration} />
 
-        {(activity.locationName || activity.address) && (
+        {(locationName || address) && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-950 text-yellow-400">
               <Icon name="map-pin" className="h-5 w-5" />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-bold text-blue-950">
-                {activity.locationName || activity.address}
+                {locationName || address}
               </span>
-              {activity.address && activity.address !== activity.locationName && (
-                <span className="block truncate text-[11px] text-slate-500">{activity.address}</span>
+              {address && address !== locationName && (
+                <span className="block truncate text-[11px] text-slate-500">{address}</span>
               )}
             </span>
             <a
@@ -142,7 +147,7 @@ export function TourCard({ activity }) {
             )}
             <h2 className="mt-1.5 text-xl font-extrabold leading-snug tracking-tight text-blue-950 sm:text-2xl">
               <Link to={detailPath} state={{ activity }} className="transition hover:text-blue-700">
-                {activity.title}
+                {title}
               </Link>
             </h2>
           </div>

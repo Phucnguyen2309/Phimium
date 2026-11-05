@@ -20,6 +20,7 @@ public class ActivityDetailMapper {
 
         return ActivityDetailResponse.builder()
                 .title(activity.getTitle())
+                .titleEn(activity.getTitleEn())
                 .description(activity.getDescription())
                 .descriptionEn(activity.getDescriptionEn())
                 .tags(new LinkedHashSet<>(activity.getTags()))
@@ -27,7 +28,9 @@ public class ActivityDetailMapper {
                 .thumbnailUrl(activity.getThumbnailUrl())
                 .imageUrls(activity.getImageUrls() == null ? List.of() : List.copyOf(activity.getImageUrls()))
                 .locationName(activity.getLocationName())
+                .locationNameEn(activity.getLocationNameEn())
                 .address(activity.getAddress())
+                .addressEn(activity.getAddressEn())
                 .participationFee(activity.getParticipationFee())
                 .maximumParticipants(activity.getMaximumParticipants())
                 .latitude(activity.getLatitude())

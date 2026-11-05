@@ -18,6 +18,7 @@ import java.util.Set;
 @Builder
 public class ActivityDetailResponse {
     private String title;
+    private String titleEn;
     private String description;
     private String descriptionEn;
     private Set<MatchingTag> tags;
@@ -27,7 +28,9 @@ public class ActivityDetailResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String locationName;
+    private String locationNameEn;
     private String address;
+    private String addressEn;
     private BigDecimal participationFee;
     private Integer maximumParticipants;
     private BigDecimal longitude;

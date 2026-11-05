@@ -55,12 +55,20 @@ public interface MatchingCandidateService {
         public Map<String, String> tourFacts() {
             Map<String, String> facts = new LinkedHashMap<>();
             addFact(facts, "title", activity.getTitle());
+            addFact(facts, "titleEn", activity.getTitleEn());
             addFact(facts, "description", activity.getDescription());
+            addFact(facts, "descriptionEn", activity.getDescriptionEn());
+            addFact(facts, "location", activity.getLocationName());
+            addFact(facts, "locationEn", activity.getLocationNameEn());
+            addFact(facts, "address", activity.getAddress());
+            addFact(facts, "addressEn", activity.getAddressEn());
             if (itinerary != null) {
                 for (int i = 0; i < itinerary.size(); i++) {
                     ItineraryStopResponse stop = itinerary.get(i);
                     addFact(facts, "stop:" + i + ":title", stop.getTitle());
+                    addFact(facts, "stop:" + i + ":titleEn", stop.getTitleEn());
                     addFact(facts, "stop:" + i + ":description", stop.getDescription());
+                    addFact(facts, "stop:" + i + ":descriptionEn", stop.getDescriptionEn());
                 }
             }
             return facts;

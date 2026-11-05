@@ -1,4 +1,4 @@
-import { getUpcomingDepartures, mapActivity } from '@/features/activity/activityMapper.js'
+import { getLocalizedActivity, getLocalizedText, getUpcomingDepartures, mapActivity } from '@/features/activity/activityMapper.js'
 import { getValidImage } from '@/utils/image.js'
 import { getResponseData, getResponseList } from '@/utils/response.js'
 import { getValidText } from '@/utils/text.js'
@@ -18,8 +18,8 @@ export const mapItineraryStops = (detail) =>
     .map((stop, index) => ({
       id: stop?.stopId ?? `stop-${index}`,
       order: toNumber(stop?.stopOrder) || index + 1,
-      title: getValidText(stop?.title),
-      description: getValidText(stop?.description),
+      title: getLocalizedText(stop, 'title'),
+      description: getLocalizedText(stop, 'description'),
       offsetMinutes: Number.isFinite(Number(stop?.offsetMinutes)) ? Number(stop.offsetMinutes) : null,
       durationMinutes: toNumber(stop?.durationMinutes),
       image: getValidImage(stop?.imageUrl),
@@ -39,7 +39,7 @@ export const buildActivityDetail = (id, detailResponse, listResponse, fromState)
   const detail = getResponseData(detailResponse) ?? {}
   const listItem =
     getResponseList(listResponse).find((item) => String(item?.id) === String(id)) ?? fromState ?? null
-  const base = mapActivity({ ...(listItem ?? {}), ...detail, id })
+  const base = getLocalizedActivity(mapActivity({ ...(listItem ?? {}), ...detail, id }))
 
   return {
     ...base,
