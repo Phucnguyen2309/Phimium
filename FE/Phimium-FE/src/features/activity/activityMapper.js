@@ -1,7 +1,8 @@
 import { ACTIVITY_STATUS } from '@/constants/activity.js'
 import { formatEnumLabel, formatMoney } from '@/utils/format.js'
-import { getLocale, t } from '@/utils/i18n.js'
+import { getCurrentLanguage, getLocale, t } from '@/utils/i18n.js'
 import { getResponseList } from '@/utils/response.js'
+import { getValidText } from '@/utils/text.js'
 
 export { formatDateTime } from '@/utils/format.js'
 export { getValidImage } from '@/utils/image.js'
@@ -133,12 +134,25 @@ export const formatDuration = (minutes) => {
  * Mô tả tour theo ngôn ngữ đang chọn: tiếng Anh dùng descriptionEn (admin nhập / AI dịch),
  * chưa có bản dịch thì dùng bản tiếng Việt.
  */
+export const getLocalizedText = (item, field, language = getCurrentLanguage()) =>
+  getValidText(language === 'en' ? item?.[`${field}En`] : '') || getValidText(item?.[field])
+
 export const getLocalizedDescription = (activity, language) =>
-  (language === 'en' && activity?.descriptionEn) || activity?.description || ''
+  getLocalizedText(activity, 'description', language)
+
+/** Bản hiển thị cho trang public; giữ object gốc để form admin luôn sửa nội dung nguồn. */
+export const getLocalizedActivity = (activity, language = getCurrentLanguage()) => ({
+  ...activity,
+  title: getLocalizedText(activity, 'title', language),
+  description: getLocalizedText(activity, 'description', language),
+  locationName: getLocalizedText(activity, 'locationName', language),
+  address: getLocalizedText(activity, 'address', language),
+})
 
 export const mapActivity = (activity) => ({
   id: activity?.id ?? '',
   title: activity?.title ?? t('activity.untitled'),
+  titleEn: activity?.titleEn ?? '',
   description: activity?.description ?? '',
   descriptionEn: activity?.descriptionEn ?? '',
   activityType: activity?.activityType ?? 'ACTIVITY',
@@ -149,7 +163,9 @@ export const mapActivity = (activity) => ({
   endTime: activity?.endTime ?? null,
   registrationDeadline: activity?.registrationDeadline ?? null,
   locationName: activity?.locationName ?? '',
+  locationNameEn: activity?.locationNameEn ?? '',
   address: activity?.address ?? '',
+  addressEn: activity?.addressEn ?? '',
   participationFee: activity?.participationFee ?? 0,
   minimumParticipants: activity?.minimumParticipants ?? 0,
   maximumParticipants: activity?.maximumParticipants ?? 0,

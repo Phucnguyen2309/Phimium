@@ -58,14 +58,14 @@ public class AiMatchResultStoreImpl implements AiMatchResultStore {
         result.setMetadataFingerprint(MatchingFingerprint.of(candidate.activity(), selected));
         result.setEngine(engine); result.setCreatedAt(DateTimeUtils.nowVietnam());
         result.setModelName("GEMINI".equals(engine) ? properties.getGemini().getModel() : null);
-        result.setPromptVersion("smart-match-v2-experiences");
+        result.setPromptVersion("smart-match-v6-semantic-tour-tags");
         result.setExpiresAt(result.getCreatedAt().plusMinutes(properties.getResultMinutes()));
         matches.saveAndFlush(result);
         Set<MatchingTag> shared = MatchingRules.shared(criteria.getTags(), candidate.activity().getTags());
         Set<MatchingTag> missing = new LinkedHashSet<>(criteria.getTags()); missing.removeAll(shared);
         List<String> reasons = new ArrayList<>();
         boolean en = "en".equals(criteria.getLocale());
-        reasons.add((en ? "Tour interests: " : "Chủ đề tour phù hợp: ") + labels(shared, en));
+        if (!shared.isEmpty()) reasons.add((en ? "Tour interests: " : "Chủ đề tour phù hợp: ") + labels(shared, en));
         if (!criteria.getRequiredExperiences().isEmpty()) {
             reasons.add((en ? "Supported tour experiences: " : "Trải nghiệm tour đáp ứng: ")
                     + criteria.getRequiredExperiences().stream().map(RequiredExperience::description)

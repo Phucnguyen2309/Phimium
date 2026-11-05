@@ -70,6 +70,9 @@ public class Activity {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    @Column(name = "title_en", length = 400)
+    private String titleEn;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -94,8 +97,14 @@ public class Activity {
     @Column(name = "location_name", nullable = false, length = 255)
     private String locationName;
 
+    @Column(name = "location_name_en", length = 500)
+    private String locationNameEn;
+
     @Column(name = "address", nullable = false, length = 500)
     private String address;
+
+    @Column(name = "address_en", length = 1000)
+    private String addressEn;
 
     @DecimalMin(value = "-180.0", message = "Longitude must be greater than or equal to -180")
     @DecimalMax(value = "180.0", message = "Longitude must be less than or equal to 180")

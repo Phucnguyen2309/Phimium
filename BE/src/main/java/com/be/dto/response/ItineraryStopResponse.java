@@ -16,7 +16,9 @@ public class ItineraryStopResponse {
     private UUID activityId;
     private Integer stopOrder;
     private String title;
+    private String titleEn;
     private String description;
+    private String descriptionEn;
     private Integer offsetMinutes;
     private Integer durationMinutes;
     private String imageUrl;

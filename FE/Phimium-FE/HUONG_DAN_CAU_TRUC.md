@@ -305,7 +305,7 @@ navigate(ROUTES.userDashboard, { state: { activeTab: 'GROUPS' } })
 | `buildGoogleMapsUrl(item)` / `buildDirectionsUrl(item)` | `utils/geo.js` | Link Google Maps xem vị trí / chỉ đường (ưu tiên toạ độ, không có thì theo tên + địa chỉ) |
 | `decodeJwtPayload(token)` | `utils/jwt.js` | đọc claim từ JWT, lỗi thì trả `null`. Hiện **không còn dùng** vì FE không giữ token |
 
-Cho activity thì dùng thêm `@/features/activity/activityMapper.js`: `mapActivity`, `mapActivitiesResponse`, `formatActivityType`, `formatStatus`, `formatPrice`, `getRemainingSlots`.
+Cho activity thì dùng thêm `@/features/activity/activityMapper.js`: `mapActivity`, `mapActivitiesResponse`, `formatActivityType`, `formatStatus`, `formatPrice`, `getRemainingSlots`. Nội dung song ngữ dùng `getLocalizedText(item, field, language?)`, `getLocalizedDescription` hoặc `getLocalizedActivity`; các helper mặc định theo ngôn ngữ hiện tại, giữ nguyên object nguồn. Mapper chi tiết public và điểm dừng dùng các helper này; không tự viết lại quy tắc chọn bản dịch.
 
 Lịch khởi hành (`activity.departures`, đã map sẵn `{ id, date, startTime, endTime, capacity, status }`): `getUpcomingDepartures(activity)` (bỏ lịch đã qua / CLOSED / CANCELLED, giữ FULL), `getDurationMinutes`, `formatDuration`, `formatDepartureDate`, `formatDepartureTime`, hằng `DEPARTURE_STATUS`. Tên loại tour (`FOODTOUR`, `HISTORYTOUR`) dịch qua key `activity.types.*` trong `formatActivityType`.
 
@@ -653,7 +653,7 @@ example: {                                 example: {
 - Hàm helper nằm **ngoài component** trong file `.jsx` không có `t` của hook: truyền `t` hoặc chuỗi đã dịch vào qua tham số (xem `getGroupSizeText(activity, t)`).
 - Ngày, giờ, tiền: luôn dùng `utils/format.js`. Các hàm này tự theo ngôn ngữ hiện tại (`getLocale()`). Không viết cứng `'vi-VN'`.
 - Thông báo truyền qua `navigate(..., { state })` thì truyền **key** (`messageKey: 'dashboard.joinSuccess'`), không truyền chuỗi đã dịch.
-- Nội dung đến từ API (tên hoạt động, mô tả…) giữ nguyên, **không** dịch.
+- Nội dung tour từ API có bản nguồn tiếng Việt và các field `titleEn`, `descriptionEn`, `locationNameEn`, `addressEn`; điểm dừng có `titleEn`/`descriptionEn`. BE dịch nền và lưu bản tiếng Anh. FE chọn bản `*En` khi dùng tiếng Anh, thiếu thì fallback nội dung nguồn; không gọi AI trực tiếp khi đổi ngôn ngữ. Form admin luôn sửa dữ liệu nguồn, không đưa bản hiển thị đã dịch vào payload tiếng Việt.
 - Sản phẩm của Phimium là **tour tại TP. Hồ Chí Minh, gồm 2 dòng: Food tour và History tour**, dành cho khách đi một mình, cặp đôi và nhóm nhỏ, có hướng dẫn viên địa phương nói tiếng Anh. Mọi nội dung marketing phải đúng với định vị này (không viết workshop, cafe, board game…).
 - Khi đổi ngôn ngữ, `LanguageProvider` mount lại toàn app (`key={language}`) để dữ liệu đã map được tính lại. Không cần tự xử lý trong từng trang.
 - Thêm ngôn ngữ thứ 3: thêm vào `LANGUAGES` (`constants/app.js`), `DICTIONARIES` / `LOCALES` (`utils/i18n.js`), tạo `locales/<lang>.js` và thêm nút trong `LanguageSwitcher`.

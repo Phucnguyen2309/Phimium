@@ -1,5 +1,5 @@
+import { getLocalizedText } from '@/features/activity/activityMapper.js'
 import { getCoordinates } from '@/utils/geo.js'
-import { getValidText } from '@/utils/text.js'
 
 export const ALL_TYPES = 'ALL'
 
@@ -14,8 +14,8 @@ export const getMeetingPoints = (activities, limit = 5) => {
   const points = new Map()
 
   activities.forEach((activity) => {
-    const name = getValidText(activity.locationName)
-    const address = getValidText(activity.address)
+    const name = getLocalizedText(activity, 'locationName')
+    const address = getLocalizedText(activity, 'address')
     const key = name || address
     const coordinates = getCoordinates(activity)
 

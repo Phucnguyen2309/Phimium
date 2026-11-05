@@ -29,9 +29,13 @@ public class ActivityRequest {
     @Size(max = 200)
     private String title;
 
+    @Size(max = 400)
+    @Schema(description = "English title; omit to translate automatically in the background")
+    private String titleEn;
+
     private String description;
 
-    @Schema(description = "Mô tả tiếng Anh (tùy chọn). Bỏ trống thì Backend tự dịch từ mô tả tiếng Việt bằng AI")
+    @Schema(description = "English description; omit to translate automatically in the background")
     private String descriptionEn;
 
     @NotNull(message = "Tags must not be null")
@@ -58,9 +62,17 @@ public class ActivityRequest {
     @Size(max = 255)
     private String locationName;
 
+    @Size(max = 500)
+    @Schema(description = "English meeting point; omit to translate automatically")
+    private String locationNameEn;
+
     @NotBlank(message = "Address is required")
     @Size(max = 500)
     private String address;
+
+    @Size(max = 1000)
+    @Schema(description = "English address; street names and numbers are preserved")
+    private String addressEn;
 
     @NotNull(message = "Participation fee is required")
     @DecimalMin(value = "0.0", inclusive = true)

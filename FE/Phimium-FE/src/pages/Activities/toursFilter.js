@@ -1,8 +1,8 @@
 import {
   getDurationMinutes,
+  getLocalizedText,
   getUpcomingDepartures,
 } from '@/features/activity/activityMapper.js'
-import { getValidText } from '@/utils/text.js'
 
 export const ANY = 'ANY'
 
@@ -73,7 +73,7 @@ export const getMaxGroupSize = (activity) =>
 
 /** Các điểm hẹn khác nhau có trong dữ liệu (dùng cho ô chọn khu vực). */
 export const getLocationOptions = (activities) => [
-  ...new Set(activities.map((activity) => getValidText(activity.locationName)).filter(Boolean)),
+  ...new Set(activities.map((activity) => getLocalizedText(activity, 'locationName')).filter(Boolean)),
 ].sort((a, b) => a.localeCompare(b))
 
 /** Các loại tour có trong dữ liệu, luôn bắt đầu bằng ANY. */
@@ -85,7 +85,7 @@ export const getTypeOptions = (activities) => [
 const matchKeyword = (activity, keyword) => {
   if (!keyword) return true
 
-  return [activity.title, activity.description, activity.descriptionEn, activity.locationName, activity.address]
+  return [activity.title, activity.titleEn, activity.description, activity.descriptionEn, activity.locationName, activity.locationNameEn, activity.address, activity.addressEn]
     .filter(Boolean)
     .some((text) => text.toLowerCase().includes(keyword))
 }
@@ -125,7 +125,7 @@ export const filterTours = (activities, filters, keyword = '', now = new Date())
   return activities.filter(
     (activity) =>
       (filters.type === ANY || activity.activityType === filters.type) &&
-      (filters.location === ANY || getValidText(activity.locationName) === filters.location) &&
+      (filters.location === ANY || getLocalizedText(activity, 'locationName') === filters.location) &&
       matchGroupSize(activity, filters.groupSize) &&
       matchDuration(activity, filters.duration) &&
       matchDate(activity, filters.date, now) &&

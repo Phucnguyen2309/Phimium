@@ -7,6 +7,7 @@ import {
   formatActivityType,
   formatPrice,
   getLocalizedDescription,
+  getLocalizedText,
   getValidImage,
 } from '@/features/activity/activityMapper.js'
 import { buildActivityDetailPath } from '@/routes/paths.js'
@@ -37,13 +38,16 @@ const getGroupSizeText = (activity, t) => {
 export function FeaturedActivityCard({ activity }) {
   const { language, t } = useLanguage()
   const description = getLocalizedDescription(activity, language)
+  const title = getLocalizedText(activity, 'title', language)
+  const locationName = getLocalizedText(activity, 'locationName', language)
+  const address = getLocalizedText(activity, 'address', language)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
 
   const imageUrl = imageFailed ? '' : getValidImage(activity.thumbnailUrl)
   const detailPath = buildActivityDetailPath(activity.id)
   const highlights = [
-    activity.address,
+    address,
     // Buddy chỉ được xếp sau khi khách đặt tour -> không hiện tên Buddy ở đây
     t('home.featured.buddyAfterBooking'),
     t('home.featured.safetyNote'),
@@ -55,7 +59,7 @@ export function FeaturedActivityCard({ activity }) {
         {imageUrl ? (
           <img
             src={imageUrl}
-            alt={activity.title}
+            alt={title}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
@@ -84,7 +88,7 @@ export function FeaturedActivityCard({ activity }) {
             {formatTimeRange(activity.startTime, activity.endTime)}
           </MetaItem>
           <MetaItem icon="user-group">{getGroupSizeText(activity, t)}</MetaItem>
-          {activity.locationName && <MetaItem icon="map-pin">{activity.locationName}</MetaItem>}
+          {locationName && <MetaItem icon="map-pin">{locationName}</MetaItem>}
         </div>
 
         <h3 className="mt-4 font-display text-2xl font-bold leading-snug text-blue-950">
@@ -93,7 +97,7 @@ export function FeaturedActivityCard({ activity }) {
             state={{ activity }}
             className="outline-none after:absolute after:inset-0 after:content-['']"
           >
-            {activity.title}
+            {title}
           </Link>
         </h3>
 

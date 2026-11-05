@@ -29,7 +29,7 @@ public interface ActivityService {
 
     ActivityMatchingMetadataRequest updateMatchingMetadata(UUID activityId, ActivityMatchingMetadataRequest request);
 
-    /** Dịch (AI) mô tả tiếng Anh cho các tour chưa có bản dịch. Trả về số tour đã dịch. */
+    /** Queue missing English tour and itinerary content; returns the number of candidate tours. */
     int translateMissingDescriptions();
 
     ActivityResponse updateActivity(UUID activityId, UpdateActivityRequest request, MultipartFile image,

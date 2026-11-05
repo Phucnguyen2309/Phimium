@@ -1,5 +1,6 @@
 package com.be.service.impl;
 
+import com.be.dto.request.AiMatchRequest;
 import com.be.entity.Buddy;
 import com.be.enums.BuddyStatus;
 import com.be.enums.GuidingStyle;
@@ -22,6 +23,17 @@ public final class MatchingRules {
 
     public static boolean tagsMatch(Set<MatchingTag> wanted, Set<MatchingTag> actual, boolean all) {
         return wanted.isEmpty() || (all ? actual.containsAll(wanted) : !Collections.disjoint(wanted, actual));
+    }
+
+    public static boolean usesSemanticTourMatching(AiMatchRequest criteria) {
+        return criteria != null && criteria.getMessage() != null && !criteria.getMessage().isBlank()
+                && criteria.getRequiredExperiences() != null && !criteria.getRequiredExperiences().isEmpty()
+                && !Boolean.TRUE.equals(criteria.getRequireAllTags());
+    }
+
+    public static boolean tourTagsMatch(AiMatchRequest criteria, Set<MatchingTag> actual) {
+        return usesSemanticTourMatching(criteria)
+                || tagsMatch(criteria.getTags(), actual, Boolean.TRUE.equals(criteria.getRequireAllTags()));
     }
 
     public static boolean buddyMatches(Buddy buddy, Set<MatchingTag> tags, boolean all,

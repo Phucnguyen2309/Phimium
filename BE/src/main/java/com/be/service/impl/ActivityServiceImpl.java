@@ -17,10 +17,11 @@ import com.be.mapper.MyActivityMapper;
 import com.be.repository.ActivityRepository;
 import com.be.repository.RegistrationRepository;
 import com.be.service.ActivityService;
+import com.be.service.ActivityTranslationService;
 import com.be.service.CloudinaryService;
+import com.be.util.EnglishTranslation;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -42,10 +42,7 @@ public class ActivityServiceImpl implements ActivityService {
     private final RegistrationRepository registrationRepository;
     private final ActivityDetailMapper activityDetailMapper;
     private final MyActivityMapper myActivityMapper;
-
-    // Không bắt buộc: test dựng service bằng tay sẽ không có translator -> bỏ qua việc dịch
-    @Autowired(required = false)
-    private ActivityDescriptionTranslator descriptionTranslator;
+    private final ActivityTranslationService translations;
 
 
     @Override
@@ -53,7 +50,10 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityResponse createActivity(ActivityRequest request, MultipartFile image, List<MultipartFile> images, User currentUser) throws IOException {
 
         Activity activity = activityMapper.toEntity(request, currentUser);
-        applyEnglishDescription(activity, request.getDescriptionEn(), true);
+        activity.setTitleEn(EnglishTranslation.resolve(null, activity.getTitle(), null, request.getTitleEn()));
+        activity.setDescriptionEn(EnglishTranslation.resolve(null, activity.getDescription(), null, request.getDescriptionEn()));
+        activity.setLocationNameEn(EnglishTranslation.resolve(null, activity.getLocationName(), null, request.getLocationNameEn()));
+        activity.setAddressEn(EnglishTranslation.resolve(null, activity.getAddress(), null, request.getAddressEn()));
 
         if (image != null && !image.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(image);
@@ -70,6 +70,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         Activity savedActivity =
                 activityRepository.save(activity);
+        translations.schedule(savedActivity.getId());
 
         return activityMapper.toResponse(savedActivity);
     }
@@ -151,10 +152,15 @@ public class ActivityServiceImpl implements ActivityService {
             throw new AppException(ErrorCode.VALIDATION_ERROR);
         }
 
+        String previousTitle = activity.getTitle();
         String previousDescription = activity.getDescription();
+        String previousLocation = activity.getLocationName();
+        String previousAddress = activity.getAddress();
         activityMapper.updateEntity(request, activity);
-        applyEnglishDescription(activity, request.getDescriptionEn(),
-                !Objects.equals(previousDescription, activity.getDescription()));
+        activity.setTitleEn(EnglishTranslation.resolve(previousTitle, activity.getTitle(), activity.getTitleEn(), request.getTitleEn()));
+        activity.setDescriptionEn(EnglishTranslation.resolve(previousDescription, activity.getDescription(), activity.getDescriptionEn(), request.getDescriptionEn()));
+        activity.setLocationNameEn(EnglishTranslation.resolve(previousLocation, activity.getLocationName(), activity.getLocationNameEn(), request.getLocationNameEn()));
+        activity.setAddressEn(EnglishTranslation.resolve(previousAddress, activity.getAddress(), activity.getAddressEn(), request.getAddressEn()));
 
         if (image != null && !image.isEmpty()) {
             activity.setThumbnailUrl(cloudinaryService.uploadImage(image));
@@ -188,6 +194,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         Activity updated = activityRepository.save(activity);
+        translations.schedule(activityId);
         return activityMapper.toResponse(updated);
     }
 
@@ -204,33 +211,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    @Transactional
     public int translateMissingDescriptions() {
-        int translated = 0;
-        for (Activity activity : activityRepository.findAll()) {
-            boolean missing = activity.getDescriptionEn() == null || activity.getDescriptionEn().isBlank();
-            if (!missing || activity.getDescription() == null || activity.getDescription().isBlank()) continue;
-            applyEnglishDescription(activity, null, false);
-            if (activity.getDescriptionEn() != null) translated++;
-        }
-        return translated;
-    }
-
-    /**
-     * Mô tả tiếng Anh: admin tự nhập thì dùng luôn. Bỏ trống thì AI dịch từ mô tả tiếng Việt,
-     * chỉ khi mô tả tiếng Việt vừa đổi hoặc chưa có bản dịch (tránh gọi AI mỗi lần lưu).
-     */
-    private void applyEnglishDescription(Activity activity, String providedEn, boolean vietnameseChanged) {
-        if (providedEn != null && !providedEn.isBlank()) {
-            activity.setDescriptionEn(providedEn.trim());
-            return;
-        }
-        if (activity.getDescription() == null || activity.getDescription().isBlank()) {
-            activity.setDescriptionEn(null);
-            return;
-        }
-        boolean missing = activity.getDescriptionEn() == null || activity.getDescriptionEn().isBlank();
-        if (!vietnameseChanged && !missing) return;
-        activity.setDescriptionEn(descriptionTranslator == null ? null : descriptionTranslator.toEnglish(activity.getDescription()));
+        return translations.scheduleMissing();
     }
 }

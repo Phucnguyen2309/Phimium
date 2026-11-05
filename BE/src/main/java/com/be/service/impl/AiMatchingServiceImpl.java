@@ -15,7 +15,6 @@ import com.be.exception.ErrorCode;
 import com.be.service.AiMatchResultStore;
 import com.be.service.AiMatchingService;
 import com.be.service.MatchingAiClient;
-import com.be.service.MatchingAiClient.ExperienceEvidence;
 import com.be.service.MatchingAiClient.RankedChoice;
 import com.be.service.MatchingCandidateService;
 import com.be.service.MatchingCandidateService.Candidate;
@@ -27,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.text.Normalizer;
 
 @Service
 @RequiredArgsConstructor
@@ -101,12 +100,13 @@ public class AiMatchingServiceImpl implements AiMatchingService {
                         c.departure().getDepartureId(), c.buddies().stream().limit(guests).map(BuddyResponse::getBuddyId).toList())).toList();
         if (ranked == null || ranked.size() > Math.min(properties.getMaxResults(), options.size()))
             throw new AppException(ErrorCode.AI_INVALID_RESPONSE);
-        if (ranked.isEmpty()) return noMatches(engine, criteria, true);
+        if (ranked.isEmpty()) return unrankedMatches(engine, criteria, options.size());
         Map<UUID, Candidate> byDeparture = new HashMap<>();
         options.forEach(c -> byDeparture.put(c.departure().getDepartureId(), c));
         Set<UUID> seen = new HashSet<>();
         List<RankedChoice> supported = new ArrayList<>();
         List<List<BuddyResponse>> selectedTeams = new ArrayList<>();
+        List<CandidateCheck> checks = new ArrayList<>();
         // Validate the entire model response before persisting any proposals.
         for (var choice : ranked) {
             var candidate = byDeparture.get(choice.departureId());
@@ -116,11 +116,13 @@ public class AiMatchingServiceImpl implements AiMatchingService {
             Map<UUID, BuddyResponse> eligible = new HashMap<>();
             candidate.buddies().forEach(b -> eligible.put(b.getBuddyId(), b));
             if (!eligible.keySet().containsAll(choice.buddyIds())) throw new AppException(ErrorCode.AI_INVALID_RESPONSE);
-            if (!hasExperienceEvidence(criteria, candidate, choice)) continue;
+            var check = MatchingExperienceEvidence.verify(criteria.getRequiredExperiences(), candidate, choice.experienceEvidence());
+            checks.add(new CandidateCheck(candidate, check));
+            if (!check.unverified().isEmpty() || !check.issues().isEmpty()) continue;
             supported.add(choice);
             selectedTeams.add(choice.buddyIds().stream().map(eligible::get).toList());
         }
-        if (supported.isEmpty()) return noMatches(engine, criteria, true);
+        if (supported.isEmpty()) return contentNoMatches(engine, criteria, checks);
         List<AiMatchResponse.Choice> result = new ArrayList<>();
         for (int i = 0; i < supported.size(); i++) {
             result.add(store.save(user.getUserId(), criteria, byDeparture.get(supported.get(i).departureId()), selectedTeams.get(i), engine));
@@ -160,27 +162,49 @@ public class AiMatchingServiceImpl implements AiMatchingService {
         parsed.setCouponCode(explicit.getCouponCode()); parsed.setLocale(explicit.getLocale()); parsed.setMessage(explicit.getMessage());
     }
 
-    private boolean hasExperienceEvidence(AiMatchRequest criteria, Candidate candidate, RankedChoice choice) {
-        Map<String, RequiredExperience> required = new LinkedHashMap<>();
-        criteria.getRequiredExperiences().forEach(experience -> required.put(experience.description(), experience));
-        if (required.isEmpty()) return true;
-        List<ExperienceEvidence> evidence = choice.experienceEvidence();
-        if (evidence == null || evidence.size() != required.size()) return false;
-        Map<String, String> facts = candidate.tourFacts();
-        Set<String> verified = new HashSet<>();
-        for (ExperienceEvidence entry : evidence) {
-            if (entry == null || !required.containsKey(entry.experience()) || !verified.add(entry.experience())
-                    || entry.quote() == null || entry.quote().isBlank()) return false;
-            String fact = facts.get(entry.factId());
-            if (fact == null || !fact.contains(entry.quote())) return false;
-            String normalizedQuote = normalizeEvidence(entry.quote());
-            if (required.get(entry.experience()).evidencePhrases().stream().noneMatch(phrase -> {
-                String normalizedPhrase = normalizeEvidence(phrase);
-                return !normalizedPhrase.isBlank() && normalizedQuote.contains(normalizedPhrase);
-            })) return false;
-        }
-        return verified.equals(required.keySet());
+    private AiMatchResponse unrankedMatches(String engine, AiMatchRequest criteria, int candidateCount) {
+        if (criteria.getRequiredExperiences().isEmpty()) return noMatches(engine, criteria, true);
+        String summary = text(criteria,
+                "Có ca tour và Buddy đáp ứng tiêu chí cơ bản, nhưng AI chưa xác minh được lựa chọn đáp ứng đầy đủ trải nghiệm bạn yêu cầu.",
+                "Tour and Buddy candidates meet the basic criteria, but the AI could not verify a choice covering all your requested experiences.");
+        Reason reason = new Reason("UNVERIFIED_REQUIRED_EXPERIENCES", "requiredExperiences", summary,
+                Map.of("verificationStage", "AI_RANKING", "requiredExperiences", experienceDescriptions(criteria),
+                        "checkedCandidateCount", candidateCount));
+        return new AiMatchResponse("NO_MATCHES", engine, criteria, List.of(), List.of(), summary, List.of(reason));
     }
+
+    private AiMatchResponse contentNoMatches(String engine, AiMatchRequest criteria, List<CandidateCheck> checks) {
+        if (criteria.getRequiredExperiences().isEmpty()) return noMatches(engine, criteria, true);
+        List<CandidateCheck> closest = checks.stream().sorted(Comparator
+                .comparingInt((CandidateCheck entry) -> entry.check().unverified().size())
+                .thenComparing(entry -> entry.candidate().departure().getDepartureId())).limit(properties.getMaxResults()).toList();
+        var best = closest.get(0);
+        List<String> unverified = best.check().unverified();
+        String summary = text(criteria, "Bằng chứng AI cung cấp chưa đủ hoặc chưa hợp lệ để xác nhận các trải nghiệm: ",
+                        "The AI evidence is incomplete or invalid for these experiences: ")
+                        + String.join(", ", unverified) + ".";
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("date", criteria.getDate());
+        details.put("tags", Set.copyOf(criteria.getTags()));
+        details.put("requiredExperiences", experienceDescriptions(criteria));
+        details.put("verificationStage", "EVIDENCE_VALIDATION");
+        details.put("verifiedExperiences", best.check().verified());
+        details.put("unverifiedExperiences", unverified);
+        details.put("evidenceIssues", best.check().issues());
+        details.put("candidateChecks", closest.stream().map(entry -> {
+            Map<String, Object> check = new LinkedHashMap<>();
+            check.put("activityId", entry.candidate().activity().getId());
+            check.put("departureId", entry.candidate().departure().getDepartureId());
+            check.put("verifiedExperiences", entry.check().verified());
+            check.put("unverifiedExperiences", entry.check().unverified());
+            check.put("evidenceIssues", entry.check().issues());
+            return check;
+        }).toList());
+        Reason reason = new Reason("UNVERIFIED_REQUIRED_EXPERIENCES", "requiredExperiences", summary, details);
+        return new AiMatchResponse("NO_MATCHES", engine, criteria, List.of(), List.of(), summary, List.of(reason));
+    }
+
+    private record CandidateCheck(Candidate candidate, MatchingExperienceEvidence.Check check) { }
 
     private AiMatchResponse noMatches(String engine, AiMatchRequest criteria, boolean contentRejected) {
         boolean specific = contentRejected && !criteria.getRequiredExperiences().isEmpty();
@@ -200,12 +224,6 @@ public class AiMatchingServiceImpl implements AiMatchingService {
 
     private List<String> experienceDescriptions(AiMatchRequest criteria) {
         return criteria.getRequiredExperiences().stream().map(RequiredExperience::description).toList();
-    }
-
-    private String normalizeEvidence(String value) {
-        return " " + Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
-                .replace('đ', 'd').replace('Đ', 'D').toLowerCase(Locale.ROOT)
-                .replaceAll("[^\\p{L}\\p{N}]+", " ").strip() + " ";
     }
 
     private String text(AiMatchRequest criteria, String vi, String en) {

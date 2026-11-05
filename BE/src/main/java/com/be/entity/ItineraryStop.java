@@ -51,10 +51,18 @@ public class ItineraryStop {
     @Column(name = "stop_title", nullable = false, length = 200)
     private String title;
 
+    @Size(max = 400)
+    @Column(name = "stop_title_en", length = 400)
+    private String titleEn;
+
     @NotBlank
     @Size(max = 1000)
     @Column(name = "stop_description", nullable = false, length = 1000)
     private String description;
+
+    @Size(max = 2000)
+    @Column(name = "stop_description_en", length = 2000)
+    private String descriptionEn;
 
     @NotNull
     @Min(0)

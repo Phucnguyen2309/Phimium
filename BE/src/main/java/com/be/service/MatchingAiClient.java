@@ -9,7 +9,9 @@ public interface MatchingAiClient {
     boolean configured();
     AiMatchRequest extract(String message, String locale);
     List<RankedChoice> rank(AiMatchRequest criteria, List<Map<String, Object>> candidates, int limit);
-    record ExperienceEvidence(String experience, String factId, String quote) { }
+    enum SupportStatus { SUPPORTED, NOT_SUPPORTED, INSUFFICIENT_INFORMATION }
+    record FactCitation(String factId, String quote) { }
+    record ExperienceEvidence(String requirementId, SupportStatus status, List<FactCitation> citations) { }
     record RankedChoice(UUID departureId, List<UUID> buddyIds, List<ExperienceEvidence> experienceEvidence) {
         public RankedChoice(UUID departureId, List<UUID> buddyIds) {
             this(departureId, buddyIds, List.of());
