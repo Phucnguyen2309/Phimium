@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { mapActivitiesResponse } from '@/features/activity/activityMapper.js'
+import { useLanguage } from '@/context/languageContext.js'
+import { getLocalizedText, mapActivitiesResponse } from '@/features/activity/activityMapper.js'
 import activityService from '@/services/activityService.js'
 
 import {
@@ -17,6 +18,7 @@ const ITEMS_PER_PAGE = 6
 export function useActivities() {
   // Nhận bộ lọc ban đầu từ URL, VD: /activities?q=pho&type=FOODTOUR
   const [searchParams] = useSearchParams()
+  const { language } = useLanguage()
 
   const [activities, setActivities] = useState([])
   const [filters, setFilters] = useState(() => {
@@ -59,11 +61,27 @@ export function useActivities() {
   }, [])
 
   const typeOptions = useMemo(() => getTypeOptions(activities), [activities])
-  const locationOptions = useMemo(() => getLocationOptions(activities), [activities])
+  const locationOptions = useMemo(() => getLocationOptions(activities, language), [activities, language])
+
+  // Đổi ngôn ngữ: chuyển khu vực đang chọn sang tên tương ứng của ngôn ngữ mới để bộ lọc không bị mất
+  const previousLanguageRef = useRef(language)
+  useEffect(() => {
+    const previous = previousLanguageRef.current
+    previousLanguageRef.current = language
+    if (previous === language) return
+
+    setFilters((current) => {
+      if (current.location === ANY) return current
+      const match = activities.find(
+        (activity) => getLocalizedText(activity, 'locationName', previous) === current.location,
+      )
+      return { ...current, location: match ? getLocalizedText(match, 'locationName', language) : ANY }
+    })
+  }, [language, activities])
 
   const filteredActivities = useMemo(
-    () => filterTours(activities, filters, keyword),
-    [activities, filters, keyword],
+    () => filterTours(activities, filters, keyword, language),
+    [activities, filters, keyword, language],
   )
 
   const totalPages = Math.max(Math.ceil(filteredActivities.length / ITEMS_PER_PAGE), 1)
