@@ -17,6 +17,7 @@ import {
   estimatePrice,
   getGroupLimit,
   groupDeparturesByDate,
+  localizeActivityDetail,
   mapQuote,
 } from './activityDetailMapper.js'
 
@@ -28,7 +29,7 @@ export function useActivityDetail() {
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
 
   const stateActivity = location.state?.activity ?? null
 
@@ -73,7 +74,10 @@ export function useActivityDetail() {
     }
   }, [location.state])
 
-  useDocumentTitle(activity?.title || t('activityDetail.pageTitle'))
+  // Dữ liệu gốc giữ cả VI/EN -> đổi ngôn ngữ là hiển thị lại ngay, không cần F5
+  const localizedActivity = useMemo(() => localizeActivityDetail(activity, language), [activity, language])
+
+  useDocumentTitle(localizedActivity?.title || t('activityDetail.pageTitle'))
 
   useEffect(() => {
     if (!id) return undefined
@@ -271,7 +275,7 @@ export function useActivityDetail() {
 
   return {
     activeDate,
-    activity,
+    activity: localizedActivity,
     adultCount,
     aiMatch: location.state?.aiMatch || null,
     matchResultId: location.state?.matchResultId || null,

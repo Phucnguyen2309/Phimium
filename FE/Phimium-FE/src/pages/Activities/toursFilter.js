@@ -72,8 +72,8 @@ export const getMaxGroupSize = (activity) =>
   Number(activity?.groupMaxSize) || Number(activity?.maximumParticipants) || 0
 
 /** Các điểm hẹn khác nhau có trong dữ liệu (dùng cho ô chọn khu vực). */
-export const getLocationOptions = (activities) => [
-  ...new Set(activities.map((activity) => getLocalizedText(activity, 'locationName')).filter(Boolean)),
+export const getLocationOptions = (activities, language) => [
+  ...new Set(activities.map((activity) => getLocalizedText(activity, 'locationName', language)).filter(Boolean)),
 ].sort((a, b) => a.localeCompare(b))
 
 /** Các loại tour có trong dữ liệu, luôn bắt đầu bằng ANY. */
@@ -119,13 +119,13 @@ const matchDate = (activity, value, now) => {
   )
 }
 
-export const filterTours = (activities, filters, keyword = '', now = new Date()) => {
+export const filterTours = (activities, filters, keyword = '', language, now = new Date()) => {
   const normalizedKeyword = keyword.trim().toLowerCase()
 
   return activities.filter(
     (activity) =>
       (filters.type === ANY || activity.activityType === filters.type) &&
-      (filters.location === ANY || getLocalizedText(activity, 'locationName') === filters.location) &&
+      (filters.location === ANY || getLocalizedText(activity, 'locationName', language) === filters.location) &&
       matchGroupSize(activity, filters.groupSize) &&
       matchDuration(activity, filters.duration) &&
       matchDate(activity, filters.date, now) &&

@@ -18,13 +18,16 @@ export const mapItineraryStops = (detail) =>
     .map((stop, index) => ({
       id: stop?.stopId ?? `stop-${index}`,
       order: toNumber(stop?.stopOrder) || index + 1,
-      title: getLocalizedText(stop, 'title'),
-      description: getLocalizedText(stop, 'description'),
+      // Giữ cả 2 ngôn ngữ, chọn lúc hiển thị (localizeActivityDetail) để đổi VI/EN không cần tải lại
+      title: getValidText(stop?.title),
+      titleEn: getValidText(stop?.titleEn),
+      description: getValidText(stop?.description),
+      descriptionEn: getValidText(stop?.descriptionEn),
       offsetMinutes: Number.isFinite(Number(stop?.offsetMinutes)) ? Number(stop.offsetMinutes) : null,
       durationMinutes: toNumber(stop?.durationMinutes),
       image: getValidImage(stop?.imageUrl),
     }))
-    .filter((stop) => stop.title)
+    .filter((stop) => stop.title || stop.titleEn)
     .sort((a, b) => a.order - b.order)
 
 /** Tổng thời gian lịch trình (phút) = điểm kết thúc muộn nhất */
@@ -39,7 +42,8 @@ export const buildActivityDetail = (id, detailResponse, listResponse, fromState)
   const detail = getResponseData(detailResponse) ?? {}
   const listItem =
     getResponseList(listResponse).find((item) => String(item?.id) === String(id)) ?? fromState ?? null
-  const base = getLocalizedActivity(mapActivity({ ...(listItem ?? {}), ...detail, id }))
+  // Không dịch ở đây: dữ liệu gốc giữ nguyên cả bản VI và EN
+  const base = mapActivity({ ...(listItem ?? {}), ...detail, id })
 
   return {
     ...base,
@@ -53,6 +57,22 @@ export const buildActivityDetail = (id, detailResponse, listResponse, fromState)
     stops: mapItineraryStops(detail),
   }
 }
+
+/**
+ * Bản hiển thị theo ngôn ngữ đang chọn (tên, mô tả, địa điểm, điểm dừng).
+ * Gọi lại mỗi khi đổi ngôn ngữ; dữ liệu gốc không bị ghi đè.
+ */
+export const localizeActivityDetail = (activity, language) =>
+  activity
+    ? {
+        ...getLocalizedActivity(activity, language),
+        stops: (activity.stops ?? []).map((stop) => ({
+          ...stop,
+          title: getLocalizedText(stop, 'title', language),
+          description: getLocalizedText(stop, 'description', language),
+        })),
+      }
+    : null
 
 /** Gom lịch khởi hành sắp tới theo ngày: [{ date, label, departures: [...] }] */
 export const groupDeparturesByDate = (activity, now = new Date()) => {

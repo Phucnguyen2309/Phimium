@@ -10,12 +10,12 @@ export const getActivityTypes = (activities) => [
 ]
 
 /** Các điểm hẹn (địa điểm) khác nhau của hoạt động, kèm toạ độ thật nếu Backend có. */
-export const getMeetingPoints = (activities, limit = 5) => {
+export const getMeetingPoints = (activities, limit = 5, language) => {
   const points = new Map()
 
   activities.forEach((activity) => {
-    const name = getLocalizedText(activity, 'locationName')
-    const address = getLocalizedText(activity, 'address')
+    const name = getLocalizedText(activity, 'locationName', language)
+    const address = getLocalizedText(activity, 'address', language)
     const key = name || address
     const coordinates = getCoordinates(activity)
 

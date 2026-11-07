@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { useLanguage } from '@/context/languageContext.js'
 import { mapActivitiesResponse } from '@/features/activity/activityMapper.js'
 import activityService from '@/services/activityService.js'
 
@@ -14,6 +15,7 @@ const FEATURED_LIMIT = 4
 
 export function useHome() {
   const location = useLocation()
+  const { language } = useLanguage()
   const [activities, setActivities] = useState([])
   const [selectedType, setSelectedType] = useState(ALL_TYPES)
   const [loading, setLoading] = useState(false)
@@ -75,7 +77,7 @@ export function useHome() {
   }, [activities, selectedType])
 
 
-  const meetingPoints = useMemo(() => getMeetingPoints(activities), [activities])
+  const meetingPoints = useMemo(() => getMeetingPoints(activities, 5, language), [activities, language])
 
   return {
     activityTypes,
